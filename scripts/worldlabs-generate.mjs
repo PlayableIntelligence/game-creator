@@ -47,12 +47,15 @@
 
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, join, basename, extname } from 'node:path';
+import { homedir } from 'node:os';
+import { randomUUID } from 'node:crypto';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const API_BASE = 'https://api.worldlabs.ai/marble/v1';
+const DIRECT_API_BASE = 'https://api.worldlabs.ai/marble/v1';
+const DEFAULT_PROXY   = 'https://plus.gamecreator.dev';
 const POLL_INTERVAL_MS = 5000;
 const MAX_POLL_ATTEMPTS = 720; // 60 minutes max (worlds can take a while)
 
@@ -87,13 +90,26 @@ const skipCollider = hasFlag('skip-collider');
 const skipPano = hasFlag('skip-pano');
 const pageSize = parseInt(getArg('page-size', '20'), 10);
 
-const API_KEY = process.env.WORLDLABS_API_KEY;
+// Routing — Plus proxy if GCPLUS_TOKEN is set or ~/.gcplus/token exists,
+// else direct upstream with WORLDLABS_API_KEY. Proxy mode pays through your
+// Plus credit balance; direct mode hits World Labs with your own API key.
+const TOKEN_PATH  = join(homedir(), '.gcplus', 'token');
+const GCPLUS_TOKEN =
+  process.env.GCPLUS_TOKEN ||
+  (existsSync(TOKEN_PATH) ? readFileSync(TOKEN_PATH, 'utf8').trim() : null);
+const GCPLUS_PROXY = process.env.GCPLUS_PROXY || DEFAULT_PROXY;
+const API_KEY      = process.env.WORLDLABS_API_KEY;
+
+const useProxy = !!GCPLUS_TOKEN;
+const API_BASE = useProxy ? `${GCPLUS_PROXY}/v1/marble` : DIRECT_API_BASE;
 
 function requireApiKey() {
+  if (useProxy) return; // token already validated above
   if (!API_KEY) {
     throw new Error(
-      'WORLDLABS_API_KEY environment variable is required.\n' +
-      'Get an API key at: https://platform.worldlabs.ai/'
+      'No credentials. Set GCPLUS_TOKEN (proxy mode) or WORLDLABS_API_KEY (direct).\n' +
+      '  - Plus proxy: node scripts/plus-auth.mjs signup --email <you@example.com>\n' +
+      '  - Direct API: get a key at https://platform.worldlabs.ai/',
     );
   }
 }
@@ -145,20 +161,38 @@ function formatBytes(bytes) {
 }
 
 function headers(contentType = 'application/json') {
-  const h = { 'WLT-Api-Key': API_KEY };
+  const h = useProxy
+    ? { Authorization: `Bearer ${GCPLUS_TOKEN}` }
+    : { 'WLT-Api-Key': API_KEY };
   if (contentType) h['Content-Type'] = contentType;
   return h;
 }
 
 async function apiPost(path, body) {
   const url = `${API_BASE}${path}`;
+  const reqHeaders = headers();
+  // Plus proxy honors Idempotency-Key for billed endpoints — set it on
+  // every generate so retries don't double-bill.
+  if (useProxy && path.includes(':generate')) {
+    reqHeaders['Idempotency-Key'] = randomUUID();
+  }
   const res = await fetch(url, {
     method: 'POST',
-    headers: headers(),
+    headers: reqHeaders,
     body: JSON.stringify(body),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
+    // Plus proxy returns 402 with a topup URL when out of credits — surface
+    // it as a friendly error message.
+    if (useProxy && res.status === 402) {
+      let parsed;
+      try { parsed = JSON.parse(text); } catch {}
+      throw new Error(
+        `Out of credits. Need ${parsed?.needed ?? '?'} cr, have ${parsed?.balance ?? '?'} cr.\n` +
+        `Top up: node scripts/plus-auth.mjs topup --amount 20`,
+      );
+    }
     throw new Error(`POST ${path} → HTTP ${res.status}: ${text}`);
   }
   return res.json();
