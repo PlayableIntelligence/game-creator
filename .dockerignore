@@ -1,0 +1,16 @@
+# Only `site/` is needed for the landing-page Dockerfile build.
+# Excluding everything else makes the build context tiny + avoids
+# broken symlinks in examples/ (point at a sibling repo not in CI).
+**
+
+# Allow back in only what site/Dockerfile actually needs:
+!site/
+!site/**
+
+# Always exclude the build output (we generate it inside the image)
+site/_site/
+
+# Hygiene
+**/.DS_Store
+**/node_modules/
+**/.git/
