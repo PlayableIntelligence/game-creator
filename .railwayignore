@@ -1,0 +1,18 @@
+# Railway-side ignore for `railway up`. Mirrors .dockerignore but
+# applies during the indexing step before upload.
+#
+# We only need `site/` — everything else is excluded to (a) keep the
+# upload small and fast, (b) avoid broken symlinks in examples/.
+
+**
+
+!site/
+!site/**
+
+!railway.json
+!.dockerignore
+
+site/_site/
+**/.DS_Store
+**/node_modules/
+**/.git/
