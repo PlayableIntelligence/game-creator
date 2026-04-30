@@ -31,7 +31,7 @@ Build a complete browser game from scratch, step by step. This command walks you
 ## Reference Files
 
 - **[verification-protocol.md](verification-protocol.md)** — QA subagent instructions, autofix subagent instructions, visual review details, and the orchestrator flow for the verification loop.
-- **[step-details.md](step-details.md)** — Detailed Step 1-5 subagent prompt templates, infrastructure setup instructions, character library checks, and per-step user messaging.
+- **[step-details.md](step-details.md)** — Detailed Step 1-5 subagent prompt templates, infrastructure setup instructions, and per-step user messaging.
 - **[tweet-pipeline.md](tweet-pipeline.md)** — Tweet-to-game pipeline: fetching and parsing tweets, creative abstraction, celebrity detection, and Meshy API key prerequisites.
 
 ## Security Notes
@@ -131,6 +131,7 @@ Base tasks (always included):
 1. Scaffold game from template
 2. **[CONDITIONAL]** Scaffold gateables — include ONLY IF `MONETIZATION_INTENT != 'none'`. Produces `isEntitled()` hooks and gateable features (skin picker, continue-after-death, etc.) that any monetization layer can activate later.
 3. Add assets: pixel art sprites (2D) or World Labs environments + Meshy AI-generated GLB models + animated characters (3D)
+3.5. **[CONDITIONAL]** Meme pass — include ONLY IF Form B (tweet input) detected celebrities (`hasCelebrities = true`). Hands off to `/meme-game` to swap detected slugs into photo-composite / caricature characters with expression wiring.
 4. Add visual polish (particles, transitions, juice)
 5. Record promo video (autonomous 50 FPS capture)
 6. Add audio (BGM + SFX)
@@ -175,17 +176,27 @@ Mark the gateables task as `completed`.
 
 ### Step 1.5: Add game assets
 
-**Always run this step for both 2D and 3D games.** 2D games get pixel art sprites; 3D games get GLB models and animated characters.
+**Always run this step for both 2D and 3D games.** 2D games get pixel art sprites; 3D games get GLB models and animated characters. **This step is generic** — no photo-composite characters, no expression wiring, no celebrity caricatures. Personality work happens in the optional Step 1.6 below.
 
 Mark the assets task as `in_progress`.
 
-See [step-details.md](step-details.md) for the full Step 1.5 character library check, tiered fallback, 2D subagent prompt, 3D asset flow, 3D subagent prompt, and user messaging.
+See [step-details.md](step-details.md) for the full Step 1.5 2D subagent prompt, 3D asset flow, 3D subagent prompt, and user messaging.
 
 **After subagent returns**, run the Verification Protocol (see [verification-protocol.md](verification-protocol.md)).
 
 Mark the assets task as `completed`.
 
 **Wait for user confirmation before proceeding.**
+
+### Step 1.6: Meme pass (conditional, Form B only)
+
+**Skip this step entirely** unless the tweet pipeline (Form B) flagged `hasCelebrities = true` during Step 0. For Form A (direct game spec), the user can always run `/meme-game` themselves later — don't auto-run.
+
+If `hasCelebrities = true`, invoke `/meme-game <project-dir> <slug1,slug2,...>` with the detected celebrity slugs. The skill handles the 5-tier character resolution, expression wiring, and (for 3D) caricature Meshy generation. See [tweet-pipeline.md](tweet-pipeline.md) for the hand-off contract and `skills/meme-game/SKILL.md` for the personality pass itself.
+
+**After meme-game returns**, the verification protocol it runs internally already covers build + visual review. No additional verification needed here.
+
+**Wait for user confirmation before proceeding** to Step 2.
 
 ### Step 2: Design the visuals
 
@@ -591,9 +602,10 @@ Result: Fetches tweet → abstracts game concept → 3D Three.js scaffold → Me
 
 ### Pipeline Complete!
 
-**Assemble the final message based on `MONETIZATION_INTENT`:**
+**Assemble the final message based on `MONETIZATION_INTENT` and whether Step 1.6 ran:**
 
 - Include the **Gateables** bullet only when `MONETIZATION_INTENT != 'none'` (Step 1.25 ran).
+- Include the **Personality characters** bullet only when Step 1.6 ran (Form B + `hasCelebrities = true`).
 - Include the **Monetized on Play.fun** bullet + the Moltbook share line only when `MONETIZATION_INTENT ∈ {'playfun', 'both'}`.
 - Include the **sub.games next** callout only when `MONETIZATION_INTENT ∈ {'subgames', 'both'}`.
 
@@ -604,6 +616,7 @@ Tell the user:
 > - **Pixel art sprites** — recognizable characters (if chosen) or clean geometric shapes
 > - **3D environments** — photorealistic Gaussian Splat worlds (3D games with World Labs)
 > - **Gateables scaffolded** — `isEntitled()` hooks for skins, continue, bonus modes at silver/gold tiers (all locked by default, ready for monetization wiring) *[include only if Step 1.25 ran]*
+> - **Personality characters** — photo-composite heads on cartoon bodies with reactive expressions *[include only if Step 1.6 ran]*
 > - **Visual polish** — gradients, particles, transitions, juice
 > - **Promo video** — 50 FPS gameplay footage in mobile portrait (`output/promo.mp4`)
 > - **Music and SFX** — chiptune background music and retro sound effects
@@ -626,6 +639,7 @@ Tell the user:
 > - Add new gameplay features: `/game-creator:add-feature [describe what you want]`
 > - Add more gateables later: `/game-creator:scaffold-gateables`
 > - Upgrade to pixel art (if using shapes): `/game-creator:add-assets`
+> - **Turn this into a meme/personality game** (real people, CEOs, photo-composite characters): `/game-creator:meme-game [name1,name2,...]`
 > - Re-record promo video: `/game-creator:record-promo`
 > - Run a deeper code review: `/game-creator:review-game`
 > - Launch a playcoin for your game (token rewards for players)

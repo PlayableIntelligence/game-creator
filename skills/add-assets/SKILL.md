@@ -39,19 +39,18 @@ Present a table of sprites to create:
 
 | Entity | Archetype | Grid | Frames | Description |
 |--------|-----------|------|--------|-------------|
-| Player (personality) | Personality | 32x48 | 1-4 | Caricature of [name], scale 4 |
-| Player (generic) | Humanoid | 16x16 | 4 | ... |
-| Enemy X | Flying | 16x16 | 2 | ... |
-| Pickup | Item | 8x8 | 1 | ... |
-
-If the game features a real person or named personality, default to the **Personality** archetype for the player character. This uses a 32x48 grid at scale 4 (128x192px rendered, ~35% of canvas height) — large enough to recognize the personality at a glance.
+| Player | Humanoid | 16x16 | 4 | Idle + walk frames |
+| Enemy X | Flying | 16x16 | 2 | Wings up/down |
+| Pickup | Item | 8x8 | 1 | Bobs in place |
 
 Choose the palette that best matches the game's existing color scheme:
 - **DARK** — gothic, horror, dark fantasy
 - **BRIGHT** — arcade, platformer, casual
 - **RETRO** — NES-style, muted tones
 
-Grid sizes range from 8x8 (tiny pickups) through 16x16 (standard entities) to 32x48 (personality characters). Named characters always use the Personality archetype to ensure the meme hook — recognizing the person — lands immediately.
+Grid sizes range from 8x8 (tiny pickups) through 16x16 (standard entities) to 24x24 / 32x32 (boss / vehicle). For an oversized hero, push to 32x32; otherwise stick with 16x16.
+
+**Personality / photo-composite characters are out of scope for this skill.** If the user wants real people (Trump, Musk, Altman, etc.) as recognizable photo-composite characters with reactive expressions, redirect them to `/meme-game [path] [name1,name2,...]`. That skill owns the character library, the WebSearch + face-detection pipeline, the bobblehead body pattern, and the expression wiring. `/add-assets` stays focused on generic pixel art.
 
 ### Step 3: Implement
 
@@ -84,11 +83,11 @@ Grid sizes range from 8x8 (tiny pickups) through 16x16 (standard entities) to 32
 ```
 Result: Audits all entities using geometric shapes → creates `src/sprites/` with player, asteroids, and gem pixel art → replaces `fillCircle()`/`fillRect()` with `renderPixelArt()` → collision bounds adjusted.
 
-### Personality game (from tweet)
+### Personality / meme game
 ```
-/add-assets examples/nick-land-dodger
+/meme-game examples/nick-land-dodger trump,musk
 ```
-Result: Detects named personality → uses 32x48 Personality archetype at scale 4 → recognizable caricature as player character → enemies and items get themed pixel art.
+For real-people personality characters, use `/meme-game` instead of `/add-assets`. It handles the photo-composite character pipeline, expression wiring, and the bobblehead body pattern.
 
 ## Troubleshooting
 

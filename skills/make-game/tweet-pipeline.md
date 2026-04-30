@@ -39,10 +39,17 @@ After determining the game concept, scan the concept description, tweet text, an
 2. Common name recognition — politicians, tech CEOs, world leaders, entertainers
 
 If celebrities are detected:
-- Set `hasCelebrities = true` and list detected names
-- Note in `progress.md` which characters are pre-built vs need building
-- **2D**: The Step 1.5 subagent will use photo-composite characters for these
-- **3D**: For each celebrity, try: (1) generate with Meshy AI — `"a cartoon caricature of <Name>, <distinguishing features>, low poly game character"` then rig for animation, (2) check `assets/3d-characters/manifest.json` for a pre-built match, (3) search Sketchfab with `find-3d-asset.mjs`, (4) fall back to best-matching library model. Meshy generation produces the best results for named personalities since it can capture specific visual features.
+- Set `hasCelebrities = true` and store the list of detected slugs (e.g. `['altman', 'musk']`)
+- Note in `progress.md` which slugs were detected and how they map to game roles (player / opponent / collectible)
+
+**Hand-off to `/meme-game`:** Step 1.5 itself stays generic (pixel-art for 2D, GLB models for 3D — no photo-composite work, no caricature Meshy prompts, no expression wiring). After Step 1.5's verification protocol passes, **automatically invoke `/meme-game <project-dir> <slug1,slug2,...>`** as a Step 1.6 hand-off. The meme-game skill owns:
+
+- 2D: the 5-tier character resolution (pre-built library → WebSearch 4 expressions → 1‑3 photos → 1 photo → pixel-art caricature) and expression wiring.
+- 3D: caricature Meshy prompts (`"a cartoon caricature of <Name>, <distinguishing features>, low poly game character, full body"`), the rig step, and the pre-built / Sketchfab / generic-library fallback chain.
+
+If detection is uncertain (e.g. an ambiguous name that *might* be a public figure but Tier 1 doesn't match), surface the candidates to the user and ask "Run `/meme-game` for these characters? (y/n)" rather than auto-running. Don't burn Meshy credits or do WebSearch on a guess.
+
+When `hasCelebrities = false`, skip the hand-off entirely — the user's tweet didn't mention named real people, so the standard generic pipeline is the correct end state.
 
 ## API Keys (3D games only)
 
