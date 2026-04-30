@@ -1,0 +1,14 @@
+{
+  "name": "maze-tanks-multiplayer-server",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "partykit dev",
+    "deploy": "partykit deploy",
+    "build": "partykit build"
+  },
+  "devDependencies": {
+    "partykit": "^0.0.114",
+    "typescript": "^5.4.0"
+  }
+}

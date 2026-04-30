@@ -1,0 +1,18 @@
+{
+  "name": "maze-tanks",
+  "description": "Classic Atari-style 4-player tanks in a fixed maze. Dogfood test for the add-multiplayer skill.",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "partysocket": "^1.1.18",
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
