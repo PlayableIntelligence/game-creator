@@ -76,6 +76,7 @@ examples/
   flappy-bird/             # Complete example game (see below)
   nick-land-dodger/        # Dodge game with photo-composite character + promo video
   3d-asset-test/           # 3D asset pipeline demo (animated characters, model loading, OrbitControls)
+  maze-tanks/              # 4-player multiplayer demo (PartyKit + Cloudflare DOs) — exercises the add-multiplayer skill
 ```
 
 **Game creation directory**: When the `/make-game` pipeline is launched from within the `game-creator` repository (i.e., the current working directory is `game-creator/` or a subdirectory), new games **must be created in `examples/`** (e.g., `examples/<game-name>/`). This keeps the repo organized and ensures example games are versioned alongside the plugin. When launched from any other directory, games are created in the current working directory as normal.
