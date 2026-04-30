@@ -1,6 +1,6 @@
 {
   "name": "maze-tanks",
-  "description": "Classic Atari-style 4-player tanks in a fixed maze. Dogfood test for the add-multiplayer skill.",
+  "description": "Classic Atari-style 4-player tanks in a fixed maze. Example of the add-multiplayer skill.",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

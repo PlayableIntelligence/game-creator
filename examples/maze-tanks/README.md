@@ -1,8 +1,8 @@
 # Maze Tanks
 
-Classic Atari Combat-style 4-player tanks-in-a-maze. Built as a dogfood test for
-the [`add-multiplayer`](../../skills/add-multiplayer/) skill — Phaser 3 client +
-PartyKit server (Cloudflare Durable Objects).
+Classic Atari Combat-style 4-player tanks-in-a-maze. Phaser 3 client + PartyKit
+server (Cloudflare Durable Objects). Demonstrates the
+[`add-multiplayer`](../../skills/add-multiplayer/) skill.
 
 Live-players-only: empty corners stay empty (no NPC bots). Up to 4 humans share
 a `lobby` room; first to join takes RED (top-left), second BLUE (top-right),
@@ -84,13 +84,3 @@ Follows the game-creator [architecture rules](../../CLAUDE.md):
 All positions/velocities are broadcast in **design pixels** (PX-independent).
 Receivers multiply by their own `PX` to render — this lets clients with
 different DPRs/window sizes agree on positions.
-
-## Dogfood findings
-
-Build journal in [`STEP1-DONE.md`](STEP1-DONE.md) … [`STEP-MP-GLUE-DONE.md`](STEP-MP-GLUE-DONE.md)
-captures findings from each pipeline step. Notable issues surfaced and fixed:
-
-- Wire format must be PX-independent (clients with different window sizes diverge otherwise)
-- Local human deaths must broadcast regardless of who killed them (early shooter-authoritative-only logic missed self-suicide and bot-kills)
-- Round-end consensus needs human-only counting (bots disagree across clients)
-- PartyKit's clerk login flow is broken in 2026 (dashboard.partykit.io retired); use `--provider github` instead
