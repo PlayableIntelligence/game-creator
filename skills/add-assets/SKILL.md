@@ -1,6 +1,6 @@
 ---
 name: add-assets
-description: Replace geometric shapes with pixel art sprites — recognizable characters, enemies, and items with optional animation. Use when the user says "add sprites", "replace the shapes with real art", "add pixel art", "make the characters look real", or "add game assets". For 3D games, use add-3d-assets instead. Do NOT use for 3D models (use add-3d-assets) or gameplay changes (use add-feature).
+description: Replace geometric shapes (circles, rectangles) with pixel art sprites — generic characters, enemies, items, and projectiles. Use when the user says "add sprites", "add pixel art", "convert shapes to art", "replace the shapes with sprites", or "add game assets". For 3D games, use add-3d-assets instead. Do NOT use for: 3D models (use add-3d-assets), gameplay changes (use add-feature), or swapping in **real public figures** like Trump/Musk/Altman/CEOs as photo-composite characters (use `/meme-game`).
 argument-hint: "[path-to-game]"
 license: MIT
 metadata:
@@ -50,7 +50,7 @@ Choose the palette that best matches the game's existing color scheme:
 
 Grid sizes range from 8x8 (tiny pickups) through 16x16 (standard entities) to 24x24 / 32x32 (boss / vehicle). For an oversized hero, push to 32x32; otherwise stick with 16x16.
 
-**Personality / photo-composite characters are out of scope for this skill.** If the user wants real people (Trump, Musk, Altman, etc.) as recognizable photo-composite characters with reactive expressions, redirect them to `/meme-game [path] [name1,name2,...]`. That skill owns the character library, the WebSearch + face-detection pipeline, the bobblehead body pattern, and the expression wiring. `/add-assets` stays focused on generic pixel art.
+**Public-figure / photo-composite characters are out of scope for this skill.** If the user wants real public figures (Trump, Musk, Altman, etc.) as recognizable photo-composite characters with reactive expressions, redirect them to `/meme-game [path] [name1,name2,...]`. That skill owns the character library, the WebSearch + face-detection pipeline, the bobblehead body pattern, and the expression wiring. `/add-assets` stays focused on generic pixel art for fictional or unnamed entities.
 
 ### Step 3: Implement
 
@@ -83,11 +83,11 @@ Grid sizes range from 8x8 (tiny pickups) through 16x16 (standard entities) to 24
 ```
 Result: Audits all entities using geometric shapes → creates `src/sprites/` with player, asteroids, and gem pixel art → replaces `fillCircle()`/`fillRect()` with `renderPixelArt()` → collision bounds adjusted.
 
-### Personality / meme game
+### Public-figure / meme game
 ```
 /meme-game examples/nick-land-dodger trump,musk
 ```
-For real-people personality characters, use `/meme-game` instead of `/add-assets`. It handles the photo-composite character pipeline, expression wiring, and the bobblehead body pattern.
+For real public figures, use `/meme-game` instead of `/add-assets`. It handles the photo-composite character pipeline, expression wiring, and the bobblehead body pattern.
 
 ## Troubleshooting
 

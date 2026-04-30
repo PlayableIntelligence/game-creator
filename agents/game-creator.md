@@ -166,10 +166,13 @@ When the QA subagent reports FAIL:
 
 Parse input to determine engine, game name, and concept.
 
+**Public Figure Detection.** Scan the game concept text for explicit mentions of public figures (politicians, tech CEOs, world leaders, entertainers) and public companies. Match against `assets/characters/manifest.json` (relative to plugin root) and known names; map mentioned companies to CEO slugs (OpenAI → `altman`, Anthropic → `amodei`, xAI → `musk`, Meta → `zuckerberg`, Microsoft → `nadella`, Google → `pichai`, NVIDIA → `huang`). If anything matches, set `hasPublicFigures = true` and store the slug list in `publicFigureSlugs`. Otherwise `hasPublicFigures = false` and the pipeline stays purely generic — no real-person content at any step. Do not infer from topic alone (basketball ≠ LeBron).
+
 Create all pipeline tasks upfront using `TaskCreate`:
 
 1. Scaffold game from template
 2. Add pixel art sprites and backgrounds (2D only; marked N/A for 3D)
+2.5. **[CONDITIONAL]** Public-figure pass via `/meme-game` — include ONLY IF `hasPublicFigures = true`
 3. Add visual polish (particles, transitions, juice)
 4. Add audio (BGM + SFX)
 5. Monetize with Play.fun (add SDK)
@@ -252,11 +255,17 @@ Launch a `Task` subagent with these instructions:
 > - Add `isMuted` to GameState for mute support
 > - **Update `render_game_to_text()`** in `main.js` to reflect your new entities, obstacles, and mechanics. Add all player-relevant state: position, velocity, visible enemies/obstacles, collectibles, timers/cooldowns, and mode flags.
 >
-> **Visual identity — push the pose:**
-> - If the player character represents a real person or brand, build visual recognition into the entity from the start. Don't use generic circles/rectangles as placeholders — use descriptive colors, proportions, and features that communicate identity even before pixel art is added.
-> - Named opponents/NPCs must have visual presence on screen — never text-only. At minimum use distinct colored shapes that suggest the brand. Better: simple character forms with recognizable features.
-> - Collectibles and hazards must be visually self-explanatory. Avoid abstract concepts ("imagination blocks", "creativity sparks"). Use concrete objects players instantly recognize (polaroids, trophies, lightning bolts, money bags, etc.).
-> - Think: "Could someone screenshot this and immediately know what the game is about?"
+> **Visual identity (generic):**
+> - Each entity needs a distinct silhouette and proportions. Never differentiate two entities only by fill color.
+> - Never use a single letter (C, G, O) as an entity's visual identity.
+> - Collectibles and hazards must be visually self-explanatory at a glance — concrete shapes the player can read in peripheral vision (gem, coin, skull, bomb), not abstract concepts.
+> - Use descriptive colors and shape language up front; pixel art / models come in Step 1.5. The scaffold should already feel readable with primitives.
+>
+> **Public figures — conditional (only when `hasPublicFigures = true`):**
+> - The orchestrator passes `publicFigureSlugs` when Step 0's Public Figure Detection fired (e.g. `['trump', 'altman']`). If empty, ignore this block — generic prompts like "maze-tank" stay generic.
+> - When non-empty, name the entities with the slug (e.g. `class TrumpPlayer extends Phaser.GameObjects.Container`) and use placeholder colors that hint at the figure's identity (Trump: blonde + dark suit + red tie hint; Musk: dark casual; Altman: brown hair + casual button-down; Amodei: dark hair + glasses; Huang: black leather; Zuckerberg: brown hair + plain tee; Pichai: business-casual; Nadella: business-casual + glasses; Karpathy: long dark hair + casual). The Step 1.6 `/meme-game` pass swaps these for photo-composite spritesheets.
+> - Use 12–15% of `GAME.WIDTH` for the player width with caricature proportions (large head ~40–50% of sprite height) so the photo head fits naturally.
+> - Do NOT add `EXPRESSION` constants, expression frames, or photo-composite paths here — that's Step 1.6's job.
 >
 > **Iterate after each meaningful change**: The dev server is running on port `<port>`. After each chunk of work (e.g., input wired up, collision added, scoring working), run:
 > ```
@@ -329,14 +338,12 @@ Launch a `Task` subagent:
 > 9. Add Phaser animations for entities with multiple frames
 > 10. Adjust physics bodies for new sprite dimensions
 >
-> **Character prominence**: If the game features a real person or named personality, use the Personality Character (Caricature) archetype — 32x48 grid at scale 4 (renders to 128x192px, ~35% of canvas height). The character must be the visually dominant element on screen. Supporting entities stay at Medium (16x16) or Small (12x12) to create clear visual hierarchy.
+> **Visual hierarchy:**
+> - The player character should be visually dominant — pick a sprite size that's clearly the largest gameplay entity on screen.
+> - Supporting entities (enemies, projectiles, collectibles) sit at Medium (16x16) or Small (12x12) to create clear hierarchy.
+> - Each entity needs a distinct silhouette — never differentiate two entities by fill color alone.
 >
-> **Push the pose — thematic expressiveness:**
-> - Sprites must visually embody who/what they represent. A sprite for "Grok AI" should look like Grok (logo features, brand colors, xAI aesthetic) — not a generic robot or colored circle.
-> - For real people: exaggerate their most recognizable features (signature hairstyle, glasses, facial hair, clothing). Recognition IS the meme hook.
-> - For brands/products: incorporate logo shapes, brand colors, and distinctive visual elements into the sprite design.
-> - For game objects: make them instantly recognizable. A "power-up" should look like the specific thing it represents in the theme, not a generic star or diamond.
-> - Opponents should be visually distinct from each other — different colors, shapes, sizes, and personality. A player should tell them apart at a glance.
+> **Public-figure photo-composite work is NOT done here.** Even when `hasPublicFigures = true`, this step still produces only generic pixel art. Step 1.6's `/meme-game` pass swaps the public-figure-named placeholder entities for photo-composite spritesheets. Do NOT load `public/assets/characters/`, photo-composite spritesheets, `EXPRESSION` constants, or expression-wiring code here.
 >
 > **Iterate after each meaningful change**: The dev server is running on port `<port>`. After updating sprites/backgrounds, run:
 > ```

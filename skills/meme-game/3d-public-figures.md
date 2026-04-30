@@ -1,10 +1,10 @@
-# 3D Personality Characters
+# 3D Public-Figure Characters
 
-For 3D games (Three.js), personality characters need rigged caricature models with walk/run animations. The 4-tier flow below mirrors the 2D resolution but produces GLB models instead of spritesheets. The generic 3D asset pipeline (rig, SkeletonUtils.clone, world props, AssetLoader) is owned by `make-game` Step 1.5 and the `game-3d-assets` skill — this file covers only the personality-specific pieces.
+For 3D games (Three.js), public-figure characters need rigged caricature models with walk/run animations. The 4-tier flow below mirrors the 2D resolution but produces GLB models instead of spritesheets. The generic 3D asset pipeline (rig, SkeletonUtils.clone, world props, AssetLoader) is owned by `make-game` Step 1.5 and the `game-3d-assets` skill — this file covers only the public-figure-specific pieces.
 
 ## Prerequisite
 
-`MESHY_API_KEY` should be set in `.env` or the environment. If not, ask the user before proceeding (Tier 1 is the dramatically better option for named personalities).
+`MESHY_API_KEY` should be set in `.env` or the environment. If not, ask the user before proceeding (Tier 1 is the dramatically better option for named real people — the caricature prompt captures specific visual features that the generic library cannot).
 
 ## Tier 1 — Meshy AI caricature (preferred)
 
@@ -31,7 +31,7 @@ After completion you have 3 files per character:
 - `<slug>-walk.glb` — walking animation (auto-downloaded by the rig step)
 - `<slug>-run.glb` — running animation (auto-downloaded by the rig step)
 
-### Prompt guidance for named personalities
+### Prompt guidance for named public figures
 
 Be specific about distinguishing features so the model actually resembles the person:
 
@@ -56,7 +56,7 @@ cp <plugin-root>/assets/3d-characters/models/<slug>.glb \
    <project-dir>/public/assets/models/<slug>.glb
 ```
 
-The library currently contains a small number of personality GLBs (e.g. trump, biden) plus generic models (Soldier, Xbot, RobotExpressive, Fox). Personality entries are the only useful Tier 2 results — generic models are Tier 4.
+The library currently contains a small number of public-figure GLBs (e.g. trump, biden) plus generic models (Soldier, Xbot, RobotExpressive, Fox). Public-figure entries are the only useful Tier 2 results — generic models are Tier 4.
 
 ## Tier 3 — Sketchfab search
 
@@ -72,7 +72,7 @@ Review the listing manually before downloading — Sketchfab results vary widely
 
 ## Tier 4 — Generic library fallback
 
-When all personality-specific tiers fail, fall back to the best generic model from `assets/3d-characters/`:
+When all public-figure-specific tiers fail, fall back to the best generic model from `assets/3d-characters/`:
 
 - **Soldier** — action / military / default human
 - **Xbot** — sci-fi / tech / futuristic
@@ -83,16 +83,16 @@ When 2+ characters fall back to the library, pick **different** models for visua
 
 ## Wiring into the game
 
-The generic 3D asset wiring (AssetLoader, SkeletonUtils.clone, mixer setup, fadeToAction transitions) is owned by `game-3d-assets`. This skill only adds the personality models alongside whatever the game already loads.
+The generic 3D asset wiring (AssetLoader, SkeletonUtils.clone, mixer setup, fadeToAction transitions) is owned by `game-3d-assets`. This skill only adds the public-figure models alongside whatever the game already loads.
 
-For each personality model:
+For each public-figure model:
 
 1. Add to `MODELS` config in `Constants.js` with `path` (rigged GLB), `walkPath`, `runPath`, `scale`, `rotationY`. Start with `rotationY: Math.PI` — most Meshy models face +Z and need flipping.
 2. Load with `loadAnimatedModel()` (NOT `loadModel()` — that's for static props), create an `AnimationMixer`, register walk/run clips as mixer actions.
 3. Log clip names: `console.log('Clips:', clips.map(c => c.name))`.
 4. Store mixer + actions in entity `userData`. Call `mixer.update(delta)` every frame.
 5. Verify orientation and scale: log bounding box, auto-scale to target height, align feet to floor (`position.y = -box.min.y`), confirm character faces the correct direction relative to its environment.
-6. Add a primitive fallback in the `.catch()` so a failed personality load doesn't break the scene.
+6. Add a primitive fallback in the `.catch()` so a failed public-figure load doesn't break the scene.
 
 ## Recording results
 

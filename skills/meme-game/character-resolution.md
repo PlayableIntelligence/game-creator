@@ -1,6 +1,6 @@
 # Character Resolution — 5-Tier Fallback (2D)
 
-For each named personality, walk these tiers in order. Stop at the first tier that produces a usable spritesheet. Record which tier each character resolved to in `progress.md`.
+For each named public figure, walk these tiers in order. Stop at the first tier that produces a usable spritesheet. Record which tier each character resolved to in `progress.md`.
 
 ## Plugin path resolution
 
@@ -79,7 +79,7 @@ Result: All 4 frames identical. Character is photo-recognizable but has no expre
 
 ## Tier 5 — Pixel-art caricature (worst case)
 
-Only when no photos can be sourced or the entire pipeline crashes (background removal fails on all images, face detection fails on all images, network errors). At this point, abandon photo-composite for this character and produce a pixel-art caricature using the Personality archetype documented in `game-assets/SKILL.md`:
+Only when no photos can be sourced or the entire pipeline crashes (background removal fails on all images, face detection fails on all images, network errors). At this point, abandon photo-composite for this character and produce a pixel-art caricature using the Caricature archetype documented in `game-assets/SKILL.md`:
 
 - Grid: **32×48 at scale 4** (renders to 128×192px, ~35% of canvas height)
 - Use caricature proportions: large head (60%+ of sprite height), exaggerated signature features (signature hairstyle, glasses, facial hair, suit/clothing color)
@@ -88,7 +88,7 @@ Only when no photos can be sourced or the entire pipeline crashes (background re
 
 Note in `progress.md`: `<slug>: Tier 5 (pixel art caricature — no photo available)`.
 
-Always exhaust image search first. Even a single photo (Tier 4) produces a more recognizable result than pixel-art for known personalities.
+Always exhaust image search first. Even a single photo (Tier 4) produces a more recognizable result than pixel-art for known public figures.
 
 ## Recording results
 

@@ -1,212 +1,67 @@
-# Expression Wiring & Bobblehead Body Pattern
+# Expression Wiring (meme-game workflow)
 
-This file describes how to wire reactive expressions to game events and how to pair photo-composite heads with cartoon bodies. Applies to characters resolved in Tiers 1–4 (those with a 4-frame spritesheet). Tier 5 (pixel-art caricature) skips this entire flow.
+This file describes how `/meme-game` wires reactive expressions to game events for public-figure characters. The static technique reference — `EXPRESSION` constants, the spritesheet loading pattern, the `setExpression(expression, holdMs)` helper, the Bobblehead body Pattern (Container layering, body components, `CHARACTER` scaling constants, head positioning, idle breathing tween, clothing palette) — lives in **`game-assets/character-pipeline.md`**. Load that file as a reference and follow it for the foundational wiring code.
 
-## Expression constants
+This file covers only what is specific to running the wiring pass on an existing game.
 
-Add to `Constants.js`:
+## When to apply
 
-```js
-export const EXPRESSION = {
-  NORMAL: 0,
-  HAPPY: 1,
-  ANGRY: 2,
-  SURPRISED: 3,
-};
+Applies to public-figure characters resolved in Tiers 1–4 (those with a 4-frame spritesheet). Tier 5 (pixel-art caricature) skips this entire flow — no spritesheet, no expression timer, just a regular pixel-art entity.
 
-export const EXPRESSION_HOLD_MS = 600;
-```
+## Game-event → expression mapping
 
-The frame indices are stable across the entire `assets/characters/` library — every spritesheet uses the same order.
+After loading `game-assets/character-pipeline.md`'s patterns, read `src/core/EventBus.js` and the scene files to find the closest semantic match for each public-figure character. There is no universal event list — every game has different event names. Pick from this template:
 
-## Loading the spritesheet
-
-In the Phaser preloader (typically `BootScene.js` or `GameScene.preload()`):
-
-```js
-preload() {
-  this.load.spritesheet('trump', 'assets/characters/trump/spritesheet.png', {
-    frameWidth: 200,
-    frameHeight: 300,
-  });
-}
-```
-
-## Expression-hold pattern
-
-Every reactive expression is held for `EXPRESSION_HOLD_MS` and then reverts to `NORMAL`. Implement on the entity:
-
-```js
-setExpression(expression, holdMs = EXPRESSION_HOLD_MS) {
-  this.headSprite.setFrame(expression);
-  if (this.expressionTimer) this.expressionTimer.remove();
-  if (expression !== EXPRESSION.NORMAL) {
-    this.expressionTimer = this.scene.time.delayedCall(holdMs, () => {
-      this.headSprite.setFrame(EXPRESSION.NORMAL);
-    });
-  }
-}
-```
-
-Use `headSprite.setFrame()` (not `sprite.setFrame()`) once the bobblehead body is in place — the head is a child sprite of the character Container, not the root.
-
-## Event → expression mapping
-
-Wire in the entity's constructor (or in the scene's `create()` for shared events):
-
-```js
-// Player reactions
-eventBus.on(Events.SCORE_CHANGED, () => {
-  player.setExpression(EXPRESSION.HAPPY);
-});
-eventBus.on(Events.PLAYER_DAMAGED, () => {
-  player.setExpression(EXPRESSION.ANGRY);
-});
-eventBus.on(Events.SPECTACLE_STREAK, ({ streak }) => {
-  player.setExpression(EXPRESSION.SURPRISED, 1000);  // longer hold for milestones
-});
-
-// Opponent reactions (for named opponents/NPCs)
-eventBus.on(Events.OPPONENT_HIT, ({ id }) => {
-  opponents[id].setExpression(EXPRESSION.ANGRY);
-});
-eventBus.on(Events.OPPONENT_SCORES, ({ id }) => {
-  opponents[id].setExpression(EXPRESSION.HAPPY);
-});
-```
-
-The exact event names depend on the game. Read `src/core/EventBus.js` and pick the closest semantic match. Common patterns:
-
-| Game event | Player expression | Why |
+| Game event semantic | Expression | Notes |
 |---|---|---|
-| Score / collect / hit target | HAPPY | Positive feedback |
-| Take damage / lose life / die | ANGRY | Visceral reaction |
-| Power-up / streak / milestone | SURPRISED | Excitement |
-| Idle / default | NORMAL | Resting state (auto-revert) |
+| Score / collect / hit target | `HAPPY` | Positive feedback. Default 600ms hold. |
+| Take damage / lose life / die | `ANGRY` | Visceral reaction. Default 600ms hold. |
+| Power-up / streak / milestone | `SURPRISED` | Excitement. Use a longer hold (1000ms) so milestones linger. |
+| Idle / default | `NORMAL` | Auto-revert after `EXPRESSION_HOLD_MS`. Don't wire — `setExpression` handles it. |
 
-## Bobblehead body pattern
+For named opponents/NPCs, mirror the player's reactions with inverted polarity:
 
-**Never display a floating head sprite alone.** Always pair the photo-composite head with a South Park-style cartoon body drawn in Phaser Graphics. The bobblehead aesthetic (giant photo head on a tiny cartoon body) is the signature look — and it scales cleanly to any device because the body is vector, not pixel.
+| Game event | Opponent expression | Why |
+|---|---|---|
+| `OPPONENT_HIT` / opponent loses life | `ANGRY` | Frustrated |
+| `OPPONENT_SCORES` / opponent succeeds | `HAPPY` | Gloating |
+| Near-miss / close call | `SURPRISED` | Tension |
 
-### Architecture
+Use the `setExpression(expression, holdMs)` helper from `character-pipeline.md` — do not reinvent the timer logic.
 
-The character is a Phaser `Container` holding:
-- Two `Graphics` objects for arms (separately animatable)
-- One `Graphics` object for the body (shoes/legs/torso/neck)
-- One `Sprite` for the photo-composite head, layered on top
+## Idle revert behavior
 
-```js
-this.container.add([
-  this.leftArmGfx,    // Layer 0: behind body
-  this.rightArmGfx,   // Layer 1: behind body
-  this.bodyGfx,       // Layer 2: middle (shoes, legs, torso, neck)
-  this.headSprite,    // Layer 3: on top (photo-composite head)
-]);
-```
+After `EXPRESSION_HOLD_MS` (default 600ms) elapses post-expression-change, the head sprite reverts to `NORMAL`. Pass a longer `holdMs` for milestone events you want to linger on (e.g. `setExpression(EXPRESSION.SURPRISED, 1000)` for a streak milestone).
 
-### Body components (drawn bottom-to-top)
-
-1. **Shoes** — rounded rectangles at the bottom
-2. **Legs (pants)** — two rounded rectangles with gap between
-3. **Torso (jacket/shirt)** — trapezoidal polygon, wider shoulders, narrower waist
-4. **Jacket detail** — lighter panel for depth, lapels on each side
-5. **Shirt/collar V** — V-shape at neckline
-6. **Tie** (optional) — knot + blade tapering down
-7. **Buttons** — small circles on jacket front
-8. **Neck** — rounded rectangle, skin-colored, connects body to head
-
-### Arms (separate Graphics for animation)
-
-1. **Upper arm (sleeve)** — rounded rectangle in jacket color
-2. **Shirt cuff** — thin lighter rectangle
-3. **Hand (mitten)** — rounded rectangle in skin color, no fingers (South Park convention)
-
-### Scaling system
-
-All dimensions derive from a single base unit `U`:
-
-```js
-const _U = GAME.WIDTH * 0.012;
-
-export const CHARACTER = {
-  U: _U,
-  TORSO_H: _U * 5,
-  SHOULDER_W: _U * 7,
-  WAIST_W: _U * 5,
-  NECK_W: _U * 2.5,
-  NECK_H: _U * 1,
-  HEAD_H: GAME.WIDTH * 0.25,   // Derive from WIDTH (not HEIGHT) to stay proportional in mobile portrait
-  FRAME_W: 200,                // Spritesheet frame dimensions
-  FRAME_H: 300,
-  UPPER_ARM_W: _U * 1.8,
-  UPPER_ARM_H: _U * 3,
-  HAND_W: _U * 1.8,
-  HAND_H: _U * 1.5,
-  LEG_W: _U * 2.4,
-  LEG_H: _U * 3,
-  LEG_GAP: _U * 1.2,
-  SHOE_W: _U * 3,
-  SHOE_H: _U * 1.2,
-  TIE_W: _U * 1,
-  BUTTON_R: _U * 0.3,
-  OUTLINE: Math.max(1, Math.round(_U * 0.3)),
-};
-```
-
-### Head positioning
-
-```js
-const headY = -C.TORSO_H * 0.5 - C.NECK_H - C.HEAD_H * 0.35;
-this.headSprite = scene.add.sprite(0, headY, sheetKey, EXPRESSION.NORMAL);
-const headScale = C.HEAD_H / C.FRAME_H;
-this.headSprite.setScale(headScale);
-```
-
-### Idle breathing tween (adds life)
-
-```js
-scene.tweens.add({
-  targets: this.container,
-  y: y - 2 * PX,
-  duration: 1400 + Math.random() * 400,
-  yoyo: true,
-  repeat: -1,
-  ease: 'Sine.easeInOut',
-});
-```
-
-### Per-character clothing palette
-
-Customize the body Graphics colors per character:
-
-- **Suit characters** (executives, politicians): dark navy/charcoal suit, white shirt, themed tie color
-- **Casual characters**: t-shirt as a single torso color, skip jacket detail/lapels/tie
-- **Branded characters**: incorporate brand colors
-
-See `examples/trump-mog/src/entities/Character.js` for a complete reference implementation if it exists in this repo.
+The revert is built into the helper — don't add extra timers in event handlers.
 
 ## Optional: Expression Map in design-brief.md
 
-If `design-brief.md` exists at the project root, append (don't overwrite) an Expression Map section so future agents understand the wiring intent:
+If `design-brief.md` exists at the project root, append (do not overwrite) an Expression Map section so future agents understand the wiring intent. Skip this if there is no `design-brief.md` — don't create one just for the Expression Map.
 
 ```markdown
 ## Expression Map (added by /meme-game)
 
 ### Player: <Name>
-| Game Event | Expression | Why |
+| Game Event | Expression | Hold (ms) |
 |---|---|---|
-| Idle/default | normal | Resting |
-| Score / collect | happy | Positive feedback |
-| Damage / death | angry | Visceral reaction |
-| Streak / milestone | surprised | Excitement |
+| Idle/default | normal | — |
+| Score / collect | happy | 600 |
+| Damage / death | angry | 600 |
+| Streak / milestone | surprised | 1000 |
 
 ### Opponent: <Name>
-| Game Event | Expression | Why |
+| Game Event | Expression | Hold (ms) |
 |---|---|---|
-| Idle/default | normal | Resting |
-| Player scores | angry | Frustrated |
-| Opponent scores | happy | Gloating |
-| Near-miss | surprised | Tension |
+| Idle/default | normal | — |
+| Player scores | angry | 600 |
+| Opponent scores | happy | 600 |
+| Near-miss | surprised | 600 |
 ```
 
-Skip this if there's no `design-brief.md` — don't create one just for the Expression Map.
+## Self-check before returning
+
+- For each public-figure character, at least three game events are wired (one each for `HAPPY`, `ANGRY`, `SURPRISED` semantics).
+- The `setExpression` helper is imported and used everywhere — no manual `setFrame()` calls in event handlers.
+- The bobblehead body Container layering matches `character-pipeline.md` (arms behind body, body in middle, head sprite on top). A floating head with no body is a bug.
+- `EXPRESSION_HOLD_MS` is in `Constants.js` and is referenced by name — no magic 600 in the code.

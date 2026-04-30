@@ -36,7 +36,7 @@ skills/
   record-promo/SKILL.md    # Record autonomous promo video (standalone command)
   monetize-game/SKILL.md   # Play.fun monetization (register, SDK, redeploy)
   scaffold-gateables/SKILL.md  # Add monetization-agnostic gateable features (isEntitled hooks + skin picker, continue, etc.)
-  meme-game/SKILL.md       # Personality pass: photo-composite characters of real people + expression wiring (opt-in, separate from make-game)
+  meme-game/SKILL.md       # Public-figure pass: photo-composite characters of real people + expression wiring (auto-invoked by /make-game when public figure detected; manual via /meme-game)
   qa-game/SKILL.md         # Add Playwright QA tests
   sub-games/SKILL.md       # Sub.games community platform for finding players and supporters
   review-game/SKILL.md     # Code review for architecture + best practices

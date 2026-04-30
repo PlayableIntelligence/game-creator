@@ -32,7 +32,7 @@ Build a complete browser game from scratch, step by step. This command walks you
 
 - **[verification-protocol.md](verification-protocol.md)** — QA subagent instructions, autofix subagent instructions, visual review details, and the orchestrator flow for the verification loop.
 - **[step-details.md](step-details.md)** — Detailed Step 1-5 subagent prompt templates, infrastructure setup instructions, and per-step user messaging.
-- **[tweet-pipeline.md](tweet-pipeline.md)** — Tweet-to-game pipeline: fetching and parsing tweets, creative abstraction, celebrity detection, and Meshy API key prerequisites.
+- **[tweet-pipeline.md](tweet-pipeline.md)** — Tweet-to-game pipeline: fetching and parsing tweets, creative abstraction, public-figure detection (incl. company → CEO mapping), and Meshy API key prerequisites.
 
 ## Security Notes
 
@@ -103,7 +103,31 @@ For 3D games, check for these API keys — first in `.env` (`test -f .env && gre
 
 #### Form B: Tweet URL as game concept
 
-See [tweet-pipeline.md](tweet-pipeline.md) for the full tweet fetching, parsing, creative abstraction, celebrity detection, and Meshy API key flow.
+See [tweet-pipeline.md](tweet-pipeline.md) for the full tweet fetching, parsing, creative abstraction, public-figure detection, and Meshy API key flow.
+
+#### Public Figure Detection (both forms)
+
+**Run this for every `/make-game` invocation, regardless of form.** It is the single auto-detection pass — if it doesn't fire, no public-figure work happens anywhere in the pipeline.
+
+For Form A, scan the original `$ARGUMENTS` text and the parsed game concept (the kebab-case name and any free-text description) for explicit mentions of:
+
+1. Slugs in `assets/characters/manifest.json` (relative to plugin root) — exact match against a pre-built character (e.g. `trump`, `altman`, `musk`).
+2. Recognizable public figures by name — politicians, tech CEOs, world leaders, entertainers. Only match what is literally in the prompt; do not infer from topic ("basketball" does not imply LeBron).
+3. Public-company names — when a known company is named, map to its CEO and add the CEO's slug:
+   - OpenAI → `altman`, Anthropic → `amodei`, xAI → `musk`, Meta → `zuckerberg`,
+     Microsoft → `nadella`, Google → `pichai`, NVIDIA → `huang`.
+   - Unknown company → no mapping; skip.
+
+For Form B, run the same logic against the tweet text + abstracted game concept (see [tweet-pipeline.md](tweet-pipeline.md) for the tweet-specific entry points).
+
+If anything matches:
+- Set `hasPublicFigures = true` and store the deduplicated slug list (e.g. `['trump', 'altman']`).
+- Pass the slug list into the Step 1 subagent so it scaffolds entities with matching names and visual hints (see [step-details.md](step-details.md) Step 1 conditional block).
+- Step 1.6 will automatically run `/meme-game` after Step 1.5 with these slugs.
+
+If nothing matches: `hasPublicFigures = false`. The pipeline stays purely generic at every step. Public-figure work only happens later if the user explicitly runs `/meme-game` themselves.
+
+**Do not over-detect.** A prompt like `maze-tank` (retro Atari maze game) must NOT match — no public figures, no companies, no auto-injection. Generic concepts stay generic.
 
 #### Monetization intent
 
@@ -131,7 +155,7 @@ Base tasks (always included):
 1. Scaffold game from template
 2. **[CONDITIONAL]** Scaffold gateables — include ONLY IF `MONETIZATION_INTENT != 'none'`. Produces `isEntitled()` hooks and gateable features (skin picker, continue-after-death, etc.) that any monetization layer can activate later.
 3. Add assets: pixel art sprites (2D) or World Labs environments + Meshy AI-generated GLB models + animated characters (3D)
-3.5. **[CONDITIONAL]** Meme pass — include ONLY IF Form B (tweet input) detected celebrities (`hasCelebrities = true`). Hands off to `/meme-game` to swap detected slugs into photo-composite / caricature characters with expression wiring.
+3.5. **[CONDITIONAL]** Public-figure pass — include ONLY IF the Public Figure Detection step set `hasPublicFigures = true` (either form). Hands off to `/meme-game` to swap detected slugs into photo-composite / caricature characters with expression wiring.
 4. Add visual polish (particles, transitions, juice)
 5. Record promo video (autonomous 50 FPS capture)
 6. Add audio (BGM + SFX)
@@ -176,7 +200,7 @@ Mark the gateables task as `completed`.
 
 ### Step 1.5: Add game assets
 
-**Always run this step for both 2D and 3D games.** 2D games get pixel art sprites; 3D games get GLB models and animated characters. **This step is generic** — no photo-composite characters, no expression wiring, no celebrity caricatures. Personality work happens in the optional Step 1.6 below.
+**Always run this step for both 2D and 3D games.** 2D games get pixel art sprites; 3D games get GLB models and animated characters. **This step does not do photo-composite or expression wiring** — even when `hasPublicFigures = true`, that work is deferred to Step 1.6 below. Step 1.5 produces the visual scaffold that Step 1.6 then swaps to photo-composite where applicable.
 
 Mark the assets task as `in_progress`.
 
@@ -188,11 +212,11 @@ Mark the assets task as `completed`.
 
 **Wait for user confirmation before proceeding.**
 
-### Step 1.6: Meme pass (conditional, Form B only)
+### Step 1.6: Public-figure pass (conditional)
 
-**Skip this step entirely** unless the tweet pipeline (Form B) flagged `hasCelebrities = true` during Step 0. For Form A (direct game spec), the user can always run `/meme-game` themselves later — don't auto-run.
+**Skip this step entirely** unless `hasPublicFigures = true` was set during Step 0's Public Figure Detection. The flag fires for both forms — Form A when the user's prompt explicitly mentions a public figure or known company, and Form B when the tweet pipeline detects one. If the flag is false, the pipeline stays purely generic and skips this step silently.
 
-If `hasCelebrities = true`, invoke `/meme-game <project-dir> <slug1,slug2,...>` with the detected celebrity slugs. The skill handles the 5-tier character resolution, expression wiring, and (for 3D) caricature Meshy generation. See [tweet-pipeline.md](tweet-pipeline.md) for the hand-off contract and `skills/meme-game/SKILL.md` for the personality pass itself.
+When the flag is true, invoke `/meme-game <project-dir> <slug1,slug2,...>` with the detected public-figure slugs. The skill handles the 5-tier character resolution, expression wiring, and (for 3D) caricature Meshy generation. See [tweet-pipeline.md](tweet-pipeline.md) for the Form B hand-off contract and `skills/meme-game/SKILL.md` for the public-figure pass itself.
 
 **After meme-game returns**, the verification protocol it runs internally already covers build + visual review. No additional verification needed here.
 
@@ -605,7 +629,7 @@ Result: Fetches tweet → abstracts game concept → 3D Three.js scaffold → Me
 **Assemble the final message based on `MONETIZATION_INTENT` and whether Step 1.6 ran:**
 
 - Include the **Gateables** bullet only when `MONETIZATION_INTENT != 'none'` (Step 1.25 ran).
-- Include the **Personality characters** bullet only when Step 1.6 ran (Form B + `hasCelebrities = true`).
+- Include the **Public-figure characters** bullet only when Step 1.6 ran (`hasPublicFigures = true` from either form).
 - Include the **Monetized on Play.fun** bullet + the Moltbook share line only when `MONETIZATION_INTENT ∈ {'playfun', 'both'}`.
 - Include the **sub.games next** callout only when `MONETIZATION_INTENT ∈ {'subgames', 'both'}`.
 
@@ -616,7 +640,7 @@ Tell the user:
 > - **Pixel art sprites** — recognizable characters (if chosen) or clean geometric shapes
 > - **3D environments** — photorealistic Gaussian Splat worlds (3D games with World Labs)
 > - **Gateables scaffolded** — `isEntitled()` hooks for skins, continue, bonus modes at silver/gold tiers (all locked by default, ready for monetization wiring) *[include only if Step 1.25 ran]*
-> - **Personality characters** — photo-composite heads on cartoon bodies with reactive expressions *[include only if Step 1.6 ran]*
+> - **Public-figure characters** — photo-composite heads on cartoon bodies with reactive expressions *[include only if Step 1.6 ran]*
 > - **Visual polish** — gradients, particles, transitions, juice
 > - **Promo video** — 50 FPS gameplay footage in mobile portrait (`output/promo.mp4`)
 > - **Music and SFX** — chiptune background music and retro sound effects
@@ -639,7 +663,7 @@ Tell the user:
 > - Add new gameplay features: `/game-creator:add-feature [describe what you want]`
 > - Add more gateables later: `/game-creator:scaffold-gateables`
 > - Upgrade to pixel art (if using shapes): `/game-creator:add-assets`
-> - **Turn this into a meme/personality game** (real people, CEOs, photo-composite characters): `/game-creator:meme-game [name1,name2,...]`
+> - **Add public figures as characters** (real people, CEOs, photo-composite faces): `/game-creator:meme-game [name1,name2,...]`
 > - Re-record promo video: `/game-creator:record-promo`
 > - Run a deeper code review: `/game-creator:review-game`
 > - Launch a playcoin for your game (token rewards for players)

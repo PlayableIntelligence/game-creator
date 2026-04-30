@@ -4,9 +4,9 @@ Reference patterns for visual improvements in browser games. Apply what fits the
 
 ## Character Prominence
 
-If the main character (especially a named personality) is smaller than 25% of screen height, it's too hard to recognize:
+If the main character (especially a named public figure) is smaller than 25% of screen height, it's too hard to recognize:
 
-**Fix**: Re-render the character sprite at a higher scale, or redesign using the Personality Character (Caricature) archetype — 32x48 grid at scale 4 (128x192px rendered, ~35% of 540px canvas). The character should be the largest entity on screen. Reduce surrounding entity sizes if needed to maintain visual hierarchy.
+**Fix**: Re-render the character sprite at a higher scale, or redesign using the Public-Figure Caricature archetype — 32x48 grid at scale 4 (128x192px rendered, ~35% of 540px canvas). The character should be the largest entity on screen. Reduce surrounding entity sizes if needed to maintain visual hierarchy.
 
 ## Backgrounds & Atmosphere
 

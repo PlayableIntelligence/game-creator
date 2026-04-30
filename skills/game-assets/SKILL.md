@@ -38,9 +38,9 @@ Procedural circles and rectangles are fast to scaffold, but players can't tell a
 |------|---------|--------|
 | **Pixel art** (default) | All characters, enemies, items, projectiles, game objects | Code-only 2D arrays rendered at runtime via `renderPixelArt()` / `renderSpriteSheet()` |
 | **Real logos / images** | Company logos, brand marks, source-tweet images that enhance thematic identity | Download to `public/assets/` with pixel-art fallback |
-| **Photo-composite characters** | Real people (CEOs, public figures) — **only when a personality pass is running** | Character library at `assets/characters/` (plugin root). Loaded by `/meme-game`, **not** by this skill standalone. |
+| **Photo-composite characters** | Real public figures (politicians, tech CEOs, world leaders, entertainers) — **only when a public-figure pass is running** | Character library at `assets/characters/` (plugin root). Loaded by `/meme-game`, **not** by this skill standalone. |
 
-**Pixel art is the default for everything.** Whether the game features a named character or not, this skill produces pixel art. Personality / photo-composite work is an opt-in pass owned by `/meme-game` — when invoked, it swaps personality entities into the spots scaffolded here.
+**Pixel art is the default for everything.** Whether the game features a named character or not, this skill produces pixel art. Public-figure / photo-composite work is an opt-in pass owned by `/meme-game` — when invoked, it swaps public-figure entities into the spots scaffolded here.
 
 **Real logos** are preferred for brand identity when a brand is genuinely part of the game's theme. Download the logo, use it; fall back to pixel art if download fails.
 
@@ -48,7 +48,7 @@ All tiers share the same fallback pattern: if an external asset fails to load, f
 
 ## Photo-Composite Characters (loaded by `meme-game`)
 
-The `character-pipeline.md` companion file documents the photo-composite character system: character library structure, expression constants, expression wiring pattern, bobblehead body pattern, and building new characters (4-tier fallback from full expression build to generative pixel art). This material is consumed by the `/meme-game` skill — not by `/add-assets` or by this skill's standalone Process flow below. Read it when you are running a personality pass; otherwise stay in pure-pixel-art mode.
+The `character-pipeline.md` companion file documents the photo-composite character system: character library structure, expression constants, expression wiring pattern, bobblehead body pattern, and building new characters (4-tier fallback from full expression build to generative pixel art). This material is consumed by the `/meme-game` skill — not by `/add-assets` or by this skill's standalone Process flow below. Read it when you are running a public-figure pass; otherwise stay in pure-pixel-art mode.
 
 ## Pixel Art Rendering System
 
@@ -104,9 +104,9 @@ At small scales, subtle changes read as smooth motion:
 | Small (items, collectibles) | 12x12 | 3 | 36x36px | 7% |
 | Medium (enemies, obstacles) | 16x16 | 3 | 48x48px | 9% |
 | Large (boss, vehicle) | 24x24 or 32x32 | 3 | 72-96px | 13-18% |
-| Caricature (Tier 5 personality fallback) | 32x48 | 4 | 128x192px | 35% |
+| Caricature (Tier 5 public-figure fallback) | 32x48 | 4 | 128x192px | 35% |
 
-The Caricature archetype is reserved for the `/meme-game` Tier 5 fallback (when no photo can be sourced for a named personality). Don't reach for it in `/add-assets` standalone — pick Medium or Large for an oversized player character instead.
+The Caricature archetype is reserved for the `/meme-game` Tier 5 fallback (when no photo can be sourced for a named public figure). Don't reach for it in `/add-assets` standalone — pick Medium or Large for an oversized player character instead.
 
 When replacing geometric shapes with pixel art, match the rendered sprite size to the entity's `WIDTH`/`HEIGHT` in Constants.js. If the Constants values are too small for the art style, increase them — the sprite and the physics body should agree.
 

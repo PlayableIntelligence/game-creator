@@ -70,7 +70,28 @@ Launch a `Task` subagent with these instructions:
 > - Ensure restart is clean — test mentally that 3 restarts in a row would work identically.
 > - Add `isMuted` to GameState for mute support.
 >
-> Note: Personality/meme work (real people, CEOs, photo-composite heads, expression wiring) is **NOT** part of this pipeline. If the user wants those, they'll run `/meme-game` separately, or the tweet pipeline will invoke it after Step 1.5. Don't preemptively scaffold personality-specific entities, expression frames, or photo-composite hooks here.
+> **Public figures — conditional scaffolding (only when `hasPublicFigures = true`):**
+>
+> The orchestrator passes a `publicFigureSlugs` list when Step 0's Public Figure Detection fired (e.g. `['trump', 'altman']`). If that list is empty, ignore this whole block — the game is purely generic, no real-person scaffolding at any layer. Defaults stay clean for prompts like "maze-tank" or "asteroid dodge".
+>
+> When the list is non-empty, lean into the public figures explicitly named in the user's prompt:
+>
+> - Use the public-figure slug as the entity name (e.g. `class TrumpPlayer extends Phaser.GameObjects.Container` or `enemies['altman']`). The slug needs to match because Step 1.6's `/meme-game` pass will look it up and swap the placeholder for a photo-composite spritesheet.
+> - Use placeholder colors and proportions that hint at the public figure's visual identity so the scaffold reads correctly even before Step 1.6 runs:
+>   - **Trump** — blonde combover hint, dark navy box for suit, red rectangle for tie
+>   - **Musk** — dark casual block (t-shirt or leather jacket tone), short brown hair hint
+>   - **Altman** — short brown hair, neutral casual button-down tone
+>   - **Amodei** — curly dark hair hint, glasses suggestion, casual shirt tone
+>   - **Huang** — black leather jacket tone, short black hair
+>   - **Zuckerberg** — short brown hair, plain t-shirt tone
+>   - **Pichai** — neutral business-casual tone, short dark hair
+>   - **Nadella** — neutral business-casual tone, short dark hair, glasses suggestion
+>   - **Karpathy** — long dark hair hint, casual hoodie/t-shirt tone
+> - Make the named entity prominent — `GAME.WIDTH * 0.12` to `GAME.WIDTH * 0.15` (12–15% of screen width) for player characters, with caricature proportions (large head ~40–50% of sprite height) so Step 1.6's photo-composite head fits naturally on top of it.
+> - Do NOT add `EXPRESSION` constants, expression frames, photo-composite spritesheet loading, or `assets/characters/` paths in this step. That's owned by `/meme-game` and runs in Step 1.6 — don't preempt it.
+> - Do NOT add an Expression Map to `design-brief.md`. Step 1.6's `/meme-game` adds it additively if needed.
+>
+> When `publicFigureSlugs` is empty, follow only the generic visual-identity rules above. Don't introduce real people, CEOs, or company branding — even if it would be thematically interesting.
 >
 > **CRITICAL — Preserve the button pattern:**
 > - The template's `GameOverScene.js` contains a working `createButton()` helper (Container + Graphics + Text). **Do NOT rewrite this method.** Keep it intact or copy it into any new scenes that need buttons. The correct z-order is: Graphics first (background), Text second (label), Container interactive. If you put Graphics on top of Text, the text becomes invisible. If you make the Graphics interactive instead of the Container, hover/press states break.
@@ -137,7 +158,7 @@ Launch a `Task` subagent with these instructions:
 > - **AI/opponent interaction**: how the opponent interacts with it, if applicable.
 > ```
 >
-> Note: do NOT add an Expression Map or photo-composite character spec to `design-brief.md`. Those are added later (additively) by `/meme-game` if the user runs the personality pass. Keeping them out of the default scaffold means generic games stay generic.
+> Note: do NOT add an Expression Map or photo-composite character spec to `design-brief.md`. Those are added later (additively) by `/meme-game` in Step 1.6 when `hasPublicFigures = true`. Keeping them out of the default scaffold means generic games stay generic.
 >
 > Do NOT start a dev server or run builds — the orchestrator handles that.
 
@@ -261,11 +282,11 @@ Mark the gateables task as `completed`.
 
 Mark the assets task as `in_progress`.
 
-### Personality work is NOT part of Step 1.5
+### Photo-composite work is NOT part of Step 1.5
 
-This pipeline scaffolds **generic** game assets — pixel-art sprites for 2D, GLB models for 3D. It does not load photo-composite character spritesheets, does not wire expression frames, and does not run the character-library / WebSearch / `build-character.mjs` pipeline. All of that lives in the separate `/meme-game` skill, which the user invokes explicitly (or which the tweet pipeline triggers automatically when celebrities are detected).
+Even when `hasPublicFigures = true`, this step still produces only generic pixel-art / GLB scaffolding. It does not load photo-composite character spritesheets, does not wire expression frames, and does not run the character-library / WebSearch / `build-character.mjs` pipeline. All of that lives in `/meme-game`, which the orchestrator invokes in Step 1.6 immediately after this step's verification protocol passes.
 
-If the user wants personality characters, they will run `/meme-game` after the standard pipeline finishes. Don't preempt that here.
+The Step 1 subagent has already named the player and named entities using public-figure slugs and given them placeholder colors that hint at the figure's identity (see Step 1's conditional block). Step 1.5 just upgrades those placeholders to recognizable pixel art / models. Step 1.6 then swaps the named-entity placeholders for photo-composite spritesheets when applicable.
 
 ### 2D Subagent (Phaser 3)
 
@@ -302,7 +323,7 @@ Launch a `Task` subagent with these instructions:
 > - Are physics bodies adjusted to match new sprite dimensions?
 > - Is any `scene.add.text()` being used as the primary visual identity for an entity? If so, remove it and add a real sprite.
 >
-> **Do NOT** load `public/assets/characters/`, photo-composite spritesheets, `EXPRESSION` constants, or expression-wiring code. That's owned by `/meme-game`. If the user later runs `/meme-game`, it will swap personality entities into the spots you scaffolded here.
+> **Do NOT** load `public/assets/characters/`, photo-composite spritesheets, `EXPRESSION` constants, or expression-wiring code. That's owned by `/meme-game` and runs in Step 1.6 — it will swap public-figure entities into the spots you scaffolded here. Even when public figures are named in the game concept, your job is generic pixel art with caricature proportions; the photo-composite head goes on top later.
 >
 > **After completing your work**, append a `## Step 1.5: Assets` section to `progress.md` with: palette used, sprites created, any dimension changes to entities.
 >
@@ -378,7 +399,7 @@ After this completes you have 3 files per character:
 
 For multiple characters, generate each with a distinct description for visual variety (e.g. `knight` vs `goblin`, `astronaut` vs `alien`). Run generate->rig in parallel for different characters to save time.
 
-**Note:** Personality / named-real-person characters (Trump, Musk, Altman, etc.) are NOT scaffolded here. If the user wants those, they'll run `/meme-game` after this pipeline finishes, which uses caricature-specific Meshy prompts and the 3D personality fallback chain (see `meme-game/3d-personality.md`). Stick to the game concept's generic character archetypes here — fantasy classes, sci-fi roles, animals, abstract shapes — not real people.
+**Note on public figures:** The Step 1.6 `/meme-game` pass owns caricature Meshy generation for named real people (Trump, Musk, Altman, etc. — see `meme-game/3d-public-figures.md`). In Step 1.5, when `hasPublicFigures = true`, generate generic humanoid placeholders for the named slots — `"a stylized human in a dark suit"` for the player slot named `trump`, etc. — so the scene composes correctly. Step 1.6 then replaces those placeholders with caricature-specific Meshy generations. When `hasPublicFigures = false`, ignore real people entirely and stick to the game concept's generic archetypes (fantasy classes, sci-fi roles, animals, abstract shapes).
 
 **Tier 2 — Pre-built in `assets/3d-characters/`** (Meshy unavailable): Check `manifest.json` for a name/theme match. Copy the GLB:
 ```bash
