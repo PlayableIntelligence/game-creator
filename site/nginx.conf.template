@@ -1,0 +1,35 @@
+server {
+    listen ${PORT};
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Aggressive caching for hashed/static assets (thumbnails, fonts).
+    # Short cache for HTML so deploys propagate within a minute.
+    location ~* \.(png|jpg|jpeg|gif|webp|ico|svg|woff|woff2|ttf)$ {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000, immutable";
+    }
+    location ~* \.html?$ {
+        expires 1m;
+        add_header Cache-Control "public, max-age=60";
+    }
+
+    # /gallery → /gallery/index.html (trailing-slash safe)
+    location / {
+        try_files $uri $uri/ $uri.html =404;
+    }
+
+    # Plain-text health endpoint so Railway / curl can hit a tiny route.
+    location = /health {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    # Hide server identity, basic security headers
+    server_tokens off;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+}
