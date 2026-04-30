@@ -22,6 +22,10 @@ export class NetworkManager {
     this.reconnectAttempts = 0;
     this.reconnectTimer = null;
     this.intentionalDisconnect = false;
+    // Set when we trigger a room switch — _onSocketClosed reads + clears it
+    // to perform a clean handoff to the new room without racing the old
+    // socket's async close event.
+    this.pendingRoomId = null;
 
     this.boundHandlers = {};
     this._joinedAtCache = new Map();
@@ -83,11 +87,19 @@ export class NetworkManager {
   _wireGameEvents() {
     this.boundHandlers.joinRoom = ({ roomId } = {}) => {
       if (!roomId || roomId === this.gameState.multiplayer.roomId) return;
+      this.gameState.multiplayer.roomId = roomId;
+      // If we're not connected, just connect; nothing to hand off.
+      if (!this.client.isConnected()) {
+        this._connect(roomId);
+        return;
+      }
+      // Defer the connect to _onSocketClosed via pendingRoomId so we
+      // don't race the old socket's async close event (which would
+      // otherwise misclassify as an error and trigger an extra
+      // reconnect on top of the new room connection).
+      this.pendingRoomId = roomId;
       this.intentionalDisconnect = true;
       this.client.disconnect();
-      this.gameState.multiplayer.roomId = roomId;
-      this.intentionalDisconnect = false;
-      this._connect(roomId);
     };
     this.boundHandlers.leaveRoom = () => this.destroy();
 
@@ -128,6 +140,10 @@ export class NetworkManager {
       this.client.connect({ host, room: roomId });
     } catch (err) {
       console.warn('[NetworkManager] connect threw', err);
+      // Surface the disconnect so single-player fallback runs even when
+      // connect() throws synchronously (no socket callbacks will fire).
+      this.gameState.multiplayer.connected = false;
+      this.eventBus.emit(Events.NETWORK_DISCONNECTED, { reason: 'error' });
       this._scheduleReconnect();
     }
   }
@@ -138,6 +154,15 @@ export class NetworkManager {
     this.gameState.multiplayer.connected = false;
     this.registry.clear();
     this.eventBus.emit(Events.NETWORK_DISCONNECTED, { reason: this.intentionalDisconnect ? 'closed' : 'error' });
+    // Room-switch handoff: if joinRoom queued a pending room, connect
+    // to it now (instead of triggering the regular reconnect path).
+    if (this.pendingRoomId) {
+      const next = this.pendingRoomId;
+      this.pendingRoomId = null;
+      this.intentionalDisconnect = false;
+      this._connect(next);
+      return;
+    }
     if (!this.intentionalDisconnect) this._scheduleReconnect();
     this.intentionalDisconnect = false;
   }

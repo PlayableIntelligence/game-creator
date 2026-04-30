@@ -169,7 +169,9 @@ export default class Room implements Party.Server {
   }
 
   onMessage(rawMessage: string, sender: Connection): void | Promise<void> {
-    if (rawMessage.length > MAX_MESSAGE_BYTES) {
+    // UTF-8 byte length, not JS string `.length` — multibyte characters
+    // (emoji, accented letters) inflate byte count vs char count.
+    if (new TextEncoder().encode(rawMessage).byteLength > MAX_MESSAGE_BYTES) {
       sender.send(JSON.stringify({ type: 'reject', reason: 'message-too-large' } satisfies ServerMessage));
       return;
     }
@@ -334,7 +336,9 @@ export default class Room implements Party.Server {
   }
 
   onMessage(rawMessage: string, sender: Connection): void | Promise<void> {
-    if (rawMessage.length > MAX_MESSAGE_BYTES) {
+    // UTF-8 byte length, not JS string `.length` — multibyte characters
+    // (emoji, accented letters) inflate byte count vs char count.
+    if (new TextEncoder().encode(rawMessage).byteLength > MAX_MESSAGE_BYTES) {
       sender.send(JSON.stringify({ type: 'reject', reason: 'message-too-large' } satisfies ServerMessage));
       return;
     }

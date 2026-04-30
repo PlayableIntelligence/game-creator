@@ -114,7 +114,23 @@ export class MazeSystem {
         const dy = entity.y - closestY;
         const dist2 = dx * dx + dy * dy;
         if (dist2 < radius * radius) {
-          const dist = Math.sqrt(dist2) || 0.0001;
+          // Edge case: entity center is exactly on the wall surface (e.g. a
+          // forced-spawn position). dx == dy == 0 → would yield NaN normals
+          // and leave the entity embedded. Push out along the shortest of
+          // the four wall edges instead.
+          if (dist2 === 0) {
+            const left = entity.x - wx;
+            const right = wx + ts - entity.x;
+            const top = entity.y - wy;
+            const bottom = wy + ts - entity.y;
+            const minPen = Math.min(left, right, top, bottom);
+            if      (minPen === left)   { entity.x = wx - radius;       collidedX = true; }
+            else if (minPen === right)  { entity.x = wx + ts + radius;  collidedX = true; }
+            else if (minPen === top)    { entity.y = wy - radius;       collidedY = true; }
+            else                        { entity.y = wy + ts + radius;  collidedY = true; }
+            continue;
+          }
+          const dist = Math.sqrt(dist2);
           const overlap = radius - dist;
           const nx = dx / dist;
           const ny = dy / dist;

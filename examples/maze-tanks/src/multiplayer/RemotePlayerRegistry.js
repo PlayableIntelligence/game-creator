@@ -4,6 +4,10 @@ export class RemotePlayerRegistry {
   }
 
   upsert(playerId, partial) {
+    // Defensive: a malformed network message could pass non-string ids
+    // here (object, undefined, __proto__, etc.). Reject anything that
+    // isn't a plain string with content.
+    if (typeof playerId !== 'string' || !playerId) return;
     const existing = this.gameState.multiplayer.remotePlayers[playerId] ?? {};
     this.gameState.multiplayer.remotePlayers[playerId] = {
       ...existing,
@@ -13,10 +17,12 @@ export class RemotePlayerRegistry {
   }
 
   remove(playerId) {
+    if (typeof playerId !== 'string' || !playerId) return;
     delete this.gameState.multiplayer.remotePlayers[playerId];
   }
 
   has(playerId) {
+    if (typeof playerId !== 'string' || !playerId) return false;
     return playerId in this.gameState.multiplayer.remotePlayers;
   }
 

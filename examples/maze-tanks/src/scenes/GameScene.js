@@ -82,15 +82,6 @@ export class GameScene extends Phaser.Scene {
     this._onNetworkState = ({ playerId, state }) => this._onRemoteState(playerId, state);
     eventBus.on(Events.NETWORK_STATE_RECEIVED, this._onNetworkState);
 
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      eventBus.off(Events.TANK_FIRED, this._onTankFired);
-      eventBus.off('spawn:assignments-changed', this._onAssignmentsChanged);
-      eventBus.off(Events.NETWORK_STATE_RECEIVED, this._onNetworkState);
-      this.bulletNetSync?.destroy();
-      this.roundSync?.destroy();
-      this.spawnSystem?.destroy();
-    });
-
     this.hud = this.add.text(GAME.WIDTH / 2, 8 * PX, '', {
       fontSize: Math.round(GAME.HEIGHT * UI.SMALL_RATIO) + 'px',
       fontFamily: UI.FONT,
@@ -100,8 +91,24 @@ export class GameScene extends Phaser.Scene {
     }).setOrigin(0.5, 0).setDepth(500);
     this.updateHud();
 
-    eventBus.on(Events.TANK_DIED, () => this.updateHud());
-    eventBus.on(Events.ROUND_ENDED, () => this.updateHud());
+    // Stable refs so SHUTDOWN can `off()` them. Without this, scene restart
+    // leaks listeners that retain the old GameScene and call updateHud()
+    // after this.hud is gone.
+    this._onTankDiedHud = () => this.updateHud();
+    this._onRoundEndedHud = () => this.updateHud();
+    eventBus.on(Events.TANK_DIED, this._onTankDiedHud);
+    eventBus.on(Events.ROUND_ENDED, this._onRoundEndedHud);
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      eventBus.off(Events.TANK_FIRED, this._onTankFired);
+      eventBus.off('spawn:assignments-changed', this._onAssignmentsChanged);
+      eventBus.off(Events.NETWORK_STATE_RECEIVED, this._onNetworkState);
+      eventBus.off(Events.TANK_DIED, this._onTankDiedHud);
+      eventBus.off(Events.ROUND_ENDED, this._onRoundEndedHud);
+      this.bulletNetSync?.destroy();
+      this.roundSync?.destroy();
+      this.spawnSystem?.destroy();
+    });
 
     this._createMuteButton();
   }

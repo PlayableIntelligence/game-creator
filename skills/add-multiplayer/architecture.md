@@ -218,7 +218,10 @@ create() {
   eventBus.on(Events.NETWORK_STATE_RECEIVED, ({ playerId, state }) => {
     const sprite = this.remoteSprites.get(playerId);
     if (!sprite) return;  // sprite created on join only — race condition tolerant
-    sprite.setPosition(state.x, state.y);
+    // Wire format is design-pixel coordinates; multiply by PX to get the
+    // local canvas pixels. Without this, remote players land at the wrong
+    // position on any client whose DPR/viewport differs from the sender's.
+    sprite.setPosition(state.x * PX, state.y * PX);
     if (typeof state.alive === 'boolean') sprite.setVisible(state.alive);
   });
 

@@ -6,7 +6,9 @@ let _bulletIdSeq = 0;
 export class Bullet {
   constructor(scene, { shooterId, shooterColor, x, y, vx, vy, mazeSystem, nonAuthoritative = false, networkBulletId = null }) {
     this.scene = scene;
-    this.id = networkBulletId ?? `b${_bulletIdSeq++}`;
+    // Cross-client unique: prefix with shooterId + timestamp so two clients
+    // can't both claim id `b0`. Multiplayer dedupe keys on this.
+    this.id = networkBulletId ?? `${shooterId}:${Date.now().toString(36)}:${_bulletIdSeq++}`;
     this.shooterId = shooterId;
     this.shooterColor = shooterColor;
     this.maze = mazeSystem;

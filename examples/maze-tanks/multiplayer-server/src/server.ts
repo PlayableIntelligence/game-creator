@@ -42,7 +42,10 @@ export default class Room implements Party.Server {
   }
 
   onMessage(rawMessage: string, sender: Connection): void | Promise<void> {
-    if (rawMessage.length > MAX_MESSAGE_BYTES) {
+    // Compare UTF-8 *byte* length, not JS string `.length` (which counts
+    // UTF-16 code units). Multibyte characters like emoji or accented
+    // letters can otherwise slip through a string-length check.
+    if (new TextEncoder().encode(rawMessage).byteLength > MAX_MESSAGE_BYTES) {
       sender.send(JSON.stringify({ type: 'reject', reason: 'message-too-large' } satisfies ServerMessage));
       return;
     }
@@ -65,13 +68,17 @@ export default class Room implements Party.Server {
           sender.send(JSON.stringify({ type: 'reject', reason: 'bad-state' } satisfies ServerMessage));
           return;
         }
+        // Stamp once, persist what we broadcast — otherwise late joiners
+        // get the client-supplied `ts` from `peers` while everyone else
+        // sees the server-stamped version.
+        const stampedState = { ...msg.state, ts: Date.now() };
         const peer = this.peers.get(sender.id);
-        if (peer) peer.state = msg.state;
+        if (peer) peer.state = stampedState;
 
         const out: ServerMessage = {
           type: 'state',
           playerId: sender.id,
-          state: { ...msg.state, ts: Date.now() },
+          state: stampedState,
         };
         this.room.broadcast(JSON.stringify(out), [sender.id]);
         return;

@@ -20,6 +20,9 @@ export const Events = {
   ROUND_STARTED: 'round:started',
   ROUND_ENDED: 'round:ended',
 
+  // Spawn slot assignments (multiplayer)
+  SPAWN_ASSIGNMENTS_CHANGED: 'spawn:assignments-changed',
+
   // Particles
   PARTICLES_EMIT: 'particles:emit',
 

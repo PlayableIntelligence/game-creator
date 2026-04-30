@@ -6,7 +6,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "WebWorker"],
     "types": ["partykit/server"]
   },
   "include": ["src/**/*.ts"]

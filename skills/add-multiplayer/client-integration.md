@@ -230,11 +230,20 @@ export class NetworkManager {
   _wireGameEvents() {
     this.boundHandlers.joinRoom = ({ roomId } = {}) => {
       if (!roomId || roomId === this.gameState.multiplayer.roomId) return;
-      this.intentionalDisconnect = true;
-      this.client.disconnect();
       this.gameState.multiplayer.roomId = roomId;
-      this.intentionalDisconnect = false;
-      this._connect(roomId);
+      // Not connected → just connect, nothing to hand off.
+      if (!this.client.isConnected()) {
+        this._connect(roomId);
+        return;
+      }
+      // Already connected — defer the new connect to _onSocketClosed via
+      // pendingRoomId so we don't race the old socket's async close event.
+      // Without this, a delayed close fires AFTER intentionalDisconnect is
+      // already cleared, gets misclassified as an error, emits a spurious
+      // network:disconnected, and schedules a duplicate reconnect.
+      this.pendingRoomId = roomId;
+      this.intentionalDisconnect = true;
+      this.client.disconnect();  // _onSocketClosed performs the handoff
     };
     this.boundHandlers.leaveRoom = () => this.destroy();
 

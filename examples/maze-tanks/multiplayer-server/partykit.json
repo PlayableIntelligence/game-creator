@@ -1,5 +1,5 @@
 {
   "name": "maze-tanks-multiplayer",
   "main": "src/server.ts",
-  "compatibilityDate": "2025-01-01"
+  "compatibilityDate": "2024-09-25"
 }
