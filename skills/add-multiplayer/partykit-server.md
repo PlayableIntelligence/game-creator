@@ -23,11 +23,13 @@ multiplayer-server/
 {
   "name": "<game-name>-multiplayer",
   "main": "src/server.ts",
-  "compatibilityDate": "2025-01-01"
+  "compatibilityDate": "2026-01-15"
 }
 ```
 
 Replace `<game-name>` with the game's directory name (kebab-case). PartyKit uses this as the project slug — the deployed URL will be `https://<game-name>-multiplayer.<cf-username>.partykit.dev`.
+
+**`compatibilityDate`**: pin to a recent date (within the last ~6 months). Older dates lock you out of newer Workers runtime APIs; ones too far in the future may require flags that aren't yet available. Refresh this when scaffolding a new project — `YYYY-MM-DD` from when you ran the skill is a safe choice.
 
 ## `package.json`
 
@@ -78,7 +80,9 @@ dist/
 *.log
 ```
 
-## `src/types.ts` (shared)
+## `src/types.ts` (REQUIRED — shared wire types)
+
+Both server templates `import type { ... } from './types'`. This file is **not optional** — without it the server won't compile. Keep it next to `server.ts`.
 
 ```ts
 export const PROTOCOL_VERSION = 1;

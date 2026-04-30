@@ -47,18 +47,32 @@ Open `http://localhost:3000` in two browser tabs. Both should fire `network:conn
 
 If two tabs do not see each other locally, debug **before** deploying — the production deploy will not surface different bugs.
 
-## Step 2: Cloudflare Login
+## Step 2: PartyKit Login
+
+PartyKit was acquired by Cloudflare in 2024. As of 2026, the **default login provider (`clerk`) is broken** — it redirects through `https://dashboard.partykit.io/patience` ("under construction") and never completes. Use the **GitHub device-code flow** instead, which is reliable and independent of the deprecated dashboard:
 
 ```bash
 cd <game-path>/multiplayer-server
-npx partykit deploy
+npx partykit login --provider github
 ```
 
-On first run, PartyKit (via Wrangler under the hood) opens a browser to `https://dash.cloudflare.com/oauth2/auth?...`. Log in with the Cloudflare account that should own the deployed Worker.
+Output looks like:
 
-The grant is scoped to managing Workers and Durable Objects in that account. Credentials are saved to `~/.config/.wrangler/config/default.toml`. Subsequent deploys reuse them without prompting.
+```
+We will now open your browser to https://github.com/login/device
+Please paste the code XXXX-XXXX (copied to your clipboard) and authorize the app.
+```
 
-If the user is on a headless environment (no browser), use `npx wrangler login` first with the `--browser=false` flag, copy the URL into a desktop browser, paste the resulting code back into the terminal. Then re-run `npx partykit deploy`.
+Open `https://github.com/login/device` (the CLI tries to auto-open; if that fails, navigate manually). Paste the code, authorize the app, and the CLI completes with:
+
+```
+Congratulations, you're all set!
+Your device is now connected.
+```
+
+Credentials are saved to `~/.partykit/config.json`. Subsequent `npx partykit deploy` runs reuse them without prompting.
+
+**Do not run `npx partykit login` without `--provider github`** — the default `clerk` flow will hang forever on the broken dashboard redirect.
 
 ## Step 3: First Deploy
 
@@ -189,6 +203,22 @@ The two server templates are interchangeable. To switch, replace `multiplayer-se
 
 **Cause:** `npm install` was skipped or failed in `multiplayer-server/`.
 **Fix:** `cd multiplayer-server && npm install`.
+
+### `npx partykit login` redirects to `dashboard.partykit.io/patience` and hangs
+
+**Cause:** The default `clerk` provider was retired after Cloudflare absorbed PartyKit. The dashboard the OAuth callback expects no longer exists.
+**Fix:** Run `npx partykit login --provider github` instead — it uses GitHub's device-code OAuth flow and writes credentials to `~/.partykit/config.json` cleanly.
+
+### `npm install` in `multiplayer-server/` reports security vulnerabilities
+
+**Cause:** `partykit` pulls in older transitive deps (wrangler, esbuild). The vulnerabilities are flagged by npm audit but are not exploitable in the server template's usage.
+**Fix:** Ignore the warning. **Do not run `npm audit fix --force`** — it'll attempt major-version bumps that break the partykit toolchain.
+
+### `partykit dev` silently picks up the parent `.env`
+
+**Cause:** PartyKit's dev server walks upward looking for `.env` files. Logs `Loading environment variables from ../.env` when it does.
+**Effect:** Your client's `VITE_*` vars leak into the dev server's process env. Harmless for the standard template (server doesn't read them), but worth knowing if you ever store secrets in the client `.env`.
+**Fix:** If isolation matters, put a separate `multiplayer-server/.env` and add `multiplayer-server/.env.local` to override.
 
 ### Deploy hangs at "Uploading..."
 

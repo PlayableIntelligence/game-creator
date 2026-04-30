@@ -75,6 +75,10 @@ The game emits `MULTIPLAYER_JOIN_ROOM` to switch rooms (e.g., a private match). 
 }
 ```
 
+**The wire schema is open.** Games may extend `state` with their own fields (e.g. `rotation` for top-down games, `weapon` for shooters). The server's `isValidState` only enforces the required core (`x`, `y`, `score`, `alive`) — unknown fields pass through to all peers untouched. This lets games add gameplay-specific state without forking the skill.
+
+**Coordinate space convention.** Broadcast positions in **design pixels** (the canvas-independent logical coordinate system the game's Constants are written in), not raw canvas pixels. Receivers multiply by their own `PX` when applying. This makes the wire format independent of each client's window size / DPR — without it, two clients with different viewports see each other's positions at proportionally wrong locations. The local entity's `tank.x` is typically in canvas pixels; divide by `PX` before sending and multiply by `PX` on receive.
+
 **turn-based mode** — `state` carries the move and the resulting authoritative state:
 
 ```js
@@ -108,17 +112,33 @@ multiplayer: {
 ```js
 reset() {
   // ...existing single-player resets...
-  this.multiplayer.connected = false;
-  this.multiplayer.remotePlayers = {};
+  if (this.multiplayer) {
+    this.multiplayer.connected = false;
+    this.multiplayer.remotePlayers = {};
+  }
   // roomId and playerId persist so the next session rejoins automatically
 }
 ```
+
+**Constructor ordering footgun.** Many GameState classes call `this.reset()` from the constructor. If you naively put `this.multiplayer = {...}` *after* the `this.reset()` call, the first reset runs against `undefined` and crashes. Two safe patterns:
+
+1. Initialize `this.multiplayer = {...}` **before** calling `this.reset()` in the constructor, OR
+2. Guard the multiplayer block with `if (this.multiplayer)` (shown above) so the first reset is a no-op until the field exists.
+
+Pattern 2 is simpler when patching existing GameState files additively.
 
 `remotePlayers` is owned by `RemotePlayerRegistry`; GameState is the canonical home so `render_game_to_text()` can serialize it with one read.
 
 ## Constants Schema
 
-Append to `src/core/Constants.js`. No magic numbers — every value is named:
+**Detect the file's export convention before patching.** Two shapes are common:
+
+- **Umbrella export** — `export const Constants = { GAME: {...}, PLAYER: {...} }`. Append a new top-level key inside the object: `MULTIPLAYER: {...}`. Consumers reference `Constants.MULTIPLAYER.X`.
+- **Per-block named exports** — `export const GAME = {...}; export const PLAYER = {...};`. Append a new sibling export: `export const MULTIPLAYER = {...}`. Consumers reference `MULTIPLAYER.X` directly.
+
+Both are valid game-creator outputs. Read `src/core/Constants.js` first to decide which pattern to use, then mirror it in `NetworkManager.js`'s import (`import { Constants } from '...'` vs `import { MULTIPLAYER } from '...'`). Don't force one onto the other.
+
+The block to append (using umbrella shape; trivially adapts to per-block):
 
 ```js
 MULTIPLAYER: {

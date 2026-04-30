@@ -149,13 +149,21 @@ cd <game-path>/multiplayer-server && npx partykit dev
 
 This starts a local CF Worker emulator on `http://127.0.0.1:1999`. In another terminal, set `VITE_MULTIPLAYER_SERVER_URL=http://127.0.0.1:1999` in `<game-path>/.env` and run the client (`cd <game-path> && npm run dev`).
 
-Then deploy to production:
+For first-time deployment, the user must authenticate with PartyKit. **Always pass `--provider github`** — the default `clerk` flow is broken in 2026 (the dashboard.partykit.io callback was retired after Cloudflare absorbed PartyKit, and login hangs forever):
+
+```bash
+cd <game-path>/multiplayer-server && npx partykit login --provider github
+```
+
+This uses GitHub's device-code OAuth flow. The CLI prints a code; the user visits `https://github.com/login/device`, pastes it, and authorizes. Credentials persist in `~/.partykit/config.json`. See `deploy.md` for the full walkthrough and troubleshooting.
+
+After login, deploy:
 
 ```bash
 cd <game-path>/multiplayer-server && npx partykit deploy
 ```
 
-On first deploy, the CLI walks the user through Cloudflare login (browser flow). Capture the deployed URL from the output (format: `https://<project>.<cloudflare-username>.partykit.dev`).
+Capture the deployed URL from the output (format: `https://<project>.<cloudflare-username>.partykit.dev`). The TLS cert may take 30-60 seconds to provision after the deploy reports success.
 
 Update three places with the deployed URL:
 
@@ -253,9 +261,13 @@ Result: prints the full file list and patches without writing or deploying. Usef
 
 ## Troubleshooting
 
-### `npx partykit deploy` asks for Cloudflare login on every run
-**Cause:** Wrangler/Cloudflare credentials not persisted in `~/.config/.wrangler/`.
-**Fix:** Run `npx wrangler login` once interactively in the terminal. PartyKit reuses the same credential store.
+### `npx partykit login` redirects to `dashboard.partykit.io/patience` and never completes
+**Cause:** The default `clerk` provider was retired after Cloudflare absorbed PartyKit; the dashboard the OAuth callback expects is gone.
+**Fix:** Use `npx partykit login --provider github` instead — GitHub device-code flow, prints a code, you paste at `https://github.com/login/device`. Credentials persist in `~/.partykit/config.json`.
+
+### Remote players don't appear even though the connection succeeded
+**Cause:** Welcome-race — the WebSocket `welcome` arrived before the scene's `create()` registered its `NETWORK_PLAYER_JOINED` listener. The events fired into the void.
+**Fix:** After registering the listener, seed from `gameState.multiplayer.remotePlayers` directly. See `client-integration.md` → "Welcome-race gotcha" for the idempotent pattern.
 
 ### Two tabs connect but never see each other
 **Cause:** They joined different rooms (random room IDs from URL parsing) or the server's broadcast logic excludes the sender by default.

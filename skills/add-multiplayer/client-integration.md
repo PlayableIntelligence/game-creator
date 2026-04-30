@@ -139,6 +139,10 @@ Wires `MultiplayerClient` ↔ `EventBus` ↔ `RemotePlayerRegistry`. Owns the br
 // network:disconnected. Gameplay never depends on the server being reachable.
 
 import { Events } from '../core/EventBus.js';
+// Adapt this import to match the game's Constants.js export shape:
+//   - Umbrella:  import { Constants } from '../core/Constants.js'  →  Constants.MULTIPLAYER.X
+//   - Per-block: import { MULTIPLAYER } from '../core/Constants.js' →  MULTIPLAYER.X
+// (Most game-creator scaffolds use per-block. Read Constants.js first.)
 import { Constants } from '../core/Constants.js';
 import { MultiplayerClient } from '../multiplayer/MultiplayerClient.js';
 import { RemotePlayerRegistry } from '../multiplayer/RemotePlayerRegistry.js';
@@ -259,7 +263,11 @@ export class NetworkManager {
   }
 
   _connect(roomId) {
-    const host = import.meta.env?.VITE_MULTIPLAYER_SERVER_URL ?? Constants.MULTIPLAYER.SERVER_URL;
+    // Guard `import.meta` for non-Vite contexts (some test runners, SSR, plain
+    // Node). Without the typeof check, this throws a SyntaxError at parse time
+    // in environments where import.meta isn't a thing.
+    const envHost = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MULTIPLAYER_SERVER_URL) || null;
+    const host = envHost ?? Constants.MULTIPLAYER.SERVER_URL;
     if (!host) {
       console.warn('[NetworkManager] no SERVER_URL configured — multiplayer disabled');
       this.gameState.multiplayer.connected = false;
@@ -412,12 +420,14 @@ this.multiplayer = {
 };
 ```
 
-In `reset()`, append:
+In `reset()`, append (with a `this.multiplayer` guard — `reset()` is often called from the GameState constructor, possibly *before* the `this.multiplayer = {...}` block runs):
 
 ```js
 // === Multiplayer (transient only) ===
-this.multiplayer.connected = false;
-this.multiplayer.remotePlayers = {};
+if (this.multiplayer) {
+  this.multiplayer.connected = false;
+  this.multiplayer.remotePlayers = {};
+}
 // roomId and playerId persist intentionally.
 ```
 
@@ -520,6 +530,28 @@ payload.remotePlayers = Object.entries(gameState.multiplayer.remotePlayers).map(
 
 ## Phaser Scene Integration
 
+### Welcome-race gotcha
+
+Under fast local connections (and `npx partykit dev` in particular), the WebSocket `welcome` arrives before scene `create()` finishes registering listeners. The result: code that *only* listens for `NETWORK_CONNECTED` / `NETWORK_PLAYER_JOINED` to set up remote sprites silently misses the initial peers — `eventBus.on(...)` is called *after* the events have already fired, so the listener never runs.
+
+**Fix pattern**: register the listener AND seed from current state right after registration. Both branches are idempotent so it's safe even when the race doesn't happen:
+
+```js
+// Subscribe…
+this.eventBus.on(Events.NETWORK_PLAYER_JOINED, this._onRemoteJoined, this);
+
+// …and seed from whatever's already in GameState (in case welcome was already processed)
+if (this.gameState.multiplayer.connected) {
+  for (const id of Object.keys(this.gameState.multiplayer.remotePlayers)) {
+    this._onRemoteJoined({ playerId: id });
+  }
+}
+```
+
+The same pattern applies to `NETWORK_CONNECTED` listeners — also check `gameState.multiplayer.connected` after subscribing.
+
+### Scene patch
+
 In the active GameScene (typically `src/scenes/GameScene.js`):
 
 ```js
@@ -534,6 +566,14 @@ create() {
   this.eventBus.on(Events.NETWORK_PLAYER_JOINED, this._onRemoteJoined, this);
   this.eventBus.on(Events.NETWORK_STATE_RECEIVED, this._onRemoteState, this);
   this.eventBus.on(Events.NETWORK_PLAYER_LEFT, this._onRemoteLeft, this);
+
+  // Welcome-race seed — handle peers that joined before listener registration.
+  if (this.gameState.multiplayer.connected) {
+    for (const [id, peer] of Object.entries(this.gameState.multiplayer.remotePlayers)) {
+      this._onRemoteJoined({ playerId: id });
+      if (peer.x !== undefined) this._onRemoteState({ playerId: id, state: peer });
+    }
+  }
 }
 
 _onRemoteJoined({ playerId }) {
