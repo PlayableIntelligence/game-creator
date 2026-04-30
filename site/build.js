@@ -179,6 +179,7 @@ function sharedNav(activePage) {
       <a href="${homePrefix}"${homeActive}>Home</a>
       <a href="${homePrefix}#pipeline">Pipeline</a>
       <a href="${homePrefix}#features">Features</a>
+      <a href="${homePrefix}#plus">Plus</a>
       <a href="${galleryHref}"${galleryActive}>Gallery</a>
     </div>
     <a class="nav-btn" href="https://github.com/OpusGameLabs/game-creator" target="_blank">
@@ -552,6 +553,28 @@ function generateLandingPage(manifest, benchmarks) {
     }
     .view-all-link a:hover { text-decoration: underline; }
 
+    /* PLUS */
+    .plus-grid {
+      display: grid; gap: 16px; margin-top: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .plus-card {
+      background: var(--bg-raised); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px;
+    }
+    .plus-card h3 {
+      margin: 0 0 8px; font-size: 16px; color: #fff;
+    }
+    .plus-card p {
+      margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.5;
+    }
+    .plus-tag {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      background: rgba(255,68,68,0.12); color: var(--red-soft);
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+
     /* STACK */
     .stack { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
     .stack-item {
@@ -905,6 +928,35 @@ function generateLandingPage(manifest, benchmarks) {
   </section>
 
   ${benchmarkSection}
+
+  <!-- PLUS -->
+  <section id="plus">
+    <div class="section-label">Coming Soon &middot; Premium</div>
+    <div class="section-title">AI-generated 3D worlds + characters</div>
+    <p class="section-desc">
+      <strong>game-creator-plus</strong> calls Marble Labs (Gaussian splat environments) and Meshy AI (3D models + auto-rig + animations) on your behalf, billed via pay-as-you-go credits. No subscription, no rev share.
+    </p>
+    <div class="plus-grid">
+      <div class="plus-card">
+        <span class="plus-tag">Worlds</span>
+        <h3>Photorealistic environments</h3>
+        <p>Generate Marble Labs splat worlds from text or image. Walkable, lit, and ready to drop a player into.</p>
+      </div>
+      <div class="plus-card">
+        <span class="plus-tag">Characters</span>
+        <h3>Rigged 3D characters</h3>
+        <p>Meshy text-to-3D + auto-rig + Mixamo-compatible animations. About two minutes per asset.</p>
+      </div>
+      <div class="plus-card">
+        <span class="plus-tag">Pricing</span>
+        <h3>Pay only for what you use</h3>
+        <p>$5 / $20 / $50 / $100 topups. Failed jobs auto-refund. Asset mirroring outlives the upstream 3-day TTL.</p>
+      </div>
+    </div>
+    <div class="view-all-link">
+      <a href="https://github.com/OpusGameLabs/game-creator/tree/main/skills/game-creator-plus" target="_blank">Read the skill docs &#x2192;</a>
+    </div>
+  </section>
 
   <!-- STACK -->
   <section id="stack">
