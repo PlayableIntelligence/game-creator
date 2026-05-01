@@ -20,6 +20,11 @@ interface PlayerState {
   yaw: number;
   hp: number;
   alive: boolean;
+  // Combat / locomotion state — one of: idle | walk | run | lightAttack |
+  // heavyAttack | block | roll | hit | death. Optional for backward
+  // compatibility with clients that don't send it (RemotePlayer falls back
+  // to inferring locomotion from velocity).
+  animState?: string;
   ts: number;
 }
 
@@ -125,6 +130,7 @@ export default class CathedralArenaRoom implements Party.Server {
           yaw: msg.state.yaw ?? 0,
           hp: clamp(msg.state.hp ?? 100, 0, 100),
           alive: msg.state.alive ?? true,
+          animState: msg.state.animState,
           ts: Date.now(),
         };
         const peer = this.peers.get(sender.id);
@@ -168,6 +174,8 @@ function isValidState(s: unknown): s is Partial<PlayerState> {
   }
   if ('hp' in o && !Number.isFinite(o.hp)) return false;
   if ('alive' in o && typeof o.alive !== 'boolean') return false;
+  if ('animState' in o && o.animState !== undefined && typeof o.animState !== 'string') return false;
+  if (typeof o.animState === 'string' && o.animState.length > 32) return false;
   return true;
 }
 

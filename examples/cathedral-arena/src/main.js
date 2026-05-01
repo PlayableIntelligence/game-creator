@@ -44,6 +44,11 @@ HUD.logDeviceProfile();
 // player object so the Capsule can read input on first fixedUpdate.
 const input = new InputRouter(canvas);
 
+// Mirror pointer-lock state into GameState so subsystems (gameplay click
+// handler) can gate on it without depending on InputRouter directly.
+EventBus.on('pointer:locked',   () => { GameState.pointerLocked = true; });
+EventBus.on('pointer:unlocked', () => { GameState.pointerLocked = false; });
+
 // Mobile controls — virtual joystick + look pad + buttons. No-op on desktop.
 const mobile = new MobileControls(input);
 
@@ -105,25 +110,31 @@ let game;
     game.onWorldLoaded({ scene, world, physics, camera, hud });
     game.onPlayerSpawn({ capsule, character: capsule.character });
 
-    // Click/tap → raycast against collider → game.onClick(hit | null)
+    // Click/tap → game.onMouseDown(button) for combat (LMB=light, RMB=heavy).
+    // The first click triggers pointer lock and is swallowed; subsequent
+    // clicks (or any touch on mobile) drive combat. We also still fire
+    // onClick(hit) so games that use raycast targeting keep working.
     canvas.addEventListener('pointerdown', (e) => {
-      // Skip the first click (it triggers pointer lock) — only fire onClick
-      // once we're already locked, OR on touch primary (mobile is "always
-      // interactive"). This stops the lock-triggering click from
-      // accidentally placing markers / firing weapons / etc.
       if (!GameState.pointerLocked && !DEVICE.isTouchPrimary) return;
+      game.onMouseDown?.(e.button ?? 0);
       const hit = raycastPointer(e, camera, world.collider.debug, GameState.pointerLocked);
       game.onClick(hit);
     });
 
-    // Keyboard → game.onKeyDown(code). Mobile gets a separate path (touch
-    // buttons → InputRouter → game-specific). For desktop the unified
-    // listener works.
+    // Suppress browser context menu so RMB can be used as heavy-attack input.
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Keyboard → game.onKeyDown(code) / onKeyUp(code). The input router still
+    // owns WASD/Shift movement; we forward Space to game so it can be used as
+    // dodge-roll, and F so it can be used as block.
     window.addEventListener('keydown', (e) => {
-      // Skip keys the input router needs (movement) so onKeyDown only sees
-      // gameplay keys (E to interact, F to attack, R to reset, etc.)
-      if (['KeyW','KeyA','KeyS','KeyD','Space','ShiftLeft','ShiftRight'].includes(e.code)) return;
+      if (e.repeat) return;  // ignore key-repeat — only edges trigger combat
+      if (['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'].includes(e.code)) return;
       game.onKeyDown(e.code);
+    });
+    window.addEventListener('keyup', (e) => {
+      if (['KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'].includes(e.code)) return;
+      game.onKeyUp?.(e.code);
     });
 
     GameState.booted = true;

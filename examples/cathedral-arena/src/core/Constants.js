@@ -325,13 +325,20 @@ const CHARACTER_PRESETS = {
     scale: 1.0,
   },
   // VRM preset — uses Mixamo FBX animations retargeted to the VRM skeleton.
-  // Bundled with the template: bloody.vrm (sample) + idle/walk/run FBX.
+  // Cathedral arena ships the full souls anim set so a single AnimatedCharacter
+  // mixer can drive locomotion + combat states.
   vrm: {
     vrm: '/assets/models/bloody.vrm',
     clipMap: {
-      idle: '/assets/animations/idle.fbx',
-      walk: '/assets/animations/walk.fbx',
-      run:  '/assets/animations/run.fbx',
+      idle:        '/assets/animations/idle.fbx',
+      walk:        '/assets/animations/walk.fbx',
+      run:         '/assets/animations/run.fbx',
+      lightAttack: '/assets/animations/light-attack.fbx',
+      heavyAttack: '/assets/animations/heavy-attack.fbx',
+      block:       '/assets/animations/block.fbx',
+      roll:        '/assets/animations/roll.fbx',
+      hit:         '/assets/animations/hit.fbx',
+      death:       '/assets/animations/death.fbx',
     },
     facingOffset: Math.PI,
     scale: 1.0,
@@ -380,7 +387,9 @@ export const CAMERA = {
   mode: ['first', 'third', 'topdown', 'side'].includes(camMode) ? camMode : 'third',
   // Third-person orbit distance. Scales by √userScale so the camera doesn't
   // clip walls in tiny rooms or float infinitely far in huge ones.
-  thirdDistance: Number(params.get('camDist') ?? 4.0),
+  // 3.4m matches souls-demo — close enough for over-the-shoulder combat reads
+  // but far enough to see incoming swings.
+  thirdDistance: Number(params.get('camDist') ?? 3.4),
   // Top-down camera height above the player (in world units). Scales like
   // distance.
   topdownHeight: Number(params.get('camHeight') ?? 12),
@@ -415,10 +424,13 @@ export const ARENA = {
 export const COMBAT = {
   MAX_HP: 100,
   ATTACK_DAMAGE: 25,
+  HEAVY_DAMAGE: 45,
   ATTACK_REACH: 2.0,                    // metres
   ATTACK_CONE_RAD: (60 * Math.PI) / 180, // 60° total cone (±30° from facing)
   ATTACK_COOLDOWN_MS: 600,
   RESPAWN_DELAY_MS: 3000,
+  // 0.0 = no mitigation, 1.0 = full block. 0.75 = 75% damage soaked when blocking.
+  BLOCK_MITIGATION: 0.75,
 };
 
 export const MULTIPLAYER = {

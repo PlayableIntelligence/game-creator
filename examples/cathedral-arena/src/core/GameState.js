@@ -15,6 +15,9 @@ export const GameState = {
   colliderTriangles: 0,
   // Player state (populated when Capsule is spawned in step 5)
   player: null,
+  // Pointer-lock mirror — set by main.js's EventBus listener so subsystems
+  // outside InputRouter can gate input on lock state.
+  pointerLocked: false,
 
   reset() {
     this.booted = false;
@@ -26,5 +29,6 @@ export const GameState = {
     this.fakeFloorTopY = 0;
     this.colliderTriangles = 0;
     this.player = null;
+    this.pointerLocked = false;
   },
 };

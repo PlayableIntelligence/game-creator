@@ -1,30 +1,34 @@
 import * as THREE from 'three';
 import { NetworkManager } from '../multiplayer/NetworkManager.js';
 import { RemotePlayer } from '../multiplayer/RemotePlayer.js';
+import { CombatController } from './CombatController.js';
 import { ARENA, COMBAT, MULTIPLAYER } from '../core/Constants.js';
 
 /**
  * Cathedral Arena — multiplayer souls-style PvP demo.
  *
- *   - Local player: VRM character (already loaded by Capsule via plus-template).
- *     Click to attack — broadcasts network:attack and runs a 2m / 60° cone
- *     hitbox check against every RemotePlayer.
+ *   - Local player: VRM character (loaded by plus-template Capsule) with a
+ *     greatsword attached to the right-hand bone, driven by the souls-style
+ *     CombatController state machine (light/heavy/roll/block/hit/death +
+ *     stamina + i-frames).
  *   - Remote players: lit by NetworkManager `network:player-joined` events,
- *     re-positioned each `network:state-received`. They have their own VRM
- *     loaded and a slim animation cycle (idle / walking / hit).
+ *     re-positioned each `network:state-received`, and animated from the
+ *     broadcast `animState` so remote swings/blocks/rolls all play.
  *   - HP / death / respawn: tracked locally, server is just a relay
- *     (last-write-wins). Damage: receiver applies damage → broadcasts
- *     state with new HP → death triggers a 3s respawn at next spawn point.
+ *     (last-write-wins). Damage: receiver applies damage from incoming attack
+ *     events → broadcasts state with new HP → death triggers a 3s respawn at
+ *     the next spawn point.
  *
- * Keys:
- *   - LMB              — light attack (1.0m reach, 60° cone, 25 damage)
+ * Controls:
+ *   - LMB              — light attack
+ *   - RMB              — heavy attack
+ *   - F (held)         — block (mitigates 75% of incoming damage)
+ *   - Space            — dodge roll (i-frames during 60% of the roll)
  *   - WASD + Shift     — locomotion (handled by plus-template Capsule)
- *   - Space            — jump (Capsule)
  */
 
 const _v = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
-const _q = new THREE.Quaternion();
 
 export class Game {
   constructor() {
@@ -35,8 +39,15 @@ export class Game {
     // Combat state for the local player
     this.hp = COMBAT.MAX_HP;
     this.alive = true;
-    this.lastAttackAt = 0;
     this.respawnAt = 0;
+
+    // Souls-style combat state machine — wired in onPlayerSpawn once the
+    // character has loaded.
+    this.combat = null;
+    this._swordAttached = false;
+    // Per-swing flag — set on swing start, fires hits at the start of the
+    // active-frames window (30%-70% of the animation), cleared at swing end.
+    this._swingHitsFired = false;
 
     // Multiplayer
     this.net = null;
@@ -46,6 +57,7 @@ export class Game {
 
     // HUD elements (created in onWorldLoaded)
     this.hpBar = null;
+    this.staminaBar = null;
     this.netStatus = null;
   }
 
@@ -94,21 +106,79 @@ export class Game {
     // Spawn local player at a random spawn point
     const sp = this.spawnPoints[Math.floor(Math.random() * this.spawnPoints.length)];
     capsule.body.setTranslation({ x: sp.x, y: sp.y + 0.5, z: sp.z }, true);
+
+    // Combat controller — owns sword + state machine. AttachSword runs once
+    // the VRM is loaded; we poll because the character load is async and
+    // doesn't currently emit a "ready" event.
+    this.combat = new CombatController({
+      capsule,
+      scene: this.scene,
+      onStateChange: (s) => this._onLocalAnimChanged(s),
+      isAlive: () => this.alive,
+    });
+    // Tell the capsule to defer animation control to the combat controller
+    // (so locked action anims like lightAttack don't get stomped by the
+    // locomotion picker every frame).
+    capsule.combat = this.combat;
+    this._waitForCharacterAndAttachSword();
   }
 
-  onClick(_hit) {
-    if (!this.alive) return;
-    const now = performance.now();
-    if (now - this.lastAttackAt < COMBAT.ATTACK_COOLDOWN_MS) return;
-    this.lastAttackAt = now;
-    this._performLocalAttack();
+  async _waitForCharacterAndAttachSword() {
+    const start = performance.now();
+    while (performance.now() - start < 30000) {
+      if (this.capsule?.character?.loaded) {
+        await this.combat.attachSword();
+        this._swordAttached = true;
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    console.warn('[Game] character never loaded — sword not attached');
   }
 
-  onKeyDown(_code) { /* reserved for future block / roll */ }
+  /** Right-mouse / left-mouse attack input. button: 0 = LMB, 2 = RMB. */
+  onMouseDown(button) {
+    if (!this.alive || !this.combat) return;
+    if (button === 0) {
+      if (this.combat.lightAttack()) this._swingHitsFired = false;
+    } else if (button === 2) {
+      if (this.combat.heavyAttack()) this._swingHitsFired = false;
+    }
+  }
+
+  /** Old click hook — Game.js used to use this for LMB attacks. We now route
+   *  attacks through onMouseDown so we can tell LMB from RMB; keep the hook
+   *  as a no-op for compatibility with main.js's pointer-down listener. */
+  onClick(_hit) { /* superseded by onMouseDown */ }
+
+  /** Discrete keypress events from main.js (KeyF, Space, etc.). */
+  onKeyDown(code) {
+    if (!this.alive || !this.combat) return;
+    if (code === 'KeyF') this.combat.setBlocking(true);
+    else if (code === 'Space') this.combat.roll();
+  }
+
+  /** Key release events (block-on-release). */
+  onKeyUp(code) {
+    if (!this.combat) return;
+    if (code === 'KeyF') this.combat.setBlocking(false);
+  }
 
   onUpdate(dt) {
     // Lerp remote players toward their last-known network state
     for (const rp of this.remotePlayers.values()) rp.update(dt);
+
+    // Tick the combat state machine — drives stamina regen + lock expiry
+    this.combat?.update(dt);
+
+    // Once we're inside the active-frames window of a swing, fire the hitbox
+    // check exactly once per swing — feels in-sync with the animation rather
+    // than the input frame.
+    if (this.combat && !this._swingHitsFired && this.combat.isAttackActive()) {
+      this._swingHitsFired = true;
+      const isHeavy = this.combat._lock === 'heavyAttack';
+      this._performLocalAttackHit(isHeavy);
+    }
 
     // Death → respawn timer
     if (!this.alive && performance.now() >= this.respawnAt) {
@@ -127,11 +197,13 @@ export class Game {
 
     const t = this.capsule.body.translation();
     const yaw = this.capsule.cameraMode?.getCapsuleYaw?.() ?? 0;
+    const animState = this.combat?.getBroadcastState?.() ?? 'idle';
     this.net.sendState({
       x: t.x, y: t.y, z: t.z,
       yaw,
       hp: this.hp,
       alive: this.alive,
+      animState,
     });
   }
 
@@ -139,11 +211,13 @@ export class Game {
   // Local combat
   // -------------------------------------------------------------------------
 
-  _performLocalAttack() {
+  _performLocalAttackHit(isHeavy) {
     if (!this.capsule?.body) return;
 
-    // Hitbox = 60° cone in front of local player, reach COMBAT.ATTACK_REACH.
-    // Check every remote player and collect IDs that are inside the cone.
+    const damage = isHeavy ? COMBAT.HEAVY_DAMAGE : COMBAT.ATTACK_DAMAGE;
+    const reach = COMBAT.ATTACK_REACH * (isHeavy ? 1.15 : 1.0);
+
+    // Hitbox = 60° cone in front of local player at chest height.
     const t = this.capsule.body.translation();
     const yaw = this.capsule.cameraMode?.getCapsuleYaw?.() ?? 0;
     const facing = _v.set(Math.sin(yaw), 0, Math.cos(yaw)).normalize();
@@ -155,8 +229,7 @@ export class Game {
       const dx = rp.position.x - origin.x;
       const dz = rp.position.z - origin.z;
       const dist = Math.hypot(dx, dz);
-      if (dist > COMBAT.ATTACK_REACH) continue;
-      // Angle between facing and hit vector
+      if (dist > reach) continue;
       const dirX = dx / Math.max(dist, 0.0001);
       const dirZ = dz / Math.max(dist, 0.0001);
       const dot = facing.x * dirX + facing.z * dirZ;
@@ -165,13 +238,14 @@ export class Game {
       hits.push(id);
     }
 
-    // Broadcast attack so remotes can play hit FX even on other clients
+    // Broadcast the swing — remotes flash, victims subtract HP locally.
     this.net?.sendAttack({
       origin: { x: origin.x, y: origin.y, z: origin.z },
       facing: { x: facing.x, z: facing.z },
-      reach: COMBAT.ATTACK_REACH,
+      reach,
       hits,
-      damage: COMBAT.ATTACK_DAMAGE,
+      damage,
+      kind: isHeavy ? 'heavy' : 'light',
     });
 
     // Apply local visual feedback
@@ -183,9 +257,14 @@ export class Game {
 
   _takeDamage(amount, fromId) {
     if (!this.alive) return;
-    this.hp = Math.max(0, this.hp - amount);
+    // Block mitigation — passively soaked when F is held
+    const mit = this.combat?.blockMitigation?.() ?? 0;
+    const final = Math.max(0, amount * (1 - mit));
+    if (this.combat && !this.combat.invulnerable && final > 0) this.combat.takeHit();
+    this.hp = Math.max(0, this.hp - final);
     if (this.hp <= 0) {
       this.alive = false;
+      this.combat?.die?.();
       this.respawnAt = performance.now() + COMBAT.RESPAWN_DELAY_MS;
       this._showDeathOverlay(fromId);
     }
@@ -194,9 +273,15 @@ export class Game {
   _respawn() {
     this.hp = COMBAT.MAX_HP;
     this.alive = true;
+    this.combat?.reset?.();
     this._hideDeathOverlay();
     const sp = this.spawnPoints[Math.floor(Math.random() * this.spawnPoints.length)];
     this.capsule.body.setTranslation({ x: sp.x, y: sp.y + 0.5, z: sp.z }, true);
+  }
+
+  _onLocalAnimChanged(_state) {
+    // Animation state bubbles up to the next sendState() call via
+    // combat.getBroadcastState() — no immediate broadcast needed.
   }
 
   // -------------------------------------------------------------------------
@@ -234,7 +319,6 @@ export class Game {
   _onRemoteState(id, state) {
     let rp = this.remotePlayers.get(id);
     if (!rp) {
-      // Late-arriving state for an unknown peer — auto-create
       this._onPlayerJoined({ playerId: id, state });
       rp = this.remotePlayers.get(id);
     }
@@ -242,11 +326,9 @@ export class Game {
   }
 
   _onRemoteAttack(attackerId, evt) {
-    // If our local id is in the attacker's hit list, take damage
     if (Array.isArray(evt.hits) && evt.hits.includes(this.net?.playerId)) {
       this._takeDamage(evt.damage ?? COMBAT.ATTACK_DAMAGE, attackerId);
     }
-    // Also flash any remote player in the hit list
     for (const targetId of (evt.hits ?? [])) {
       const rp = this.remotePlayers.get(targetId);
       if (rp) rp.flashHit();
@@ -263,10 +345,11 @@ export class Game {
   // -------------------------------------------------------------------------
 
   _installHud(hud) {
-    // HP bar — bottom-left
+    // HP + stamina bars — bottom-left
     const slotBL = hud.getSlot('bl');
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;gap:8px;min-width:280px';
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;min-width:280px';
+
     const hpLabel = document.createElement('div');
     hpLabel.style.cssText = 'font-size:11px;color:#888;letter-spacing:1px;text-transform:uppercase';
     hpLabel.textContent = 'HP';
@@ -275,9 +358,20 @@ export class Game {
     const hpInner = document.createElement('div');
     hpInner.style.cssText = 'height:100%;width:100%;background:linear-gradient(90deg,#c01010,#ff4444);transition:width 0.15s';
     hpOuter.appendChild(hpInner);
-    wrap.append(hpLabel, hpOuter);
+
+    const stLabel = document.createElement('div');
+    stLabel.style.cssText = 'font-size:11px;color:#888;letter-spacing:1px;text-transform:uppercase;margin-top:4px';
+    stLabel.textContent = 'Stamina';
+    const stOuter = document.createElement('div');
+    stOuter.style.cssText = 'height:8px;background:rgba(0,0,0,0.5);border:1px solid #333;border-radius:2px;overflow:hidden';
+    const stInner = document.createElement('div');
+    stInner.style.cssText = 'height:100%;width:100%;background:linear-gradient(90deg,#208020,#60d060);transition:width 0.1s';
+    stOuter.appendChild(stInner);
+
+    wrap.append(hpLabel, hpOuter, stLabel, stOuter);
     slotBL?.appendChild(wrap);
     this.hpBar = hpInner;
+    this.staminaBar = stInner;
 
     // Net status — top-right
     const slotTR = hud.getSlot('tr');
@@ -292,6 +386,10 @@ export class Game {
     if (this.hpBar) {
       const pct = (this.hp / COMBAT.MAX_HP) * 100;
       this.hpBar.style.width = `${pct}%`;
+    }
+    if (this.staminaBar && this.combat) {
+      const pct = (this.combat.stamina / 100) * 100;
+      this.staminaBar.style.width = `${pct}%`;
     }
   }
 

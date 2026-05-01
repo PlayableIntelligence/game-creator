@@ -53,13 +53,17 @@ export class RemotePlayer {
 
   applyState(state) {
     if (!state) return;
-    // Track previous target so we can compute apparent velocity (used to
-    // pick idle/walk/run for the locomotion mixer).
+    // Track previous target so we can compute apparent velocity (used as a
+    // fallback to pick idle/walk/run when the broadcast `animState` is not
+    // a locomotion state).
     this.lastTargetPosition.copy(this.targetPosition);
     this.targetPosition.set(state.x ?? 0, state.y ?? this._floorY, state.z ?? 0);
     this.targetYaw = state.yaw ?? 0;
     this.hp = state.hp ?? this.hp;
     this.alive = state.alive ?? true;
+    // Combat / locomotion state from the local player's CombatController.
+    // null/undefined → fall back to inferred locomotion in update().
+    this.animState = state.animState ?? null;
     if (!this._haveFirstState) {
       // Snap on first state so we don't lerp from origin (0,0,0)
       this.position.copy(this.targetPosition);
@@ -86,18 +90,24 @@ export class RemotePlayer {
     while (dy < -Math.PI) dy += 2 * Math.PI;
     this.yaw += dy * a;
 
-    // Pick locomotion state from apparent server-target velocity (the
-    // server broadcasts ~30Hz so dx between two consecutive states ≈
-    // movement intent). Thresholds tuned empirically: walking ~1.5 m/s,
+    // Animation state — prefer the broadcast animState (so remote attacks /
+    // blocks / rolls play in lockstep with the source). Fall back to inferred
+    // locomotion from apparent server-target velocity for old clients that
+    // don't send animState. Thresholds tuned empirically: walking ~1.5 m/s,
     // running ~3.5 m/s.
-    const dxz = Math.hypot(
-      this.targetPosition.x - this.lastTargetPosition.x,
-      this.targetPosition.z - this.lastTargetPosition.z,
-    );
-    const speedHz = dxz * MULTIPLAYER.TICK_RATE_HZ;
-    let want = 'idle';
-    if (speedHz > 2.5) want = 'run';
-    else if (speedHz > 0.3) want = 'walk';
+    let want;
+    if (this.animState) {
+      want = this.animState;
+    } else {
+      const dxz = Math.hypot(
+        this.targetPosition.x - this.lastTargetPosition.x,
+        this.targetPosition.z - this.lastTargetPosition.z,
+      );
+      const speedHz = dxz * MULTIPLAYER.TICK_RATE_HZ;
+      want = 'idle';
+      if (speedHz > 2.5) want = 'run';
+      else if (speedHz > 0.3) want = 'walk';
+    }
 
     if (this._loaded && this.character?.loaded) {
       this.character.setPosition(this.position.x, this.position.y, this.position.z);

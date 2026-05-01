@@ -213,11 +213,17 @@ export class Capsule {
       const feetY = t.y - (CAPSULE.halfHeight + CAPSULE.radius);
       this.character.setPosition(t.x, feetY, t.z);
       this.character.setYaw(yaw);
-      // State machine — driven by INPUT INTENT, not Rapier grounded (which flickers)
-      const want = this._movingHoriz ? (this._sprinting ? 'run' : 'walk') : 'idle';
-      this.character.play(want);
+      // Animation driver: if a CombatController is attached (capsule.combat),
+      // it handles play() itself in Game.onUpdate so locked action animations
+      // can override locomotion. Otherwise default locomotion picker runs.
+      if (!this.combat) {
+        const want = this._movingHoriz ? (this._sprinting ? 'run' : 'walk') : 'idle';
+        this.character.play(want);
+        GameState.player.animState = want;
+      } else {
+        GameState.player.animState = this.character.activeName ?? 'idle';
+      }
       this.character.update(dt);
-      GameState.player.animState = want;
     }
   }
 }

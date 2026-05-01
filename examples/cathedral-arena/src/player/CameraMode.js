@@ -80,7 +80,11 @@ export class CameraMode {
     this._raycaster.far  = maxDist;
     const hits = this._raycaster.intersectObject(this.colliderRoot, true);
     if (hits.length === 0) return maxDist;
-    return Math.max(0.5, hits[0].distance - this.wallOffset);
+    // Floor at 1.5m so a tight spring-arm hit doesn't collapse the camera
+    // into the player (which reads as first-person and breaks souls feel).
+    // Below 1.5m it's better to clip the wall slightly than to lose the
+    // over-the-shoulder view.
+    return Math.max(1.5, hits[0].distance - this.wallOffset);
   }
 
   /** Y-only safety clamp — never let camera dip below fake floor or punch
