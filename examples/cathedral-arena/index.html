@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cathedral Arena — multiplayer souls demo</title>
+<style>
+  html, body { margin: 0; padding: 0; overflow: hidden; height: 100%; background: #000; color: #fff;
+               font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; }
+  #app { position: fixed; inset: 0; }
+  canvas { display: block; touch-action: none; }
+  /* HUD overlays mount into #hud-* slots */
+  #hud-tl, #hud-tr, #hud-bl, #hud-br { position: fixed; padding: 16px; pointer-events: none; }
+  #hud-tl { top: 0; left: 0; }
+  #hud-tr { top: 0; right: 0; }
+  #hud-bl { bottom: 0; left: 0; }
+  #hud-br { bottom: 0; right: 0; }
+  #hud-tl > *, #hud-tr > *, #hud-bl > *, #hud-br > * { pointer-events: auto; }
+  #boot-status { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                 font-size: 14px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="boot-status">loading…</div>
+  <div id="hud-tl"></div>
+  <div id="hud-tr"></div>
+  <div id="hud-bl"></div>
+  <div id="hud-br"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

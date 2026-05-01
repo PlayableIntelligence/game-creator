@@ -1,0 +1,34 @@
+{
+  "slug": "cathedral-ref",
+  "world_id": "bc95b993-b5fb-4c30-8fbf-712e1e4fd37a",
+  "world_marble_url": "https://marble.worldlabs.ai/world/bc95b993-b5fb-4c30-8fbf-712e1e4fd37a",
+  "model": "marble-1.1-plus",
+  "seed": null,
+  "prompt": "The scene is a vast, empty gothic cathedral interior, rendered in a painterly and desaturated style reminiscent of FromSoftware's Dark Souls, evoking a somber and foreboding atmosphere. The central feature is a completely empty, large, flat, smooth flagstone floor arena, meticulously swept and entirely clear from wall to wall, devoid of any obstructions. There are no columns, pillars, pews, chairs, altars, statues, tombs, rubble, debris, pulpits, coffins, or furniture of any kind. This expansive space forms a wide-open circular hall, designed for unobstructed movement. Distant perimeter stone walls rise dramatically into shadow, separated from the open floor by a broad, clear margin. Tall, narrow stained glass windows are set into these distant walls, glowing with a cold cobalt and violet light that pierces the gloom. Far overhead, a ribbed vaulted ceiling is lost in darkness, its intricate details obscured by the immense height. Atmospheric shafts of dim moonlight cut across the empty flagstone floor, highlighting its vastness. The arena is cavernous and abandoned, presenting a photorealistic yet desolate environment, perfectly poised for a monumental confrontation. The 360 scene is faultless.",
+  "image": "/Users/rshtirmer/Downloads/ChatGPT Image Apr 24, 2026, 03_10_59 PM.png",
+  "media_asset_id": "fd316088-7d88-4e27-b812-ebe23ad9d4c5",
+  "started": "2026-04-24T19:13:41.250Z",
+  "finished": "2026-04-24T19:22:58.076Z",
+  "assets": {
+    "mesh": {
+      "collider_mesh_url": "https://cdn.marble.worldlabs.ai/bc95b993-b5fb-4c30-8fbf-712e1e4fd37a/b2ddd3bc.glb"
+    },
+    "imagery": {
+      "pano_url": "https://cdn.marble.worldlabs.ai/bc95b993-b5fb-4c30-8fbf-712e1e4fd37a/1bfcb4f6-2517-48f7-90dc-95f5fbb500d9_panos/rgb_0.png"
+    },
+    "splats": {
+      "spz_urls": {
+        "500k": "https://cdn.marble.worldlabs.ai/bc95b993-b5fb-4c30-8fbf-712e1e4fd37a/e911efca-2e36-4e4c-b3b8-c090cce7519c_ceramic_500k.spz",
+        "100k": "https://cdn.marble.worldlabs.ai/bc95b993-b5fb-4c30-8fbf-712e1e4fd37a/ab1b3e71-417e-4352-a4b8-a57a2dca6c11_dust_100k.spz",
+        "150k": "https://cdn.marble.worldlabs.ai/bc95b993-b5fb-4c30-8fbf-712e1e4fd37a/073f5a81-f7b8-4b8e-80b1-2d54177811db_ceramic_150k.spz",
+        "full_res": "https://cdn.marble.worldlabs.ai/bc95b993-b5fb-4c30-8fbf-712e1e4fd37a/536cd8e1-514f-4394-8ce8-2ec4e9454a08_ceramic.spz"
+      },
+      "semantics_metadata": {
+        "metric_scale_factor": 0.82813334,
+        "ground_plane_offset": 0.49295893
+      }
+    },
+    "thumbnail_url": "https://cdn.marble.worldlabs.ai/bc95b993-b5fb-4c30-8fbf-712e1e4fd37a/87d4e488-a0a2-4b88-b58a-720187f537c4_sand_mpi/thumbnail.webp",
+    "caption": "The scene is a vast, empty gothic cathedral interior, rendered in a painterly and desaturated style reminiscent of FromSoftware's Dark Souls, evoking a somber and foreboding atmosphere. The central feature is a completely empty, large, flat, smooth flagstone floor arena, meticulously swept and entirely clear from wall to wall, devoid of any obstructions. There are no columns, pillars, pews, chairs, altars, statues, tombs, rubble, debris, pulpits, coffins, or furniture of any kind. This expansive space forms a wide-open circular hall, designed for unobstructed movement. Distant perimeter stone walls rise dramatically into shadow, separated from the open floor by a broad, clear margin. Tall, narrow stained glass windows are set into these distant walls, glowing with a cold cobalt and violet light that pierces the gloom. Far overhead, a ribbed vaulted ceiling is lost in darkness, its intricate details obscured by the immense height. Atmospheric shafts of dim moonlight cut across the empty flagstone floor, highlighting its vastness. The arena is cavernous and abandoned, presenting a photorealistic yet desolate environment, perfectly poised for a monumental confrontation. The 360 scene is faultless."
+  }
+}
