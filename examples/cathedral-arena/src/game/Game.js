@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { NetworkManager } from '../multiplayer/NetworkManager.js';
 import { RemotePlayer } from '../multiplayer/RemotePlayer.js';
 import { CombatController } from './CombatController.js';
+import { HitFX } from './HitFX.js';
 import { ARENA, COMBAT, MULTIPLAYER } from '../core/Constants.js';
 
 /**
@@ -28,7 +29,6 @@ import { ARENA, COMBAT, MULTIPLAYER } from '../core/Constants.js';
  */
 
 const _v = new THREE.Vector3();
-const _v2 = new THREE.Vector3();
 
 export class Game {
   constructor() {
@@ -45,9 +45,9 @@ export class Game {
     // character has loaded.
     this.combat = null;
     this._swordAttached = false;
-    // Per-swing flag — set on swing start, fires hits at the start of the
-    // active-frames window (30%-70% of the animation), cleared at swing end.
-    this._swingHitsFired = false;
+
+    // Hit FX — sparks + emissive flash. Created in onWorldLoaded.
+    this.fx = null;
 
     // Multiplayer
     this.net = null;
@@ -84,6 +84,10 @@ export class Game {
     // HUD widgets
     this._installHud(hud);
 
+    // Hit FX — sparks + emissive flash. Drawn into the same scene/camera
+    // pipeline as the splat + characters.
+    this.fx = new HitFX(scene);
+
     // Multiplayer — NetworkManager wires partysocket + emits state-received,
     // player-joined, etc. on its EventBus. We listen via callbacks below.
     this.net = new NetworkManager({
@@ -115,6 +119,7 @@ export class Game {
       scene: this.scene,
       onStateChange: (s) => this._onLocalAnimChanged(s),
       isAlive: () => this.alive,
+      onHit: (evt) => this._onSwordSweep(evt),
     });
     // Tell the capsule to defer animation control to the combat controller
     // (so locked action anims like lightAttack don't get stomped by the
@@ -139,11 +144,8 @@ export class Game {
   /** Right-mouse / left-mouse attack input. button: 0 = LMB, 2 = RMB. */
   onMouseDown(button) {
     if (!this.alive || !this.combat) return;
-    if (button === 0) {
-      if (this.combat.lightAttack()) this._swingHitsFired = false;
-    } else if (button === 2) {
-      if (this.combat.heavyAttack()) this._swingHitsFired = false;
-    }
+    if (button === 0) this.combat.lightAttack();
+    else if (button === 2) this.combat.heavyAttack();
   }
 
   /** Old click hook — Game.js used to use this for LMB attacks. We now route
@@ -168,17 +170,13 @@ export class Game {
     // Lerp remote players toward their last-known network state
     for (const rp of this.remotePlayers.values()) rp.update(dt);
 
-    // Tick the combat state machine — drives stamina regen + lock expiry
+    // Tick the combat state machine — drives stamina regen, lock expiry,
+    // and (during attacks) the per-frame sword sweep that calls back into
+    // _onSwordSweep below.
     this.combat?.update(dt);
 
-    // Once we're inside the active-frames window of a swing, fire the hitbox
-    // check exactly once per swing — feels in-sync with the animation rather
-    // than the input frame.
-    if (this.combat && !this._swingHitsFired && this.combat.isAttackActive()) {
-      this._swingHitsFired = true;
-      const isHeavy = this.combat._lock === 'heavyAttack';
-      this._performLocalAttackHit(isHeavy);
-    }
+    // Hit FX — sparks + emissive flash decay.
+    this.fx?.update(dt);
 
     // Death → respawn timer
     if (!this.alive && performance.now() >= this.respawnAt) {
@@ -208,51 +206,69 @@ export class Game {
   }
 
   // -------------------------------------------------------------------------
-  // Local combat
+  // Local combat — sword swept-sphere hit detection
   // -------------------------------------------------------------------------
 
-  _performLocalAttackHit(isHeavy) {
-    if (!this.capsule?.body) return;
+  /**
+   * Called by CombatController each frame the swing is inside its hit window
+   * (souls-demo pattern). evt = { kind: 'light'|'heavy', swordPos, bodyOffset }.
+   * Walks remote players, checks sword tip vs body sphere, fires on the
+   * first remote that's inside (BLADE_RADIUS + BODY_RADIUS). Returns true if
+   * a hit was registered — CombatController flips its per-swing fired flag
+   * so we don't double-hit on subsequent frames in the same window.
+   */
+  _onSwordSweep({ kind, swordPos }) {
+    const damage = kind === 'heavy' ? COMBAT.HEAVY_DAMAGE : COMBAT.ATTACK_DAMAGE;
+    const reach = COMBAT.BLADE_RADIUS + COMBAT.BODY_RADIUS;
 
-    const damage = isHeavy ? COMBAT.HEAVY_DAMAGE : COMBAT.ATTACK_DAMAGE;
-    const reach = COMBAT.ATTACK_REACH * (isHeavy ? 1.15 : 1.0);
-
-    // Hitbox = 60° cone in front of local player at chest height.
-    const t = this.capsule.body.translation();
-    const yaw = this.capsule.cameraMode?.getCapsuleYaw?.() ?? 0;
-    const facing = _v.set(Math.sin(yaw), 0, Math.cos(yaw)).normalize();
-    const origin = _v2.set(t.x, t.y + 1.0, t.z);   // chest height
-
-    const hits = [];
+    let hitId = null;
+    let hitPoint = null;
+    let bestSq = reach * reach;
+    // Remote position.y is the broadcast capsule-CENTER y. Chest is roughly
+    // BODY_Y_OFFSET above feet, so add BODY_Y_OFFSET-CENTER_TO_FEET = +0.5m
+    // (with default capsule). Just use BODY_Y_OFFSET above the broadcast Y
+    // — close enough for hitbox purposes given the generous BLADE_RADIUS.
     for (const [id, rp] of this.remotePlayers) {
       if (!rp.alive) continue;
-      const dx = rp.position.x - origin.x;
-      const dz = rp.position.z - origin.z;
-      const dist = Math.hypot(dx, dz);
-      if (dist > reach) continue;
-      const dirX = dx / Math.max(dist, 0.0001);
-      const dirZ = dz / Math.max(dist, 0.0001);
-      const dot = facing.x * dirX + facing.z * dirZ;
-      const cosThreshold = Math.cos(COMBAT.ATTACK_CONE_RAD * 0.5);
-      if (dot < cosThreshold) continue;
-      hits.push(id);
+      const cx = rp.position.x;
+      const cy = rp.position.y + COMBAT.BODY_Y_OFFSET * 0.5;   // ~chest
+      const cz = rp.position.z;
+      const dx = swordPos.x - cx;
+      const dy = swordPos.y - cy;
+      const dz = swordPos.z - cz;
+      const distSq = dx * dx + dy * dy + dz * dz;
+      if (distSq < bestSq) {
+        bestSq = distSq;
+        hitId = id;
+        hitPoint = _v.set(
+          (swordPos.x + cx) * 0.5,
+          (swordPos.y + cy) * 0.5,
+          (swordPos.z + cz) * 0.5,
+        ).clone();
+      }
     }
+    if (!hitId) return false;
 
-    // Broadcast the swing — remotes flash, victims subtract HP locally.
+    // Broadcast — remotes apply damage to themselves on receive; we apply
+    // local visual feedback (sparks, flash) here.
     this.net?.sendAttack({
-      origin: { x: origin.x, y: origin.y, z: origin.z },
-      facing: { x: facing.x, z: facing.z },
+      origin: { x: swordPos.x, y: swordPos.y, z: swordPos.z },
+      facing: { x: 0, z: 0 },           // legacy field — unused by recv path
       reach,
-      hits,
+      hits: [hitId],
       damage,
-      kind: isHeavy ? 'heavy' : 'light',
+      kind,
+      point: { x: hitPoint.x, y: hitPoint.y, z: hitPoint.z },
     });
 
-    // Apply local visual feedback
-    for (const id of hits) {
-      const rp = this.remotePlayers.get(id);
-      if (rp) rp.flashHit();
+    const rp = this.remotePlayers.get(hitId);
+    if (rp) {
+      rp.flashHit();
+      this.fx?.spark(hitPoint);
+      const rvrm = rp.character?.vrm;
+      if (rvrm) this.fx?.flash(rvrm);
     }
+    return true;
   }
 
   _takeDamage(amount, fromId) {
@@ -326,12 +342,24 @@ export class Game {
   }
 
   _onRemoteAttack(attackerId, evt) {
+    const point = evt.point
+      ? _v.set(evt.point.x, evt.point.y, evt.point.z)
+      : null;
+
     if (Array.isArray(evt.hits) && evt.hits.includes(this.net?.playerId)) {
       this._takeDamage(evt.damage ?? COMBAT.ATTACK_DAMAGE, attackerId);
+      if (point) this.fx?.spark(point);
+      // Flash the local character VRM so YOU see yourself getting hit.
+      const myVrm = this.capsule?.character?.vrm;
+      if (myVrm) this.fx?.flash(myVrm);
     }
     for (const targetId of (evt.hits ?? [])) {
       const rp = this.remotePlayers.get(targetId);
-      if (rp) rp.flashHit();
+      if (!rp) continue;
+      rp.flashHit();
+      if (point) this.fx?.spark(point);
+      const rvrm = rp.character?.vrm;
+      if (rvrm) this.fx?.flash(rvrm);
     }
   }
 

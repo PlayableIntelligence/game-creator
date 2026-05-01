@@ -154,7 +154,14 @@ export class AnimatedCharacter {
     this.group.add(vrm.scene);
     this.model = vrm.scene;
 
-    // Mixamo retargeting — load each FBX in clipMap, retarget to VRM skeleton
+    // Mixamo retargeting — load each FBX in clipMap, retarget to VRM skeleton.
+    // Locomotion clips loop; everything else is a one-shot that clamps on the
+    // final frame. This is the souls-demo pattern: rolls and swings should
+    // play through once, not loop, so the lock-expiry timer in
+    // CombatController can hand control back to the locomotion picker.
+    const ONE_SHOT_STATES = new Set([
+      'lightAttack', 'heavyAttack', 'roll', 'hit', 'death', 'block',
+    ]);
     this.mixer = new THREE.AnimationMixer(vrm.scene);
     const entries = Object.entries(clipMap);
     await Promise.all(entries.map(async ([stateName, fbxUrl]) => {
@@ -166,8 +173,13 @@ export class AnimatedCharacter {
           return;
         }
         const action = this.mixer.clipAction(clip);
-        action.setLoop(THREE.LoopRepeat, Infinity);
-        action.clampWhenFinished = false;
+        if (ONE_SHOT_STATES.has(stateName)) {
+          action.setLoop(THREE.LoopOnce, 1);
+          action.clampWhenFinished = true;
+        } else {
+          action.setLoop(THREE.LoopRepeat, Infinity);
+          action.clampWhenFinished = false;
+        }
         this.actions[stateName] = action;
       } catch (err) {
         console.warn(`[Character] anim "${stateName}" failed —`, err);

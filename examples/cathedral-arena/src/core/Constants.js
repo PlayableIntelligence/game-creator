@@ -431,6 +431,23 @@ export const COMBAT = {
   RESPAWN_DELAY_MS: 3000,
   // 0.0 = no mitigation, 1.0 = full block. 0.75 = 75% damage soaked when blocking.
   BLOCK_MITIGATION: 0.75,
+  // Roll tuning — copied from souls-demo PLAYER.ROLL_*. ROLL_SPEED is the
+  // burst velocity in m/s; ROLL_TIMESCALE speeds up the mixer for the roll
+  // clip so it reads as a snap-dodge rather than a slow tumble.
+  ROLL_SPEED: 5.0,
+  ROLL_TIMESCALE: 1.4,
+  ROLL_IFRAMES_MS: 420,
+  // Souls-style swept-sphere hit detection — sword tip vs body sphere.
+  // BLADE_RADIUS is generous so grazing swings still count; BODY_RADIUS
+  // is the chest/torso hurtbox; BODY_Y_OFFSET is centred at chest.
+  BLADE_RADIUS: 0.55,
+  BODY_RADIUS: 0.6,
+  BODY_Y_OFFSET: 1.0,
+  // Hit-window fractions of the swing's animation duration (souls-demo
+  // values). The sword can register damage only inside this window; outside
+  // it's wind-up (early) or recovery (late).
+  LIGHT_HIT_WINDOW: [0.28, 0.52],
+  HEAVY_HIT_WINDOW: [0.38, 0.62],
 };
 
 export const MULTIPLAYER = {

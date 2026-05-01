@@ -1,6 +1,20 @@
 import * as THREE from 'three';
 import { AnimatedCharacter } from '../player/AnimatedCharacter.js';
-import { CHARACTER, MULTIPLAYER } from '../core/Constants.js';
+import { attachWeapon } from '../combat/WeaponAttach.js';
+import { CHARACTER, MULTIPLAYER, CAPSULE } from '../core/Constants.js';
+
+// Greatsword tuning — must match CombatController's local-player numbers so
+// the same sword reads identically in third-person whether you're looking
+// at yourself or an opponent.
+const SWORD_PATH      = '/assets/props/greatsword.fbx';
+const SWORD_SCALE     = 0.0025;
+const SWORD_POSITION  = [0.175, -0.0296, -0.1759];
+const SWORD_ROTATION  = [Math.PI, 0.576, Math.PI / 2];
+
+// Feet-Y conversion. Local player broadcasts capsule-CENTER Y in `state.y`;
+// remote AnimatedCharacter wants its group origin at the FEET. Difference is
+// half the capsule plus the radius cap.
+const CENTER_TO_FEET = CAPSULE.halfHeight + CAPSULE.radius;
 
 /**
  * RemotePlayer — a network-driven character. Mirrors a peer player's
@@ -46,6 +60,24 @@ export class RemotePlayer {
       });
       this.scene.add(this.character.root);
       this._loaded = true;
+
+      // Attach the same greatsword the local player has, so opponents
+      // visibly carry a weapon (and so the sword's world position can be
+      // queried for their swings if we later move hit detection
+      // server-authoritative).
+      try {
+        if (this.character.vrm) {
+          this.sword = await attachWeapon(this.character.vrm, {
+            path: SWORD_PATH,
+            scale: SWORD_SCALE,
+            position: SWORD_POSITION,
+            rotationEuler: SWORD_ROTATION,
+            boneName: 'rightHand',
+          });
+        }
+      } catch (err) {
+        console.warn(`[RemotePlayer ${this.playerId.slice(0, 6)}] sword attach failed:`, err);
+      }
     } catch (err) {
       console.warn(`[RemotePlayer ${this.playerId.slice(0, 6)}] load failed:`, err);
     }
@@ -110,7 +142,11 @@ export class RemotePlayer {
     }
 
     if (this._loaded && this.character?.loaded) {
-      this.character.setPosition(this.position.x, this.position.y, this.position.z);
+      // Local player broadcasts capsule-CENTER y; AnimatedCharacter wants
+      // FEET y at its group origin. Subtract the half-capsule offset so the
+      // remote stands on the same floor we do.
+      const feetY = this.position.y - CENTER_TO_FEET;
+      this.character.setPosition(this.position.x, feetY, this.position.z);
       this.character.setYaw(this.yaw);
       this.character.play(want);
       this.character.update(dt);

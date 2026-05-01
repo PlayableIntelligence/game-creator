@@ -11,7 +11,9 @@ import { COMBAT } from '../core/Constants.js';
  *   - locomotion vs. action arbitration (`_lock` field — non-null means a
  *     committed action animation owns the mixer; locomotion can't override)
  *   - stamina drain + regen
- *   - per-action timers + auto-fall-through to idle when an anim wraps
+ *   - roll burst velocity (Capsule reads `_rollDir` + ROLL_SPEED)
+ *   - sword-position-vs-body-sphere hit detection (souls-demo pattern)
+ *   - root-motion absorb so heavy swings don't snap the body back to start
  *
  * The Capsule retains authority over translation. CombatController only
  * touches the AnimatedCharacter mixer + listens for input events.
@@ -21,59 +23,82 @@ import { COMBAT } from '../core/Constants.js';
  * Capsule's locomotion choice with the action clip until the timer expires.
  */
 
-// Greatsword tuning — copied from souls-demo PROPS.greatsword.player
+// Greatsword tuning — copied from souls-demo PROPS.greatsword.player.
 const SWORD_PATH      = '/assets/props/greatsword.fbx';
 const SWORD_SCALE     = 0.0025;
 const SWORD_POSITION  = [0.175, -0.0296, -0.1759];
 const SWORD_ROTATION  = [Math.PI, 0.576, Math.PI / 2];
 
-// Per-state timing (ms) — tuned to feel snappy without clipping animations
-const STATE_DURATIONS_MS = {
+// Per-state fallback durations (ms). Used when the loaded clip's wallclock
+// duration isn't available (e.g. before the FBX finishes retargeting).
+const FALLBACK_DURATIONS_MS = {
   lightAttack: 800,
   heavyAttack: 1200,
   roll:        650,
   hit:         400,
-  death:       2000,   // hold final frame
+  death:       2000,
 };
 
-// Stamina costs
+// Stamina costs.
 const STAMINA_COST = {
   lightAttack: 18,
   heavyAttack: 32,
   roll:        25,
-  // block is passive — drained on absorbed hits, not on press
 };
 
 const STAMINA_REGEN_PER_SEC = 35;
 const STAMINA_REGEN_DELAY_MS = 600;
 const STAMINA_MAX = 100;
 
+// Cap on heavy-attack drift absorbed into the capsule — guards against
+// retarget NaNs or accidental teleports.
+const MAX_ROOT_DRIFT_M = 8.0;
+
+const _hipStart = new THREE.Vector3();
+const _hipEnd   = new THREE.Vector3();
+const _bodyTmp  = new THREE.Vector3();
+const _swordTmp = new THREE.Vector3();
+
 export class CombatController {
-  constructor({ capsule, scene, onStateChange, isAlive }) {
+  constructor({ capsule, scene, onStateChange, isAlive, onHit }) {
     this.capsule = capsule;
     this.scene = scene;
     this.onStateChange = onStateChange ?? (() => {});
     this.isAlive = isAlive ?? (() => true);
+    // Fired by the active-swing tracker when our sword body-sphere touches a
+    // target. Game.js listens and applies damage + spawns hit FX.
+    this.onHit = onHit ?? (() => {});
 
     // State
-    this._lock = null;             // null | 'lightAttack' | 'heavyAttack' | 'roll' | 'hit' | 'death'
+    this._lock = null;             // null | 'lightAttack' | 'heavyAttack' | 'roll' | 'hit' | 'death' | 'block'
     this._lockUntil = 0;
     this._blocking = false;
     this.stamina = STAMINA_MAX;
     this._staminaRegenAt = 0;
 
-    // Animation state we report to the network — locomotion is auto-driven by
-    // AnimatedCharacter, but action overrides (attack/roll/etc) need to go
-    // out as discrete events for remotes to mirror.
+    // Animation state we report to the network.
     this._broadcastState = 'idle';
-    this._lastBroadcastState = 'idle';
 
     // Sword
     this.sword = null;
     this._handBone = null;
 
-    // i-frames during roll (can't take damage)
+    // Roll state (mirrors souls-demo Player). `_rollDir` is a unit XZ vector
+    // captured on roll-start; Capsule.fixedUpdate drives the body in that
+    // direction at ROLL_SPEED while `_lock === 'roll'`.
     this.invulnerable = false;
+    this._rollDir = null;
+
+    // Active-swing tracker — populated when an attack starts. Each frame in
+    // update() we read sword.getWorldPosition(), test it against every
+    // target's body sphere, and fire onHit() once per swing.
+    this._activeSwing = null;     // { kind: 'light'|'heavy', action, hitWindow, fired, started }
+
+    // Root-motion absorb for heavy swings. _hipStart captured at swing start;
+    // on swing finish we read end position + nudge the capsule body forward
+    // by the hip drift.
+    this._absorbStart = null;     // Vector3 hip world pos at swing start
+    this._absorbApplyAt = 0;      // performance.now() when to commit the drift
   }
 
   /** Call once after capsule.character.loaded === true. */
@@ -102,10 +127,11 @@ export class CombatController {
   // Input intents
   // -------------------------------------------------------------------------
 
-  /** LMB → light attack. Returns true if the swing started (caller broadcasts). */
+  /** LMB → light attack. Returns true if the swing started. */
   lightAttack() {
     if (!this._canAct() || !this._drainStamina(STAMINA_COST.lightAttack)) return false;
     this._enterLock('lightAttack');
+    this._beginSwing('light');
     return true;
   }
 
@@ -113,28 +139,56 @@ export class CombatController {
   heavyAttack() {
     if (!this._canAct() || !this._drainStamina(STAMINA_COST.heavyAttack)) return false;
     this._enterLock('heavyAttack');
+    this._beginSwing('heavy');
+    // Heavy: snapshot hip start so we can absorb the forward drift on finish.
+    this._captureAbsorbStart();
     return true;
   }
 
-  /** Space → dodge roll. Grants i-frames during the roll window. */
+  /** Space → dodge roll. Grants i-frames during the active part of the roll. */
   roll() {
     if (!this._canAct() || !this._drainStamina(STAMINA_COST.roll)) return false;
+
+    // Direction snapshot: camera-relative WASD intent if held, else current
+    // facing (so a stationary roll dodges forward, mirroring souls-demo).
+    const cap = this.capsule;
+    const yaw = cap?.cameraMode?.getCapsuleYaw?.() ?? 0;
+    let dirX = Math.sin(yaw);
+    let dirZ = Math.cos(yaw);
+    if (cap?._movingHoriz && cap?.cameraMode) {
+      const { forward, right } = cap.cameraMode.getMovementBasis();
+      // We can read the raw input only via consume(), which would steal
+      // the frame's input from the capsule. Instead reconstruct from the
+      // capsule's last desired-velocity direction (set in fixedUpdate).
+      const dx = cap._desired.x;
+      const dz = cap._desired.z;
+      const m = Math.hypot(dx, dz);
+      if (m > 0.0001) { dirX = dx / m; dirZ = dz / m; }
+      // Suppress unused-var warnings if movement basis isn't needed.
+      void forward; void right;
+    }
+    this._rollDir = { x: dirX, z: dirZ };
+
     this._enterLock('roll');
     this.invulnerable = true;
-    setTimeout(() => { this.invulnerable = false; }, STATE_DURATIONS_MS.roll * 0.6);
+    setTimeout(() => { this.invulnerable = false; }, COMBAT.ROLL_IFRAMES_MS);
     return true;
   }
 
   /** F (held) → block. Passive; reduces incoming damage when absorbing. */
   setBlocking(on) {
-    if (this._lock && this._lock !== 'block') return;  // can't enter block mid-attack
-    this._blocking = !!on;
-    if (this._blocking) {
+    const want = !!on;
+    // Always track the held flag so a release during an attack lock still
+    // exits block once the attack ends.
+    this._blocking = want;
+    // Lock manipulation only happens when no other action owns the mixer.
+    if (this._lock && this._lock !== 'block') return;
+    if (want && this._lock !== 'block') {
       this._lock = 'block';
       this._lockUntil = Infinity;
       this._setBroadcast('block');
-      this.capsule?.character?.play?.('block');
-    } else if (this._lock === 'block') {
+      this._playOneShot('block');
+    } else if (!want && this._lock === 'block') {
       this._lock = null;
       this._lockUntil = 0;
       this._setBroadcast('idle');
@@ -161,15 +215,22 @@ export class CombatController {
     this._lockUntil = 0;
     this._blocking = false;
     this.invulnerable = false;
+    this._rollDir = null;
+    this._activeSwing = null;
+    this._absorbStart = null;
     this.stamina = STAMINA_MAX;
     this._setBroadcast('idle');
   }
 
   /** Per-frame tick. Called from Game.onUpdate. */
   update(dt) {
-    // Lock expiry
     const now = performance.now();
+
+    // Lock expiry. Death and block hold indefinitely; everything else expires.
     if (this._lock && now >= this._lockUntil && this._lock !== 'death' && this._lock !== 'block') {
+      // Roll ends → drop the snapshotted direction so the capsule reverts to
+      // input-driven movement.
+      if (this._lock === 'roll') this._rollDir = null;
       this._lock = null;
       this._lockUntil = 0;
       this._setBroadcast('idle');
@@ -180,21 +241,31 @@ export class CombatController {
       this.stamina = Math.min(STAMINA_MAX, this.stamina + STAMINA_REGEN_PER_SEC * dt);
     }
 
-    // CombatController is the sole driver of the local character's animation
-    // when present (Capsule.syncMesh detects `capsule.combat` and skips its
-    // own play()-call so we don't fight). When locked, play the action; when
-    // unlocked, derive locomotion from the capsule's movement intent flags.
+    // Drive the local character animation. CombatController is the sole
+    // owner of character.play() while attached (Capsule.syncMesh defers).
     const character = this.capsule?.character;
     if (!character?.loaded) return;
     if (this._lock) {
-      character.play(this._lock);
+      // Already started in _enterLock with reset(); keep the activeName
+      // matching so play()'s identity guard treats this as a no-op.
+      // (We intentionally don't call play() here.)
     } else {
       const moving = this.capsule._movingHoriz;
       const sprinting = this.capsule._sprinting;
       const want = moving ? (sprinting ? 'run' : 'walk') : 'idle';
       character.play(want);
-      // Keep the broadcast state in sync with locomotion so remotes mirror it.
       this._setBroadcast(want);
+    }
+
+    // Active swing tracker — sample sword position vs target body sphere
+    // every frame inside the hit window, fire onHit() exactly once per swing.
+    this._tickSwing();
+
+    // Heavy-attack root-motion absorb — at the moment the swing ends we
+    // commit the hip-bone drift forward into the capsule so the visual body
+    // doesn't snap back to where it started the swing.
+    if (this._absorbApplyAt > 0 && now >= this._absorbApplyAt) {
+      this._commitAbsorb();
     }
   }
 
@@ -202,24 +273,10 @@ export class CombatController {
   // Network helpers
   // -------------------------------------------------------------------------
 
-  /** Returns the current state to broadcast. Locomotion → idle/walk/run is
+  /** Returns the current animation state to broadcast. Locomotion → idle/walk/run is
    *  derived from velocity by Capsule, so we only override here for actions. */
   getBroadcastState() {
-    if (this._lock) return this._lock;
-    // Defer to capsule locomotion
-    return this.capsule?.character?.activeName ?? 'idle';
-  }
-
-  /** Returns true if local player should be considered "swinging" right now —
-   *  used by Game.js to gate hitbox checks to a window during the swing. */
-  isAttackActive() {
-    if (this._lock !== 'lightAttack' && this._lock !== 'heavyAttack') return false;
-    // Hitbox window is the middle 40% of the attack — early frames are
-    // wind-up, late frames are recovery.
-    const elapsed = STATE_DURATIONS_MS[this._lock] - (this._lockUntil - performance.now());
-    const total = STATE_DURATIONS_MS[this._lock];
-    const t = elapsed / total;
-    return t > 0.30 && t < 0.70;
+    return this._broadcastState;
   }
 
   /** Damage multiplier (block reduces incoming damage). */
@@ -228,7 +285,7 @@ export class CombatController {
   }
 
   // -------------------------------------------------------------------------
-  // Internal
+  // Internal — locks + animation
   // -------------------------------------------------------------------------
 
   _canAct() {
@@ -239,13 +296,49 @@ export class CombatController {
     return true;
   }
 
+  /** Compute lock duration. Prefers the actual clip wallclock duration so
+   *  state-machine timing stays in sync with what the user sees on screen,
+   *  even after Mixamo retarget speeds vary across animations. */
+  _computeLockMs(state) {
+    const action = this.capsule?.character?.actions?.[state];
+    if (action) {
+      const clip = action.getClip?.();
+      const dur = clip?.duration ?? 0;
+      const ts = action.getEffectiveTimeScale?.() ?? 1;
+      if (dur > 0) return (dur / Math.max(0.01, ts)) * 1000;
+    }
+    return FALLBACK_DURATIONS_MS[state] ?? 500;
+  }
+
   _enterLock(state) {
     this._lock = state;
-    const dur = STATE_DURATIONS_MS[state] ?? 500;
-    this._lockUntil = performance.now() + dur;
     this._blocking = false;  // cancel block on action commit
     this._setBroadcast(state);
-    this.capsule?.character?.play?.(state);
+    this._playOneShot(state);
+    const dur = this._computeLockMs(state);
+    this._lockUntil = performance.now() + dur;
+  }
+
+  /** Reset + play a one-shot clip. LoopOnce + clampWhenFinished mean the
+   *  clip holds its final frame after one play; without reset() a second
+   *  call would no-op (already-clamped) and we'd never see the swing again. */
+  _playOneShot(state) {
+    const character = this.capsule?.character;
+    const action = character?.actions?.[state];
+    if (!action || !character?.mixer) return;
+
+    // Crossfade out whatever is currently active.
+    if (character.activeAction && character.activeAction !== action) {
+      character.activeAction.fadeOut(0.08);
+    }
+
+    // Special-case: roll plays slightly faster so it reads as a snap-dodge
+    // rather than a sluggish tumble. Other clips run at 1.0×.
+    action.timeScale = (state === 'roll') ? COMBAT.ROLL_TIMESCALE : 1.0;
+    action.reset().setEffectiveWeight(1).fadeIn(0.08).play();
+
+    character.activeAction = action;
+    character.activeName = state;
   }
 
   _setBroadcast(state) {
@@ -259,5 +352,98 @@ export class CombatController {
     this.stamina -= cost;
     this._staminaRegenAt = performance.now() + STAMINA_REGEN_DELAY_MS;
     return true;
+  }
+
+  // -------------------------------------------------------------------------
+  // Internal — sword swept-sphere hit detection (souls-demo CombatSystem)
+  // -------------------------------------------------------------------------
+
+  _beginSwing(kind) {
+    const stateName = kind === 'heavy' ? 'heavyAttack' : 'lightAttack';
+    const action = this.capsule?.character?.actions?.[stateName];
+    if (!action) { this._activeSwing = null; return; }
+    this._activeSwing = {
+      kind,
+      action,
+      hitWindow: kind === 'heavy' ? COMBAT.HEAVY_HIT_WINDOW : COMBAT.LIGHT_HIT_WINDOW,
+      fired: false,
+    };
+  }
+
+  _tickSwing() {
+    const a = this._activeSwing;
+    if (!a) return;
+    const action = a.action;
+    if (!action || !action.isRunning?.()) {
+      this._activeSwing = null;
+      return;
+    }
+    const clip = action.getClip?.();
+    const dur = clip?.duration ?? 0;
+    if (dur <= 0) return;
+    const progress = action.time / dur;
+    const [open, close] = a.hitWindow;
+    if (a.fired) {
+      if (progress >= 0.98) this._activeSwing = null;
+      return;
+    }
+    if (progress < open || progress > close) {
+      if (progress >= 0.98) this._activeSwing = null;
+      return;
+    }
+
+    // Inside the hit window — sample sword position vs the per-frame
+    // target list provided by Game.js via onHit's lookup function.
+    const sword = this.sword;
+    if (!sword) return;
+    sword.updateWorldMatrix(true, false);
+    sword.getWorldPosition(_swordTmp);
+
+    const fired = this.onHit({
+      kind: a.kind,
+      swordPos: _swordTmp,
+      bodyOffset: _bodyTmp.set(0, COMBAT.BODY_Y_OFFSET, 0),
+    });
+    if (fired) a.fired = true;
+  }
+
+  // -------------------------------------------------------------------------
+  // Internal — root-motion absorb (heavy attack drift)
+  // -------------------------------------------------------------------------
+
+  _captureAbsorbStart() {
+    const hip = this.capsule?.character?.vrm?.humanoid?.getRawBoneNode?.('hips');
+    if (!hip) { this._absorbStart = null; return; }
+    hip.updateWorldMatrix(true, false);
+    if (!this._absorbStart) this._absorbStart = new THREE.Vector3();
+    hip.getWorldPosition(this._absorbStart);
+    // Schedule the commit for just before the swing ends — the lock duration
+    // already accounts for clip timeScale, so apply 30 ms before lock-end.
+    const dur = this._computeLockMs('heavyAttack');
+    this._absorbApplyAt = performance.now() + Math.max(0, dur - 30);
+  }
+
+  _commitAbsorb() {
+    this._absorbApplyAt = 0;
+    if (!this._absorbStart) return;
+    const hip = this.capsule?.character?.vrm?.humanoid?.getRawBoneNode?.('hips');
+    if (!hip || !this.capsule?.body) return;
+    hip.updateWorldMatrix(true, false);
+    hip.getWorldPosition(_hipEnd);
+    const dx = _hipEnd.x - this._absorbStart.x;
+    const dz = _hipEnd.z - this._absorbStart.z;
+    this._absorbStart = null;
+    const mag = Math.hypot(dx, dz);
+    if (mag < 0.001 || mag > MAX_ROOT_DRIFT_M) return;
+    // Push the capsule forward by the drift. setNextKinematicTranslation is
+    // the standard knob for kinematic bodies — Rapier will apply on the
+    // next physics step, so the visual stays anchored where the swing
+    // landed instead of snapping back to start.
+    const t = this.capsule.body.translation();
+    this.capsule.body.setNextKinematicTranslation({
+      x: t.x + dx,
+      y: t.y,
+      z: t.z + dz,
+    });
   }
 }

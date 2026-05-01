@@ -1,8 +1,12 @@
 import * as THREE from 'three';
 import { RAPIER } from '../world/Physics.js';
-import { CAPSULE, PLAYER, WORLD, CHARACTER } from '../core/Constants.js';
+import { CAPSULE, PLAYER, WORLD, CHARACTER, COMBAT } from '../core/Constants.js';
 import { GameState } from '../core/GameState.js';
 import { AnimatedCharacter } from './AnimatedCharacter.js';
+
+// Roll burst speed. Hoisted from COMBAT.ROLL_SPEED but with a fallback so
+// the capsule still works in non-combat scenes that don't define it.
+const COMBAT_ROLL_SPEED = COMBAT?.ROLL_SPEED ?? 5.0;
 
 /**
  * Capsule — kinematic Rapier capsule body + Rapier KinematicCharacterController
@@ -145,12 +149,28 @@ export class Capsule {
     this._desired.set(0, 0, 0);
     this._movingHoriz = (inputF !== 0 || inputR !== 0);
     this._sprinting   = sprint;
-    if (this._movingHoriz && this.cameraMode) {
+
+    // Roll burst — when CombatController is locked into a roll, the snapshot
+    // direction takes over the desired velocity at ROLL_SPEED. Mirrors souls-
+    // demo: roll commits, no mid-roll steering, lands ~3.5m forward.
+    const rollDir = (this.combat?._lock === 'roll') ? this.combat._rollDir : null;
+    if (rollDir) {
+      const speed = (COMBAT_ROLL_SPEED ?? 5.0) * Math.sqrt(WORLD.userScale);
+      this._desired.x = rollDir.x * speed * dt;
+      this._desired.z = rollDir.z * speed * dt;
+    } else if (this.combat?._lock && this.combat._lock !== 'block') {
+      // Any other action lock pins horizontal movement to zero — no walking
+      // mid-attack. Block keeps slow-walk by leaving the input-driven branch
+      // below in play.
+    } else if (this._movingHoriz && this.cameraMode) {
       const { forward, right } = this.cameraMode.getMovementBasis();
       this._desired.addScaledVector(forward, inputF);
       this._desired.addScaledVector(right,   inputR);
-      // Speed scales with userScale so big rooms feel right
-      const speed = PLAYER.walkSpeed * WORLD.userScale * (sprint ? PLAYER.sprintMultiplier : 1.0);
+      // Speed scales with userScale so big rooms feel right. Block walks at
+      // ~55% — souls-demo guard speed.
+      const blocking = this.combat?._lock === 'block';
+      const blockMul = blocking ? 0.55 : 1.0;
+      const speed = PLAYER.walkSpeed * WORLD.userScale * (sprint ? PLAYER.sprintMultiplier : 1.0) * blockMul;
       this._desired.multiplyScalar(speed * dt);
     }
 
