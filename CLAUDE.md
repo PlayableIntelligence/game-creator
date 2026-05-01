@@ -29,6 +29,7 @@ skills/
   design-game/SKILL.md     # Visual design audit + improvements
   add-feature/SKILL.md     # Add feature following patterns
   add-assets/SKILL.md      # Replace shapes with pixel art sprites
+  retrodiffusion/SKILL.md  # Retro Diffusion — true pixel art via paid API (sprites, tilesets, animations)
   game-3d-assets/SKILL.md  # 3D model pipeline (GLB download, AssetLoader, animated characters)
   meshyai/SKILL.md         # Meshy AI — generate 3D models from text/images, auto-rig, animate
   add-3d-assets/SKILL.md   # Replace 3D primitives with real GLB models
@@ -48,6 +49,7 @@ scripts/
   example-actions.json     # Example action payloads for iterate-client.js
   find-3d-asset.mjs        # Search & download GLB models (Sketchfab, Poly Haven, Poly.pizza)
   meshy-generate.mjs       # Generate 3D models with Meshy AI (text-to-3d, image-to-3d, rig, animate)
+  retrodiffusion-generate.mjs  # Generate pixel art with Retro Diffusion (generate, img2img, animate, tileset, edit, balance)
 assets/
   characters/              # 2D South Park-style spritesheets (photo-composite)
     manifest.json
