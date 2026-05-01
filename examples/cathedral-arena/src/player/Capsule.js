@@ -7,6 +7,9 @@ import { AnimatedCharacter } from './AnimatedCharacter.js';
 // Roll burst speed. Hoisted from COMBAT.ROLL_SPEED but with a fallback so
 // the capsule still works in non-combat scenes that don't define it.
 const COMBAT_ROLL_SPEED = COMBAT?.ROLL_SPEED ?? 5.0;
+// Heavy-attack lunge speed. Modest — souls-demo's heavy carries the player
+// ~1.5m forward over its swing window; we apply ~3 m/s for ~0.4s.
+const COMBAT_LUNGE_SPEED = 3.0;
 
 /**
  * Capsule — kinematic Rapier capsule body + Rapier KinematicCharacterController
@@ -155,9 +158,18 @@ export class Capsule {
     // demo: roll commits, no mid-roll steering, lands ~3.5m forward.
     const rollDir = (this.combat?._lock === 'roll') ? this.combat._rollDir : null;
     if (rollDir) {
-      const speed = (COMBAT_ROLL_SPEED ?? 5.0) * Math.sqrt(WORLD.userScale);
+      const speed = COMBAT_ROLL_SPEED * Math.sqrt(WORLD.userScale);
       this._desired.x = rollDir.x * speed * dt;
       this._desired.z = rollDir.z * speed * dt;
+    } else if (this.combat?.isLunging?.()) {
+      // Heavy-attack lunge — push forward along current facing through the
+      // controller (so wall slide stays intact). Replaces the earlier
+      // setNextKinematicTranslation absorb that was embedding the capsule
+      // in walls and wedging movement after the swing.
+      const yaw = this.cameraMode ? this.cameraMode.getCapsuleYaw() : 0;
+      const speed = COMBAT_LUNGE_SPEED * Math.sqrt(WORLD.userScale);
+      this._desired.x = Math.sin(yaw) * speed * dt;
+      this._desired.z = Math.cos(yaw) * speed * dt;
     } else if (this.combat?._lock && this.combat._lock !== 'block') {
       // Any other action lock pins horizontal movement to zero — no walking
       // mid-attack. Block keeps slow-walk by leaving the input-driven branch

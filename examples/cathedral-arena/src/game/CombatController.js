@@ -50,12 +50,6 @@ const STAMINA_REGEN_PER_SEC = 35;
 const STAMINA_REGEN_DELAY_MS = 600;
 const STAMINA_MAX = 100;
 
-// Cap on heavy-attack drift absorbed into the capsule — guards against
-// retarget NaNs or accidental teleports.
-const MAX_ROOT_DRIFT_M = 8.0;
-
-const _hipStart = new THREE.Vector3();
-const _hipEnd   = new THREE.Vector3();
 const _bodyTmp  = new THREE.Vector3();
 const _swordTmp = new THREE.Vector3();
 
@@ -94,11 +88,21 @@ export class CombatController {
     // target's body sphere, and fire onHit() once per swing.
     this._activeSwing = null;     // { kind: 'light'|'heavy', action, hitWindow, fired, started }
 
-    // Root-motion absorb for heavy swings. _hipStart captured at swing start;
-    // on swing finish we read end position + nudge the capsule body forward
-    // by the hip drift.
-    this._absorbStart = null;     // Vector3 hip world pos at swing start
-    this._absorbApplyAt = 0;      // performance.now() when to commit the drift
+    // Heavy-attack lunge — Capsule reads `isLunging()` and pushes the body
+    // forward at LUNGE_SPEED through the character controller, so the swing
+    // carries the player into the strike instead of staying rooted. Routed
+    // through computeColliderMovement so walls still slide correctly (an
+    // earlier setNextKinematicTranslation-based absorb embedded the capsule
+    // in geometry next to walls and broke movement after the swing).
+    this._lungeStart = 0;
+    this._lungeUntil = 0;
+  }
+
+  /** True while the heavy-attack lunge window is active. Capsule reads this. */
+  isLunging() {
+    if (this._lock !== 'heavyAttack') return false;
+    const now = performance.now();
+    return now >= this._lungeStart && now < this._lungeUntil;
   }
 
   /** Call once after capsule.character.loaded === true. */
@@ -140,8 +144,14 @@ export class CombatController {
     if (!this._canAct() || !this._drainStamina(STAMINA_COST.heavyAttack)) return false;
     this._enterLock('heavyAttack');
     this._beginSwing('heavy');
-    // Heavy: snapshot hip start so we can absorb the forward drift on finish.
-    this._captureAbsorbStart();
+    // Heavy: schedule a short forward lunge so the swing carries the player
+    // forward through the swing, instead of leaving them rooted (and the
+    // visual then snapping back from clip hip-drift). The lunge runs through
+    // Capsule's character controller — wall slide stays intact.
+    const lockMs = this._computeLockMs('heavyAttack');
+    const now = performance.now();
+    this._lungeStart = now + lockMs * 0.18;        // start ~18% into the clip
+    this._lungeUntil = now + lockMs * 0.55;        // stop ~55% in
     return true;
   }
 
@@ -217,7 +227,8 @@ export class CombatController {
     this.invulnerable = false;
     this._rollDir = null;
     this._activeSwing = null;
-    this._absorbStart = null;
+    this._lungeStart = 0;
+    this._lungeUntil = 0;
     this.stamina = STAMINA_MAX;
     this._setBroadcast('idle');
   }
@@ -260,13 +271,6 @@ export class CombatController {
     // Active swing tracker — sample sword position vs target body sphere
     // every frame inside the hit window, fire onHit() exactly once per swing.
     this._tickSwing();
-
-    // Heavy-attack root-motion absorb — at the moment the swing ends we
-    // commit the hip-bone drift forward into the capsule so the visual body
-    // doesn't snap back to where it started the swing.
-    if (this._absorbApplyAt > 0 && now >= this._absorbApplyAt) {
-      this._commitAbsorb();
-    }
   }
 
   // -------------------------------------------------------------------------
@@ -407,43 +411,4 @@ export class CombatController {
     if (fired) a.fired = true;
   }
 
-  // -------------------------------------------------------------------------
-  // Internal — root-motion absorb (heavy attack drift)
-  // -------------------------------------------------------------------------
-
-  _captureAbsorbStart() {
-    const hip = this.capsule?.character?.vrm?.humanoid?.getRawBoneNode?.('hips');
-    if (!hip) { this._absorbStart = null; return; }
-    hip.updateWorldMatrix(true, false);
-    if (!this._absorbStart) this._absorbStart = new THREE.Vector3();
-    hip.getWorldPosition(this._absorbStart);
-    // Schedule the commit for just before the swing ends — the lock duration
-    // already accounts for clip timeScale, so apply 30 ms before lock-end.
-    const dur = this._computeLockMs('heavyAttack');
-    this._absorbApplyAt = performance.now() + Math.max(0, dur - 30);
-  }
-
-  _commitAbsorb() {
-    this._absorbApplyAt = 0;
-    if (!this._absorbStart) return;
-    const hip = this.capsule?.character?.vrm?.humanoid?.getRawBoneNode?.('hips');
-    if (!hip || !this.capsule?.body) return;
-    hip.updateWorldMatrix(true, false);
-    hip.getWorldPosition(_hipEnd);
-    const dx = _hipEnd.x - this._absorbStart.x;
-    const dz = _hipEnd.z - this._absorbStart.z;
-    this._absorbStart = null;
-    const mag = Math.hypot(dx, dz);
-    if (mag < 0.001 || mag > MAX_ROOT_DRIFT_M) return;
-    // Push the capsule forward by the drift. setNextKinematicTranslation is
-    // the standard knob for kinematic bodies — Rapier will apply on the
-    // next physics step, so the visual stays anchored where the swing
-    // landed instead of snapping back to start.
-    const t = this.capsule.body.translation();
-    this.capsule.body.setNextKinematicTranslation({
-      x: t.x + dx,
-      y: t.y,
-      z: t.z + dz,
-    });
-  }
 }
