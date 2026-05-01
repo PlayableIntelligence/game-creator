@@ -40,6 +40,7 @@ skills/
   qa-game/SKILL.md         # Add Playwright QA tests
   sub-games/SKILL.md       # Sub.games community platform for finding players and supporters
   review-game/SKILL.md     # Code review for architecture + best practices
+  unity-mcp/SKILL.md       # Unity Editor automation via MCP (git submodule → submodules/unity-mcp, beta branch)
 templates/
   phaser-2d/               # Runnable 2D starter project (Phaser 3)
   threejs-3d/              # Runnable 3D starter project (Three.js)
@@ -67,6 +68,7 @@ site/
     package.json             # Express, pg, cors
 submodules/
   playdotfun/              # Git submodule: github.com/OpusGameLabs/skills
+  unity-mcp/               # Git submodule: github.com/CoplayDev/unity-mcp (beta branch, skill at unity-mcp-skill/)
 agents/
   game-creator.md          # Autonomous game creation pipeline with build/visual gates
   game-deploy.md           # Deployment automation (preloads game-deploy skill)
@@ -226,6 +228,7 @@ This separation avoids duplicating domain knowledge across multiple skills. The 
 - Playwright screenshot tests use high pixel tolerance (3000 maxDiffPixels) because parallax clouds scroll between captures.
 - Headless Chromium reports low FPS (~7-9). FPS threshold in tests is set to 5. Use Playwright MCP for accurate FPS measurement.
 - The `playdotfun` skill is a git submodule at `submodules/playdotfun` (repo: `github.com/playdotfun/skills`). The symlink `skills/playdotfun → ../submodules/playdotfun/skills` makes SKILL.md resolve correctly. After cloning, run `git submodule update --init` to pull the submodule.
+- The `unity-mcp` skill is a git submodule at `submodules/unity-mcp` (repo: `github.com/CoplayDev/unity-mcp`, tracked on the `beta` branch). The symlink `skills/unity-mcp → ../submodules/unity-mcp/unity-mcp-skill` makes SKILL.md resolve correctly. After cloning, run `git submodule update --init` to pull the submodule.
 
 ## Site & Template Gallery
 
