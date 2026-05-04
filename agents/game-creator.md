@@ -171,8 +171,8 @@ Parse input to determine engine, game name, and concept.
 Create all pipeline tasks upfront using `TaskCreate`:
 
 1. Scaffold game from template
-2. Add pixel art sprites and backgrounds (2D only; marked N/A for 3D)
-2.5. **[CONDITIONAL]** Public-figure pass via `/meme-game` — include ONLY IF `hasPublicFigures = true`
+2. Add pixel art sprites and backgrounds (2D only; marked N/A for 3D). **MANDATORY for every game** — produces art for every entity in `src/entities/` (player, enemies, items, projectiles, tiles, decorations), including public-figure-named placeholders. This is the only step that creates art for non-public-figure entities; it is never replaced or covered by Task #2.5.
+2.5. **[CONDITIONAL]** Public-figure pass via `/meme-game` — include ONLY IF `hasPublicFigures = true`. **Layers on top of Task #2 — does not replace it. Task #2 must complete first.** Overlays photo-composite spritesheets + expression wiring onto the public-figure-named entities only. Touches nothing else.
 3. Add visual polish (particles, transitions, juice)
 4. Add audio (BGM + SFX)
 5. Monetize with Play.fun (add SDK)
@@ -263,9 +263,9 @@ Launch a `Task` subagent with these instructions:
 >
 > **Public figures — conditional (only when `hasPublicFigures = true`):**
 > - The orchestrator passes `publicFigureSlugs` when Step 0's Public Figure Detection fired (e.g. `['trump', 'altman']`). If empty, ignore this block — generic prompts like "maze-tank" stay generic.
-> - When non-empty, name the entities with the slug (e.g. `class TrumpPlayer extends Phaser.GameObjects.Container`) and use placeholder colors that hint at the figure's identity (Trump: blonde + dark suit + red tie hint; Musk: dark casual; Altman: brown hair + casual button-down; Amodei: dark hair + glasses; Huang: black leather; Zuckerberg: brown hair + plain tee; Pichai: business-casual; Nadella: business-casual + glasses; Karpathy: long dark hair + casual). The Step 1.6 `/meme-game` pass swaps these for photo-composite spritesheets.
+> - When non-empty, name the entities with the slug (e.g. `class TrumpPlayer extends Phaser.GameObjects.Container`) and use placeholder colors that hint at the figure's identity (Trump: blonde + dark suit + red tie hint; Musk: dark casual; Altman: brown hair + casual button-down; Amodei: dark hair + glasses; Huang: black leather; Zuckerberg: brown hair + plain tee; Pichai: business-casual; Nadella: business-casual + glasses; Karpathy: long dark hair + casual). Step 1.5 (pixel art) will refine these placeholders into pixel art; Step 1.6's `/meme-game` pass then overlays photo-composite heads onto them. Both later steps run; this is the entrance point, not the final visual.
 > - Use 12–15% of `GAME.WIDTH` for the player width with caricature proportions (large head ~40–50% of sprite height) so the photo head fits naturally.
-> - Do NOT add `EXPRESSION` constants, expression frames, or photo-composite paths here — that's Step 1.6's job.
+> - Do NOT add `EXPRESSION` constants, expression frames, or photo-composite paths here — that's Step 1.6's job (after Step 1.5 finishes its pixel-art pass).
 >
 > **Iterate after each meaningful change**: The dev server is running on port `<port>`. After each chunk of work (e.g., input wired up, collision added, scoring working), run:
 > ```
@@ -326,6 +326,8 @@ Launch a `Task` subagent:
 > **Engine**: 2D (Phaser 3)
 > **Skill to load**: `game-assets`
 >
+> **MANDATORY OUTPUTS — produce pixel art for EVERY entity in `src/entities/`** (player, enemies, items, projectiles) plus background tiles. This is the only step in the pipeline that does this work; if you skip an entity, the game has no art for it. Public-figure-named entities (e.g. `TrumpPlayer`, `enemies['altman']`) are NOT exceptions — produce pixel art for them too. Step 1.6 will later overlay photo-composite heads onto the public-figure entities only, but it does not run unless this step completes its full output. **Even if `hasPublicFigures = true`, you do all the pixel art here; Step 1.6 is additive (overlay), not a replacement.**
+>
 > Follow the game-assets skill fully:
 > 1. Read all entity files (`src/entities/`) to find `generateTexture()` / `fillCircle()` calls
 > 2. Choose the palette that matches the game's theme (DARK, BRIGHT, or RETRO)
@@ -343,7 +345,7 @@ Launch a `Task` subagent:
 > - Supporting entities (enemies, projectiles, collectibles) sit at Medium (16x16) or Small (12x12) to create clear hierarchy.
 > - Each entity needs a distinct silhouette — never differentiate two entities by fill color alone.
 >
-> **Public-figure photo-composite work is NOT done here.** Even when `hasPublicFigures = true`, this step still produces only generic pixel art. Step 1.6's `/meme-game` pass swaps the public-figure-named placeholder entities for photo-composite spritesheets. Do NOT load `public/assets/characters/`, photo-composite spritesheets, `EXPRESSION` constants, or expression-wiring code here.
+> **Scope guardrails — what you do NOT touch.** Do NOT load `public/assets/characters/`, photo-composite spritesheets, `EXPRESSION` constants, or expression-wiring code. That's owned by `/meme-game` and runs in Step 1.6 as an **overlay** on top of your public-figure-named entities (it does not replace this step). Even when public figures are named in the game concept, your job is generic pixel art for them AND full pixel art for every other entity. The photo-composite head goes on top later — your art for the body and for non-public-figure entities is the canonical art for the game.
 >
 > **Iterate after each meaningful change**: The dev server is running on port `<port>`. After updating sprites/backgrounds, run:
 > ```

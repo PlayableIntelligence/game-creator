@@ -154,8 +154,8 @@ Base tasks (always included):
 
 1. Scaffold game from template
 2. **[CONDITIONAL]** Scaffold gateables — include ONLY IF `MONETIZATION_INTENT != 'none'`. Produces `isEntitled()` hooks and gateable features (skin picker, continue-after-death, etc.) that any monetization layer can activate later.
-3. Add assets: pixel art sprites (2D) or World Labs environments + Meshy AI-generated GLB models + animated characters (3D)
-3.5. **[CONDITIONAL]** Public-figure pass — include ONLY IF the Public Figure Detection step set `hasPublicFigures = true` (either form). Hands off to `/meme-game` to swap detected slugs into photo-composite / caricature characters with expression wiring.
+3. Add assets: pixel art sprites (2D) or World Labs environments + Meshy AI-generated GLB models + animated characters (3D). **MANDATORY for every game** — produces art for every entity in `src/entities/` (player, enemies, items, projectiles, tiles, decorations), including public-figure-named placeholders. This is the only step that creates art for non-public-figure entities; it is never replaced or covered by Task #3.5.
+3.5. **[CONDITIONAL]** Public-figure pass — include ONLY IF the Public Figure Detection step set `hasPublicFigures = true` (either form). **Layers on top of Task #3 — does not replace it. Task #3 must complete first.** Invokes `/meme-game` to overlay photo-composite spritesheets + expression wiring onto the public-figure-named entities only. Touches nothing else; enemies/items/tiles/background still come from Task #3.
 4. Add visual polish (particles, transitions, juice)
 5. Record promo video (autonomous 50 FPS capture)
 6. Add audio (BGM + SFX)
@@ -200,7 +200,14 @@ Mark the gateables task as `completed`.
 
 ### Step 1.5: Add game assets
 
-**Always run this step for both 2D and 3D games.** 2D games get pixel art sprites; 3D games get GLB models and animated characters. **This step does not do photo-composite or expression wiring** — even when `hasPublicFigures = true`, that work is deferred to Step 1.6 below. Step 1.5 produces the visual scaffold that Step 1.6 then swaps to photo-composite where applicable.
+**MANDATORY for every game — never skipped, never replaced by Step 1.6.** Step 1.5 produces pixel art (2D) or GLB models (3D) for **every** entity in `src/entities/` plus background tiles. This is the only step that does this work — no other step covers it.
+
+Step 1.5 and Step 1.6 are **orthogonal**, not sequential alternatives:
+
+- **Step 1.5 owns**: pixel art / GLB for enemies, items, projectiles, environment tiles, decorative elements, AND public-figure-named entity placeholders. Every entity gets art here.
+- **Step 1.6 owns**: replacing only the rendering of public-figure-named entities with photo-composite spritesheets + expression wiring. It does NOT touch enemies, items, tiles, or any non-public-figure entity.
+
+If `hasPublicFigures = true`, Step 1.5 still runs first and still produces art for every entity. Step 1.6 then layers photo-composite heads onto the public-figure entities only. **Skipping Step 1.5 because Step 1.6 will run is a bug** — the non-public-figure entities (enemies, items, tiles, background) have no art created anywhere else in the pipeline.
 
 Mark the assets task as `in_progress`.
 

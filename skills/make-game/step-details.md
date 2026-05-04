@@ -76,8 +76,8 @@ Launch a `Task` subagent with these instructions:
 >
 > When the list is non-empty, lean into the public figures explicitly named in the user's prompt:
 >
-> - Use the public-figure slug as the entity name (e.g. `class TrumpPlayer extends Phaser.GameObjects.Container` or `enemies['altman']`). The slug needs to match because Step 1.6's `/meme-game` pass will look it up and swap the placeholder for a photo-composite spritesheet.
-> - Use placeholder colors and proportions that hint at the public figure's visual identity so the scaffold reads correctly even before Step 1.6 runs:
+> - Use the public-figure slug as the entity name (e.g. `class TrumpPlayer extends Phaser.GameObjects.Container` or `enemies['altman']`). The slug needs to match because Step 1.6's `/meme-game` pass will look it up and overlay a photo-composite head on top of whatever pixel art Step 1.5 produced for that entity. (Step 1.6 only touches the public-figure-named entities; everything else uses Step 1.5's art unchanged.)
+> - Use placeholder colors and proportions that hint at the public figure's visual identity so the scaffold reads correctly even before Step 1.5 (pixel art / GLB) and Step 1.6 (photo-composite overlay) refine it:
 >   - **Trump** — blonde combover hint, dark navy box for suit, red rectangle for tie
 >   - **Musk** — dark casual block (t-shirt or leather jacket tone), short brown hair hint
 >   - **Altman** — short brown hair, neutral casual button-down tone
@@ -90,6 +90,8 @@ Launch a `Task` subagent with these instructions:
 > - Make the named entity prominent — `GAME.WIDTH * 0.12` to `GAME.WIDTH * 0.15` (12–15% of screen width) for player characters, with caricature proportions (large head ~40–50% of sprite height) so Step 1.6's photo-composite head fits naturally on top of it.
 > - Do NOT add `EXPRESSION` constants, expression frames, photo-composite spritesheet loading, or `assets/characters/` paths in this step. That's owned by `/meme-game` and runs in Step 1.6 — don't preempt it.
 > - Do NOT add an Expression Map to `design-brief.md`. Step 1.6's `/meme-game` adds it additively if needed.
+>
+> Note: even when `publicFigureSlugs` is non-empty, **Step 1.5 (pixel art / GLB) still runs between Step 1 and Step 1.6**. Step 1.5 is mandatory for every game — it produces art for the public-figure-named entity placeholders AND for all other entities (enemies, items, tiles). Step 1.6 only overlays photo-composite heads onto the public-figure entities; everything else relies on the Step 1.5 art.
 >
 > When `publicFigureSlugs` is empty, follow only the generic visual-identity rules above. Don't introduce real people, CEOs, or company branding — even if it would be thematically interesting.
 >
@@ -282,11 +284,18 @@ Mark the gateables task as `completed`.
 
 Mark the assets task as `in_progress`.
 
-### Photo-composite work is NOT part of Step 1.5
+### Step 1.5 is mandatory and runs for every game
 
-Even when `hasPublicFigures = true`, this step still produces only generic pixel-art / GLB scaffolding. It does not load photo-composite character spritesheets, does not wire expression frames, and does not run the character-library / WebSearch / `build-character.mjs` pipeline. All of that lives in `/meme-game`, which the orchestrator invokes in Step 1.6 immediately after this step's verification protocol passes.
+**This step is not optional and is not replaced by Step 1.6 even when `hasPublicFigures = true`.** Step 1.5 produces pixel art (2D) or GLB models (3D) for **every** entity in `src/entities/` plus background tiles. The non-public-figure entities (enemies, items, projectiles, tiles, decorations) get their visuals **nowhere else** — if Step 1.5 is skipped, they have no art at all.
 
-The Step 1 subagent has already named the player and named entities using public-figure slugs and given them placeholder colors that hint at the figure's identity (see Step 1's conditional block). Step 1.5 just upgrades those placeholders to recognizable pixel art / models. Step 1.6 then swaps the named-entity placeholders for photo-composite spritesheets when applicable.
+Step 1.5 and Step 1.6 are orthogonal:
+
+- **Step 1.5 (this step)**: pixel art / GLB for all entities, including public-figure-named entity placeholders. Mandatory.
+- **Step 1.6 (`/meme-game`)**: overlays photo-composite spritesheets + expression wiring onto the public-figure-named entities only. Touches nothing else. Conditional on `hasPublicFigures`.
+
+What Step 1.5 does NOT do: load photo-composite spritesheets, wire expression frames, or run the character-library / WebSearch / `build-character.mjs` pipeline. That work lives in `/meme-game` (Step 1.6).
+
+The Step 1 subagent has already named the player and named entities using public-figure slugs and given them placeholder colors that hint at the figure's identity (see Step 1's conditional block). Your job in Step 1.5 is to upgrade ALL of those placeholders — public-figure-named and not — to recognizable pixel art / models. Step 1.6 then overlays photo-composite heads onto the public-figure-named entities. Until Step 1.6 runs, the public-figure-named entity displays your pixel art (which is also the Tier-5 fallback if `/meme-game`'s photo lookup fails).
 
 ### 2D Subagent (Phaser 3)
 
@@ -297,6 +306,8 @@ Launch a `Task` subagent with these instructions:
 > **Project path**: `<project-dir>`
 > **Engine**: 2D (Phaser 3)
 > **Skill to load**: `game-assets`
+>
+> **MANDATORY OUTPUTS — produce pixel art for EVERY entity in `src/entities/`** (player, enemies, items, projectiles) plus background tiles. This is the only step in the pipeline that does this work; if you skip an entity, the game has no art for it. Public-figure-named entities (e.g. `TrumpPlayer`, `enemies['altman']`) are NOT exceptions — produce pixel art for them too. Step 1.6 will later overlay photo-composite heads onto the public-figure entities only, but it does not run unless this step completes its full output. **Even if `hasPublicFigures = true`, you do all the pixel art here; Step 1.6 is additive, not a replacement.**
 >
 > **Read `progress.md`** at the project root before starting. It describes the game's entities, events, constants, and scoring system from Step 1.
 >
@@ -318,12 +329,14 @@ Launch a `Task` subagent with these instructions:
 > - Each entity needs a distinct silhouette — never differentiate two entities by fill color alone.
 >
 > **Self-audit before returning:**
+> - Did you produce pixel art for **every** entity in `src/entities/`, including any named after a public figure? (Count the entity files; count your sprite files. They should match.)
 > - Does every entity use `renderPixelArt()` or `renderSpriteSheet()` (no raw `fillCircle()` left)?
 > - Are sprites readable at game scale — bold silhouettes, 2px outline on small sprites, palette indices used consistently?
 > - Are physics bodies adjusted to match new sprite dimensions?
 > - Is any `scene.add.text()` being used as the primary visual identity for an entity? If so, remove it and add a real sprite.
 >
-> **Do NOT** load `public/assets/characters/`, photo-composite spritesheets, `EXPRESSION` constants, or expression-wiring code. That's owned by `/meme-game` and runs in Step 1.6 — it will swap public-figure entities into the spots you scaffolded here. Even when public figures are named in the game concept, your job is generic pixel art with caricature proportions; the photo-composite head goes on top later.
+> **Scope guardrails — what you do NOT touch:**
+> - Do NOT load `public/assets/characters/`, photo-composite spritesheets, `EXPRESSION` constants, or expression-wiring code. That's owned by `/meme-game` and runs in Step 1.6 as an **overlay** on top of your public-figure-named entities (it does not replace this step). Even when public figures are named in the game concept, your job is generic pixel art with caricature proportions for them, AND full pixel art for every other entity. The photo-composite head goes on top later — your art for the body and for non-public-figure entities is the canonical art for the game.
 >
 > **After completing your work**, append a `## Step 1.5: Assets` section to `progress.md` with: palette used, sprites created, any dimension changes to entities.
 >
@@ -399,7 +412,7 @@ After this completes you have 3 files per character:
 
 For multiple characters, generate each with a distinct description for visual variety (e.g. `knight` vs `goblin`, `astronaut` vs `alien`). Run generate->rig in parallel for different characters to save time.
 
-**Note on public figures:** The Step 1.6 `/meme-game` pass owns caricature Meshy generation for named real people (Trump, Musk, Altman, etc. — see `meme-game/3d-public-figures.md`). In Step 1.5, when `hasPublicFigures = true`, generate generic humanoid placeholders for the named slots — `"a stylized human in a dark suit"` for the player slot named `trump`, etc. — so the scene composes correctly. Step 1.6 then replaces those placeholders with caricature-specific Meshy generations. When `hasPublicFigures = false`, ignore real people entirely and stick to the game concept's generic archetypes (fantasy classes, sci-fi roles, animals, abstract shapes).
+**Note on public figures (still mandatory in Step 1.5):** The Step 1.6 `/meme-game` pass owns caricature Meshy generation for named real people (Trump, Musk, Altman, etc. — see `meme-game/3d-public-figures.md`). That does NOT mean Step 1.5 can skip them. In Step 1.5, when `hasPublicFigures = true`, you **still** generate or load a generic humanoid placeholder for each named slot — `"a stylized human in a dark suit"` for the player slot named `trump`, etc. — so the scene composes correctly between Step 1.5 and Step 1.6, and so the world objects (props, items, scenery) for non-public-figure entities still get models. Step 1.6 then replaces only the public-figure character slots with caricature-specific Meshy generations; everything else relies on Step 1.5's models. When `hasPublicFigures = false`, ignore real people entirely and stick to the game concept's generic archetypes (fantasy classes, sci-fi roles, animals, abstract shapes).
 
 **Tier 2 — Pre-built in `assets/3d-characters/`** (Meshy unavailable): Check `manifest.json` for a name/theme match. Copy the GLB:
 ```bash
@@ -457,6 +470,8 @@ node <plugin-root>/scripts/find-3d-asset.mjs --query "<entity description>" \
 > **Project path**: `<project-dir>`
 > **Engine**: 3D (Three.js)
 > **Skill to load**: `game-3d-assets` and `meshyai`
+>
+> **MANDATORY OUTPUTS — load and wire GLB models for EVERY entity in `src/entities/`** plus world props referenced in `design-brief.md`. This is the only step that does this work; if you skip an entity, the scene has no model for it. Public-figure-named entity slots (e.g. `trump`, `altman`) are NOT exceptions — load a generic humanoid placeholder for them so the scene composes correctly. Step 1.6 will later replace those specific slots with caricature-specific Meshy generations, but it does not run unless this step completes its full output. **Even if `hasPublicFigures = true`, you load all the models here; Step 1.6 is additive (replaces public-figure slots only), not a replacement for this step.**
 >
 > **Read `progress.md`** at the project root before starting. It lists generated/downloaded models, character details, and any World Labs environment.
 >
