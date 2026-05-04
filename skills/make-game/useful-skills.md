@@ -33,9 +33,9 @@ Skills that apply regardless of engine, renderer, or platform. Safe to install o
 
 ---
 
-## Stack: 2D Browser Games (Phaser 3 / JS)
+## Stack: 2D Browser Games (Phaser / JS)
 
-Install when `docs/tech.md` calls for Phaser 3 or any 2D HTML5 canvas game.
+Install when `docs/tech.md` calls for Phaser or any 2D HTML5 canvas game.
 
 - **phaser** _(reference)_ — Phaser 3 patterns: scenes, lifecycle, game objects, physics, UI, performance.
 - **add-assets** — Replace geometric shapes with pixel art sprites (recognizable characters, enemies, items).
