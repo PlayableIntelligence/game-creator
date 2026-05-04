@@ -1,6 +1,6 @@
 ---
 name: game-creator-plus
-description: Premium tier — generate playable splat-based 3D game levels with the Cathedral Pattern (Marble 1.1 Plus + image-guided + prompt-augmented + fake-floor + lightness bake + splat fog). Pay-as-you-go via OpenGameProtocol Plus credits — no subscriptions, passthrough pricing, talk-to-Claude topups. Use when the user says "make a splat game", "generate a level", "use plus", "premium game", or wants the full cathedral-quality pipeline. Free tier is `make-game` + `worldlabs` skills; this skill is the polished production path.
+description: Premium tier — generate playable splat-based 3D game levels with the Cathedral Pattern (Marble 1.1 Plus + image-guided + prompt-augmented + fake-floor + lightness bake + splat fog). Pay-as-you-go via OpenGameProtocol Plus credits — no subscriptions, passthrough pricing; Claude prints a one-click Stripe Checkout URL when you need to top up. Use when the user says "make a splat game", "generate a level", "use plus", "premium game", or wants the full cathedral-quality pipeline. Free tier is `make-game` + `worldlabs` skills; this skill is the polished production path.
 argument-hint: "[scene description] [--image path/url]"
 license: MIT
 compatibility: Requires GCPLUS_TOKEN (proxy mode, billed) OR WORLDLABS_API_KEY + MESHY_API_KEY (BYO-key mode, free) environment variables. Internet access required.
@@ -23,7 +23,7 @@ This is the **product** of OpenGameProtocol Plus. The free `make-game` / `worldl
 | [cathedral-pattern.md](./cathedral-pattern.md) | The prompting + reference-image recipe. Why "mostly empty interior" + image gives playable rooms. Worked examples. |
 | [splat-techniques.md](./splat-techniques.md) | Fake floor, lightness bake, splat fog, mirror — the post-generation pipeline that makes splats playable. |
 | [perf-playbook.md](./perf-playbook.md) | Performance reference. The 12.8ms `composer.setPixelRatio(1)` win, character tri counts, Spark 2.0 settings, frame budget targets, URL bisection guide. |
-| [credit-flow.md](./credit-flow.md) | How users add credits: talk-to-Claude → Stripe Checkout link → webhook credits account. Pricing table. |
+| [credit-flow.md](./credit-flow.md) | How users add credits: Claude prints a Stripe Checkout link → user clicks → webhook credits account. Pricing table. |
 | [proxy-protocol.md](./proxy-protocol.md) | Wire format for the Plus proxy: signup, balance, marble/meshy passthrough, asset mirroring. |
 
 ## When to Use
@@ -34,7 +34,7 @@ Use this skill when the user wants any of:
 - **Marble 1.1 Plus** specifically (auto-expanding worlds, biggest model)
 - The **cathedral pattern** — large, walkable, photorealistic rooms ready for boss fights
 - Production-quality output ready to monetize on Play.fun / sub.games
-- Pay-as-you-go billing (no subscription) — talk-to-Claude credit topups
+- Pay-as-you-go billing (no subscription) — Claude prints a one-click Stripe Checkout URL for credit top-ups
 
 Do NOT use this skill for:
 - 2D games — use `phaser` / `make-game` instead
@@ -114,9 +114,9 @@ The skill itself is identical in both modes. Only the network destination change
 │      - Forces model=marble-1.1-plus                         │
 │      - Uploads image, submits generation                     │
 │      - Polls 3–8 min, downloads SPZ + collider + meta        │
-│ 4. plus-bake-lightness.mjs (optional, +30s):                 │
-│      - Headless Chrome boots template                        │
-│      - Bakes 1m grid → public/lightness.json                 │
+│ 4. Lightness bake in-browser (optional, +30s):               │
+│      - Append ?bake=lightness to the running template URL    │
+│      - JSON file downloads → drop next to splat              │
 │ 5. Template wired up:                                        │
 │      - WorldLoader applies splat transform (Y-flip + scale)  │
 │      - peekColliderInfo finds floor Y from bbox raycast      │
@@ -162,12 +162,15 @@ The skill itself is identical in both modes. Only the network destination change
 
    Recommended for any scene with PBR characters/props. Skip if pure-splat with no Meshy characters.
 
-   ```bash
-   node scripts/plus-bake-lightness.mjs \
-     --slug <name> \
-     --port 5173 \
-     --output public/lightness.json
+   The bake runs in-browser. With the template's dev server running:
+
    ```
+   open http://localhost:5173/?bake=lightness
+   ```
+
+   The page samples a 1 m grid through the world and triggers a download
+   of `<slug>-lightness.json`. Move it next to the splat and the template's
+   `LightnessSampler` will pick it up on next load.
 
 5. **Wire up the template**
 
@@ -191,13 +194,18 @@ See [credit-flow.md](./credit-flow.md) for full detail. Summary:
 
 | Operation | Cost (passthrough) | Plus credits | Time |
 |-----------|---|---|---|
-| Marble 1.1 Plus world (base) | $1.20 | 150 cr | 3–8 min |
-| Marble 1.1 Plus per dynamic cube | +$0.24 | +30 cr | +30s/cube |
-| Marble Draft (1.1-mini) | $0.12 | 15 cr | ~30s |
-| Meshy text-to-3D | $0.40 | 50 cr | 2–4 min |
-| Meshy image-to-3D | $0.40 | 50 cr | 2–4 min |
-| Meshy auto-rig + animations | $0.30 | 40 cr | 2–3 min |
+| Marble 1.1 Plus — text → world | $1.26–$2.46 | 148–288 cr (preauth max, settle actual) | 3–8 min |
+| Marble 1.1 Plus — image → world | $1.20–$2.40 | 140–281 cr (preauth max, settle actual) | 3–8 min |
+| Marble 1.1 / 1.0 (fixed) | $1.20–$1.26 | 140–150 cr | 3–8 min |
+| Marble Draft (1.0-draft) | $0.12–$0.18 | 14–22 cr | ~30s |
+| Meshy text-to-3D (preview) | $0.40 | 47 cr | 2–4 min |
+| Meshy text-to-3D (refine) | $0.20 | 23 cr | 1–3 min |
+| Meshy image-to-3D | $0.40–$0.60 | 47–70 cr | 2–4 min |
+| Meshy rigging | $0.10 | 12 cr | 1 min |
+| Meshy animation per clip | $0.06 | 7 cr | 30s |
 | Lightness bake | $0 (client-side) | 0 cr | 30s |
+
+Marble 1.1 Plus is variable-cost: pre-debit at the worst-case ceiling, settle to actual after the operation completes. Backend reconciler refunds the delta automatically. See [credit-flow.md](./credit-flow.md) for the full breakdown.
 
 **1 Plus-credit = $0.01.** Top-ups: $5 / $20 / $50 / $100. Stripe fees baked in (~3% + $0.30 minimum).
 
@@ -211,7 +219,7 @@ make-game (free)              game-creator-plus (premium)
 1. scaffold                ─→ 1. scaffold (templates/plus-template)
 2. design                  ─→ 2. design
 3. plus-generate-world     ─→ 3. cathedral-prompt + marble-1.1-plus
-4. plus-bake-lightness     ─→ 4. lightness grid
+4. ?bake=lightness         ─→ 4. lightness grid
 5. game-assets (Meshy)     ─→ 5. game-assets (Meshy, billed via proxy)
 6. game-audio              ─→ 6. game-audio
 7. qa-game                 ─→ 7. qa-game

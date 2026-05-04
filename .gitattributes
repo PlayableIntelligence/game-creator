@@ -3,6 +3,12 @@
 *.gltf filter=lfs diff=lfs merge=lfs -text
 *.fbx filter=lfs diff=lfs merge=lfs -text
 *.obj filter=lfs diff=lfs merge=lfs -text
+*.vrm filter=lfs diff=lfs merge=lfs -text
+
+# Gaussian splat scene files — Marble outputs world.spz, world-Nk.spz tiers.
+# Full-res tier is typically 30–80 MB; 100k/500k tiers are small enough
+# to ship inline but everything goes through LFS for uniformity.
+*.spz filter=lfs diff=lfs merge=lfs -text
 
 # Images (large game assets only — small thumbnails are fine in git)
 character-library/**/*.jpg filter=lfs diff=lfs merge=lfs -text

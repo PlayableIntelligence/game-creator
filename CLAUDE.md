@@ -288,7 +288,7 @@ Premium tier that adds **AI-generated 3D worlds** (Marble Labs Gaussian splats) 
 
 1. **Skill** at `skills/game-creator-plus/` — cathedral pattern, splat techniques, perf playbook, credit flow, proxy protocol. Triggered when user wants playable splat-based 3D levels.
 2. **Template** at `templates/plus-template/` — runtime that renders Marble splat worlds with Three.js + SparkJS 2.0, Rapier kinematic capsule + character controller, fake-floor physics, lightness bake, splat-fog distance fade, spring-arm camera. Supports GLB and VRM characters; Meshy assets drop in via `AssetLoader.spawnAsset()`.
-3. **Backend** (private repo) — NestJS 11 + TypeORM 0.3 + Postgres. Hosted at `gamecreator.dev`. Bearer-token auth, atomic credit ledger (preauth/settle/refund-delta for variable-cost jobs), reconciliation poller (30s cron), asset mirror worker (downloads upstream → local storage to outlive Meshy's 3-day TTL), admin metrics + alert cron, single-page admin dashboard at `/admin`, user usage page at `/me`, SSE proxy for live progress. Stripe Checkout with full webhook + refund + dispute handling, atomic event idempotency, dispute claw-back. **Source NOT in this repo** — see private `OpusGameLabs/plus-backend` (TBD).
+3. **Backend** (private repo) — NestJS 11 + TypeORM 0.3 + Postgres. Hosted at `gamecreator.dev`. Bearer-token auth, atomic credit ledger (preauth/settle/refund-delta for variable-cost jobs), reconciliation poller (30s cron), asset mirror worker (downloads upstream → local storage to outlive Meshy's 3-day TTL), admin metrics + alert cron, single-page admin dashboard at `/admin`, user usage page at `/me`, SSE proxy for live progress. Stripe Checkout with full webhook + refund + dispute handling, atomic event idempotency, dispute claw-back. **Source NOT in this repo** — see private `OpusGameLabs/plus-backend`.
 
 **Pricing model** (see `skills/game-creator-plus/credit-flow.md`):
 - 1 Plus credit = $0.01 USD; topup tiers $5/$20/$50/$100
@@ -303,12 +303,9 @@ Premium tier that adds **AI-generated 3D worlds** (Marble Labs Gaussian splats) 
 
 **Tests**: 78 (40 unit + 38 e2e), live in the private backend repo. E2E uses `plus_test` Postgres database (drops + recreates per run), nock for HTTP mocking, jest spies for Stripe SDK calls.
 
-**Production checklist** (not yet shipped):
-- Deploy backend to Railway with Postgres add-on
-- Rotate Stripe sk_live_ key; register webhook at dashboard.stripe.com/webhooks pointing at production URL
-- Replace local-disk asset serving (`JobAssetsController`) with S3/R2 + signed URLs
-- SDK upgrade to `stripe@22.x` to unlock `automatic_payment_methods` (Apple Pay, Google Pay, Klarna)
-- IP allowlist Stripe webhook IPs at WAF as defense-in-depth
+Production-deployment notes, sk_live key rotation, WAF rules, and SDK-upgrade
+procedures live with the backend in the private `OpusGameLabs/plus-backend`
+repo — they don't belong in this public-facing CLAUDE.md.
 
 ## Troubleshooting
 

@@ -224,8 +224,14 @@ renderer.setAnimationLoop(() => {
 window.render_game_to_text = function () {
   const bbox = GameState.worldBbox;
   const p = GameState.player;
+  // CLAUDE.md rule 6: include coordinate system + mode + score + player.
+  // Coords are right-handed Three.js: +X right, +Y up, +Z toward camera.
+  // Game has no win/lose state by default — splat-walking is open-ended.
+  // Templates that add objectives override `mode` and `score`.
   return JSON.stringify({
-    step: 5,
+    coords: 'three-rh: +X right, +Y up, +Z toward camera (player faces -Z by default)',
+    mode: GameState.bootError ? 'boot_error' : (GameState.worldLoaded ? 'playing' : 'loading'),
+    score: GameState.score ?? 0,
     booted: GameState.booted,
     error: GameState.bootError,
     world: GameState.worldMeta?.slug || null,
@@ -242,6 +248,9 @@ window.render_game_to_text = function () {
       x: p.position.x.toFixed(2),
       y: p.position.y.toFixed(2),
       z: p.position.z.toFixed(2),
+      vx: p.velocity?.x?.toFixed?.(2) ?? '0',
+      vy: p.velocity?.y?.toFixed?.(2) ?? '0',
+      vz: p.velocity?.z?.toFixed?.(2) ?? '0',
       grounded: p.grounded,
     } : null,
   }, null, 2);

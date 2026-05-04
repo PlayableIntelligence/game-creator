@@ -679,10 +679,11 @@ async function generate() {
 
   // Suggest next steps
   console.log(`Next:`);
-  console.log(`  1. Bake lightness grid (optional, ~30s):`);
-  console.log(`       node scripts/plus-bake-lightness.mjs --slug ${fileSlug}`);
-  console.log(`  2. Wire up template (templates/plus-template/) and run:`);
+  console.log(`  1. Wire up template (templates/plus-template/) and run:`);
   console.log(`       cd <your-game> && npm run dev`);
+  console.log(`  2. Optional: bake the lightness grid for cohesive lighting.`);
+  console.log(`       In the running template, append ?bake=lightness to the URL`);
+  console.log(`       and a JSON file will download. Drop it next to your splat.`);
   console.log(``);
 }
 

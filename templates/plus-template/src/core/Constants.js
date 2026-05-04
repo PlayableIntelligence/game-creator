@@ -119,13 +119,16 @@ export const SPLAT = {
    * Quality strategy:
    *   'mini'        — load 100k tier only (mobile default — 1.4 MB)
    *   'low'         — load 500k tier only (desktop default — 7.8 MB, looks great)
-   *   'full'        — load full tier directly (67 MB, slow boot, no swap)
-   *   'progressive' — load 500k first, swap to full in background. The swap
-   *                    causes a multi-second main-thread stutter from Spark's
-   *                    LoD-tree build on 4.32M splats, plus an apparent
-   *                    "downgrade" while the LoD ranker re-picks splats from
-   *                    the larger source. Off by default — opt in for hero
-   *                    shots / cinematic recordings.
+   *   'full'        — load full tier directly (typically ~30–80 MB depending
+   *                   on the world; not shipped with the demo to keep repo
+   *                   size sane — generate your own world via
+   *                   plus-generate-world.mjs to populate it)
+   *   'progressive' — load 500k first, swap to full in background (same
+   *                   caveat). The swap causes a multi-second main-thread
+   *                   stutter from Spark's LoD-tree build on 4.32M splats,
+   *                   plus an apparent "downgrade" while the LoD ranker
+   *                   re-picks splats from the larger source. Off by
+   *                   default — opt in for hero shots / cinematic recordings.
    */
   quality: params.get('quality') ?? (DEVICE.isMobile ? 'mini' : 'low'),
 

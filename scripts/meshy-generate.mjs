@@ -113,12 +113,17 @@ const API_BASE = useProxy ? `${GCPLUS_PROXY}/v1/meshy` : DIRECT_API_BASE;
 
 /**
  * Map an upstream Meshy path to the Plus proxy path. Direct mode keeps the
- * full /v2/<endpoint> structure; the proxy strips /v2 since its versioning
- * is at /v1/meshy/<endpoint>.
+ * full version-prefixed path. The proxy strips the leading /v1 or /v2
+ * since its versioning is at /v1/meshy/<endpoint>. Meshy uses /v2 for
+ * text-to-3d and /v1 for image-to-3d, rigging, animations, retexture,
+ * remesh — all need the prefix stripped in proxy mode.
+ *
+ * PR-21-AUDIT 1.2: prior implementation stripped only /v2, so /v1
+ * endpoints resolved to /v1/meshy/v1/image-to-3d etc. and silently 404'd.
  */
 function resolvePath(path) {
   if (!useProxy) return path;
-  return path.replace(/^\/v2/, '');
+  return path.replace(/^\/v[12]/, '');
 }
 
 function requireApiKey() {
@@ -192,9 +197,11 @@ function headers() {
 async function apiPost(path, body) {
   const url = `${API_BASE}${resolvePath(path)}`;
   const reqHeaders = headers();
-  // Plus proxy honors Idempotency-Key for billed endpoints.
-  if (useProxy && (path.includes('/v2/text-to-3d') || path.includes('/v2/image-to-3d') ||
-                   path.includes('/v2/rigging')   || path.includes('/v2/animations'))) {
+  // Plus proxy honors Idempotency-Key for billed endpoints. Match either
+  // /v1 or /v2 prefix — see resolvePath comment for the version split.
+  // PR-21-AUDIT 1.2: prior version only matched /v2, so /v1/* retries
+  // could double-bill.
+  if (useProxy && /\/v[12]\/(text-to-3d|image-to-3d|rigging|animations|retexture|remesh)\b/.test(path)) {
     reqHeaders['Idempotency-Key'] = randomUUID();
   }
   const res = await fetch(url, {

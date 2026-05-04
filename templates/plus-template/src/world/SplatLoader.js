@@ -52,10 +52,22 @@ export async function loadSplat(scene, transform, onMesh) {
       break;
     }
     case 'full': {
-      active = await makeMesh(WORLD.paths.full);
-      scene.add(active);
-      onMesh?.(active);
-      console.info('[SplatLoader] full tier loaded directly');
+      // Demo doesn't ship the full tier; if missing, fall back to 500k
+      // rather than blowing up. User-generated worlds will have it.
+      try {
+        active = await makeMesh(WORLD.paths.full);
+        scene.add(active);
+        onMesh?.(active);
+        console.info('[SplatLoader] full tier loaded directly');
+      } catch (err) {
+        console.warn(
+          '[SplatLoader] full tier missing, falling back to 500k —',
+          err?.message ?? err,
+        );
+        active = await makeMesh(WORLD.paths.low);
+        scene.add(active);
+        onMesh?.(active);
+      }
       break;
     }
     case 'progressive':
