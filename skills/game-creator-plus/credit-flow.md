@@ -71,13 +71,16 @@ Claude: I'll use game-creator-plus for that. First time? Let me set up your
 
 User: [runs command]
         → Receives token, saved to ~/.gcplus/token
-        → Browser opens https://plus.gamecreator.dev/welcome?token=<one-time>
-        → Welcome page shows free $5 credit, optional $20 topup button
+        → 500cr starter grant lands immediately on the ledger
+        → Response includes a first_topup_url (Stripe Checkout link)
+          for an optional $20 topup
+        → Claude prints the URL; user clicks it
 
-User: ok, $20 topup. [clicks Stripe Checkout]
+User: [clicks Stripe Checkout]
         → Pays $20.00 via Stripe
         → Stripe webhook → ledger += 2000 credits
-        → Welcome page polls /v1/balance, shows "2500 credits ready"
+        → Browser lands on /topup/success ("payment received")
+        → Terminal-side plus-auth.mjs polls /v1/balance until +2000 lands
 
 Claude: You're set — 2500 credits. Now let's design the dungeon...
 ```
@@ -140,10 +143,14 @@ Content-Type: application/json
   "token": "gcplus_live_abc123...",
   "user_id": "u_xyz",
   "balance_credits": 500,
-  "welcome_url": "https://plus.gamecreator.dev/welcome?token=<one-time>",
-  "first_topup_url": "https://plus.gamecreator.dev/topup?session=<id>"
+  "welcome_url": null,
+  "first_topup_url": "https://checkout.stripe.com/c/pay/cs_..."
 }
 ```
+
+`welcome_url` is currently always `null` (a `/welcome` HTML page is
+roadmap). Use `first_topup_url` directly — it's a real Stripe Checkout
+link the user can click to add more credits.
 
 ### Topup (returns Stripe Checkout URL)
 

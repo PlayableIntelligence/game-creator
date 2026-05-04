@@ -44,32 +44,19 @@ Content-Type: application/json
   "token": "gcplus_live_abc...",
   "user_id": "u_xyz",
   "balance_credits": 500,
-  "welcome_url": "https://plus.gamecreator.dev/welcome?token=<one-time-magic>",
-  "first_topup_url": "https://plus.gamecreator.dev/topup?session=<id>"
+  "welcome_url": null,
+  "first_topup_url": "https://checkout.stripe.com/c/pay/cs_..."
 }
 ```
 
+Notes on the response:
+- `balance_credits: 500` is the **starter grant** — every new user gets $5 of credits to try the product.
+- `first_topup_url` is a freshly-minted Stripe Checkout link for the default $20 tier. `null` when the backend is configured without Stripe (test environments).
+- `welcome_url` is currently always `null` — a `/welcome` HTML landing page is roadmap; for now use `first_topup_url` directly.
+
 Errors:
-- `409 Conflict` if email already registered (suggest `/v1/login` instead)
-- `429 Too Many Requests` rate-limited (10 signups/IP/hour)
-
-### `POST /v1/login`
-
-Public. Existing user requesting a new bearer token (e.g., lost their token, switching machines). Sends a magic link to email.
-
-```http
-POST /v1/login
-Content-Type: application/json
-
-{ "email": "user@example.com" }
-```
-
-```http
-HTTP/1.1 200 OK
-{ "magic_url_sent": true }
-```
-
-The user opens the email, clicks the link, receives a fresh token via the welcome page.
+- `409 Conflict` if email already registered. **Magic-link login is not yet implemented**; users who lose their token must contact support to rotate it.
+- `429 Too Many Requests` rate-limited (per-IP).
 
 ### `GET /v1/balance`
 
@@ -321,9 +308,12 @@ HTTP/1.1 200 OK
 { "token": "gcplus_live_<new>", "rotated_at": "..." }
 ```
 
-### `DELETE /v1/account`
+### `DELETE /v1/account` *(roadmap — not yet implemented)*
 
-Authenticated. Deletes user. Refunds all unused credits to original payment method (Stripe). Purges assets after 30 days. GDPR-compliant.
+Authenticated. Will delete the user, refund unused credits to the original
+payment method via Stripe, and purge assets after 30 days (GDPR-compliant).
+Currently not implemented; for account deletion / refund requests, contact
+support and they'll process via the Stripe dashboard + admin grant.
 
 ## Error envelope
 
