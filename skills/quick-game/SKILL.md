@@ -1,6 +1,6 @@
 ---
 name: quick-game
-description: Rapidly scaffold and implement a playable game — no assets, design, audio, deploy, or monetize. Get something on screen fast. Use when the user says "quick game", "fast prototype", "just get something playable", or wants a game without the full pipeline. For the complete pipeline, use make-game instead. Do NOT use for production games (use make-game for the full pipeline).
+description: Rapidly scaffold and implement a playable game — no assets, design, audio, deploy, or monetize. Get something on screen fast. Use when the user says "quick game", "fast prototype", "just get something playable", or wants a game without the full pipeline. For the complete one-shot pipeline (deploy + monetize), use /viral-game instead. For a milestone-driven project, use /make-game. Do NOT use for production games.
 argument-hint: "[2d|3d] [game-name] OR [tweet-url]"
 license: MIT
 metadata:
@@ -17,7 +17,7 @@ metadata:
 
 # Quick Game (Fast Prototype)
 
-Build a playable game prototype as fast as possible. This is `/make-game` without the polish — just scaffold + implement the core loop. Get something on screen, then incrementally add layers with `/add-assets`, `/design-game`, `/add-audio`, `/game-deploy`, and `/monetize-game`.
+Build a playable game prototype as fast as possible. This is `/viral-game` without the polish — just scaffold + implement the core loop. Get something on screen, then incrementally add layers with `/add-assets`, `/design-game`, `/add-audio`, `/game-deploy`, and `/monetize-game`.
 
 **What you'll get:**
 1. A scaffolded game project with clean architecture
@@ -143,4 +143,4 @@ Tell the user:
 > - `/game-deploy` — deploy to the web
 > - `/monetize-game` — add Play.fun integration
 >
-> Or run `/make-game` next time for the full pipeline.
+> Or run `/viral-game` next time for the full one-shot pipeline (assets, polish, deploy, monetize all in one go).

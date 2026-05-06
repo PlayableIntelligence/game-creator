@@ -56,7 +56,7 @@ The user wants to add gateables to the game at `$ARGUMENTS` (or the current dire
 - Read `package.json` — detect engine (`phaser` → Phaser, `three` → Three.js).
 - Read `src/core/Constants.js`, `src/core/EventBus.js`, `src/core/GameState.js`.
 - Read `src/main.js` to find `window.render_game_to_text()` and the orchestrator entry point.
-- Read `progress.md` at the project root if it exists (written by the `/make-game` pipeline).
+- Read `progress.md` at the project root if it exists (written by the `/viral-game` pipeline).
 - Read the primary scene/system files to understand the core loop.
 
 Then tell the creator one sentence:
@@ -77,7 +77,7 @@ Anchor picks in the principles. Reject any suggestion that gates the core loop. 
 
 **In interactive mode (user-invoked skill):** wait for creator confirmation before implementing. Let them drop, swap, or tweak suggestions.
 
-**In pipeline mode (called from `/make-game` Step 1.25):** auto-pick the top 2–3 and continue without prompting.
+**In pipeline mode (called from `/viral-game` Step 1.25):** auto-pick the top 2–3 and continue without prompting.
 
 ### Step 3: Implement
 

@@ -87,4 +87,6 @@ Tell the user:
 
 > Your game now has music and sound effects! Next, run `/game-creator:qa-game` to add automated tests that verify your game boots correctly, scenes transition properly, scoring works, and visuals haven't broken.
 >
-> **Pipeline progress:** ~~/make-game~~ → ~~/design-game~~ → ~~/add-audio~~ → `/qa-game` → `/review-game`
+> **Pipeline progress:** ~~/viral-game~~ → ~~/design-game~~ → ~~/add-audio~~ → `/qa-game` → `/review-game`
+>
+> *(This is the `/viral-game` one-shot pipeline — not the `/make-game` multi-session, milestone-driven workflow.)*

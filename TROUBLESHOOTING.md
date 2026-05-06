@@ -10,7 +10,7 @@ Common issues and fixes for the game-creator plugin.
 
 **Fixes**:
 1. Check the skill is installed: `npx skills list` should show `game-creator`
-2. Use the explicit slash command: `/game-creator:make-game 2d my-game`
+2. Use the explicit slash command: `/game-creator:viral-game 2d my-game` (one-shot pipeline) or `/game-creator:make-game` (milestone-driven workflow)
 3. If using a non-Claude agent, ensure the agent supports skill loading (check `npx skills add` docs for your agent)
 4. Try rephrasing with exact trigger phrases from the skill description (e.g., "build me a game", "create a new game")
 
@@ -30,7 +30,8 @@ Common issues and fixes for the game-creator plugin.
 **Reference — which skill to use**:
 | Want to... | Use this | Not this |
 |------------|----------|----------|
-| Build from scratch | `/make-game` | `/add-feature` |
+| Build from scratch (one-shot, ~10 min, deploy + monetize) | `/viral-game` | `/add-feature` |
+| Build from scratch (milestone-driven, multi-session) | `/make-game` | `/add-feature` |
 | Add pixel art | `/add-assets` | `/add-feature` |
 | Add 3D models | `/add-3d-assets` | `/add-feature` |
 | Add music/SFX | `/add-audio` | `/add-feature` |
@@ -53,7 +54,7 @@ Common issues and fixes for the game-creator plugin.
 
 **Cause**: Another dev server is running on port 3000.
 
-**Fix**: Kill the existing process (`lsof -ti:3000 | xargs kill`) or use a different port (`npm run dev -- --port 3001`). The make-game pipeline auto-increments ports when it detects conflicts.
+**Fix**: Kill the existing process (`lsof -ti:3000 | xargs kill`) or use a different port (`npm run dev -- --port 3001`). The `/viral-game` pipeline auto-increments ports when it detects conflicts.
 
 ### Vite build outputs empty `dist/`
 
@@ -65,7 +66,7 @@ Common issues and fixes for the game-creator plugin.
 
 ### Tests fail with "browser not found"
 
-**Fix**: Run `npx playwright install chromium`. The make-game pipeline attempts this automatically but it can fail in restricted environments.
+**Fix**: Run `npx playwright install chromium`. The `/viral-game` pipeline attempts this automatically but it can fail in restricted environments.
 
 ### FPS test fails (reports ~7 FPS)
 

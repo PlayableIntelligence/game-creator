@@ -1,6 +1,6 @@
 ---
 name: improve-game
-description: Analyze a game, find what needs work, and implement the highest-impact improvements. Use when the user says "improve my game", "make my game better", "fix my game", "what's wrong with my game", or "polish my game". Run repeatedly — each pass finds the next most impactful thing to fix. Do NOT use for adding specific new features (use add-feature) or initial game creation (use make-game).
+description: Analyze a game, find what needs work, and implement the highest-impact improvements. Use when the user says "improve my game", "make my game better", "fix my game", "what's wrong with my game", or "polish my game". Run repeatedly — each pass finds the next most impactful thing to fix. Do NOT use for adding specific new features (use add-feature) or initial game creation (use viral-game for one-shot builds, make-game for milestone-driven projects).
 argument-hint: "[area-to-focus]"
 license: MIT
 metadata:

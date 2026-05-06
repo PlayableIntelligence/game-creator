@@ -30,13 +30,13 @@ When this pipeline says "starter," it means the first; when it says "doc skeleto
 
 Confirm the engine, language, and tooling. The scaffold method follows directly from this file.
 
-**2. Prefer `/use-template` if a starter matches**
+**2. Prefer `/use-template` if a starter matches and `/use-template` is available**
 
 If `templates/phaser-2d/` or `templates/threejs-3d/` (or any other starter in the repo root `templates/` folder) matches the project's stack, run `/use-template <starter-id> [project-name]`. This is a ~10-second copy + `npm install` and avoids latent setup bugs from improvised scaffolding.
 
 Use `/use-template` when:
 
-- Stack matches a starter (Phaser 3 / Three.js browser games)
+- Stack matches a starter (Phaser 4 / Three.js browser games)
 - The project does not need a custom build pipeline
 
 Skip to step 3 when:
