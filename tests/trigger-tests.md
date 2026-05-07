@@ -13,6 +13,8 @@ Manual test prompts to verify skills trigger correctly. Run each prompt against 
 
 ## make-game
 
+(Multi-session game-dev workflow: idea → scaffold → development phases with milestones, ADRs, `docs/STATE.md`.)
+
 **Should trigger:**
 - "make a game"
 - "build me a game"
@@ -21,12 +23,34 @@ Manual test prompts to verify skills trigger correctly. Run each prompt against 
 - "build a 3D space shooter"
 - "I want to make a flappy bird clone"
 - "create a browser game from scratch"
+- "let's plan out a game"
+- "I want to design a game I'll work on for a while"
 
 **Should NOT trigger:**
 - "improve my existing game" → `improve-game`
 - "add a new feature to my game" → `add-feature`
 - "fix the bug in my game" → (no skill)
 - "explain how games work" → (no skill)
+- "make a viral game from this tweet" → `viral-game`
+
+---
+
+## viral-game
+
+(One-shot pipeline: tweet/story/concept → scaffold → assets → design → audio → deploy → monetize, ~10 min.)
+
+**Should trigger:**
+- "make a viral game"
+- "build a viral game from this tweet"
+- "turn this story into a game"
+- "/viral-game 2d flappy-cat"
+- A bare tweet URL (`https://x.com/user/status/...`) with intent to ship a game
+- "ship me a quick game from this idea"
+
+**Should NOT trigger:**
+- "let's design a game with milestones" → `make-game`
+- "I want to plan out a game I'll work on for weeks" → `make-game`
+- "improve my existing viral game" → `improve-game`
 
 ---
 
@@ -40,7 +64,7 @@ Manual test prompts to verify skills trigger correctly. Run each prompt against 
 - "speed run a game build"
 
 **Should NOT trigger:**
-- "make a polished game" → `make-game`
+- "make a polished game" → `make-game` (or `viral-game` if one-shot)
 - "build a production game" → `make-game`
 
 ---
@@ -208,7 +232,7 @@ Manual test prompts to verify skills trigger correctly. Run each prompt against 
 - "use template tower-defense"
 
 **Should NOT trigger:**
-- "make a game from scratch" → `make-game`
+- "make a game from scratch" → `make-game` or `viral-game`
 - "show me the gallery" → (no skill)
 
 ---
@@ -245,7 +269,7 @@ Manual test prompts to verify skills trigger correctly. Run each prompt against 
 ## fetch-tweet
 
 **Should trigger:**
-- (auto-triggered when a tweet URL is detected in make-game)
+- (auto-triggered when a tweet URL is detected in viral-game)
 - "fetch this tweet: https://x.com/user/status/123"
 
 **Should NOT trigger:**

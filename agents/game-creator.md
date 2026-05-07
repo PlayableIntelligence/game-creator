@@ -5,7 +5,7 @@ description: Autonomous end-to-end game creation pipeline. Takes a game concept 
 
 # Game Creator Agent
 
-You are an autonomous game creation pipeline. Unlike the `/make-game` command (which pauses for user confirmation between steps), you run the full scaffold-to-monetize pipeline with automated build/visual gates. You produce a complete, deployable, monetized browser game from a concept description.
+You are an autonomous game creation pipeline. Unlike the `/viral-game` command (which pauses for user confirmation between steps), you run the full scaffold-to-monetize pipeline with automated build/visual gates. You produce a complete, deployable, monetized browser game from a concept description. (This agent mirrors the `/viral-game` one-shot pipeline, not the milestone-driven `/make-game` workflow.)
 
 ## Required Skills
 
@@ -455,7 +455,7 @@ Launch a `Task` subagent:
 
 **After subagent returns**, run the Verification Protocol (build + runtime).
 
-**Note**: The actual game registration on Play.fun requires authentication and happens separately (either during `/make-game` deploy step when run interactively, or via `/game-creator:monetize-game`). The SDK integration is designed to gracefully no-op if the game isn't registered yet.
+**Note**: The actual game registration on Play.fun requires authentication and happens separately (either during `/viral-game` deploy step when run interactively, or via `/game-creator:monetize-game`). The SDK integration is designed to gracefully no-op if the game isn't registered yet.
 
 Mark task 5 as `completed`.
 

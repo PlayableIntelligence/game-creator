@@ -88,11 +88,13 @@ Result: Architecture 6/6, Performance 4/5, Code Quality 4/4, Monetization 2/4 â†
 Tell the user:
 
 > Your game has been through the full pipeline! Here's what you have:
-> - Scaffolded architecture (`/make-game`)
+> - Scaffolded architecture (`/viral-game`)
 > - Visual polish (`/design-game`)
 > - Music and sound effects (`/add-audio`)
 > - Automated tests (`/qa-game`)
 > - Architecture review (`/review-game`)
+>
+> *(Reflects the `/viral-game` one-shot pipeline. If you're working through `/make-game`, the equivalent state is "post-scaffold-phase + first development milestone shipped".)*
 >
 > **What's next?**
 > - Add new gameplay features with `/game-creator:add-feature [description]`

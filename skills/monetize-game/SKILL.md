@@ -23,7 +23,7 @@ Register your game on [Play.fun](https://play.fun) (OpenGameProtocol), integrate
 
 ## Prerequisites
 
-- A deployed game with a public URL (run `/game-creator:make-game` first, or ensure your game is deployed to here.now / GitHub Pages / Vercel / etc.)
+- A deployed game with a public URL (run `/game-creator:viral-game` first for a one-shot deploy, or ensure your game is deployed to here.now / GitHub Pages / Vercel / etc.)
 - Node.js installed
 
 ## Instructions
