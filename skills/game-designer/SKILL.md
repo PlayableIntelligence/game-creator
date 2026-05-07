@@ -91,13 +91,13 @@ Evaluate these areas and score each 1-5:
 | **Character Prominence** | Is the main character the visually dominant element? Does it occupy 30%+ of screen height? Larger than all other entities? |
 | **First Impression / Viral Appeal** | Does the game explode visually in the first 3 seconds? Entrance animation, ambient particles active, background in motion? Would a 13-second silent clip stop a scroller? |
 | **Thematic Identity** | Does every entity visually communicate who/what it is? Could you identify the game's theme from a screenshot alone? Named entities recognizable? No abstract/generic objects? |
-| **Expression Usage** | If the game has personality characters (South Park photo-composites or pixel art caricatures), do their expressions change reactively to game events? Score 1 if expressions never change. Score 3 if only the player reacts. Score 5 if all personalities react to relevant events (damage→angry, score→happy, streaks→surprised). |
+| **Expression Usage** | If the game has public-figure characters (South Park photo-composites or pixel-art caricatures, added by `/meme-game`), do their expressions change reactively to game events? Score 1 if expressions never change. Score 3 if only the player reacts. Score 5 if all public figures react to relevant events (damage→angry, score→happy, streaks→surprised). |
 
 Present the scores as a table, then list the top improvements ranked by visual impact.
 
 **Mandatory threshold**: Any area scoring below 4 MUST be improved before the design pass is complete. **First Impression / Viral Appeal is the most critical category** — it directly determines whether the promo clip converts viewers. **Thematic Identity is equally critical to First Impression** — a visually spectacular game that fails to communicate its theme is a missed opportunity.
 
-**Expression usage audit**: If personality characters exist but their expressions never change during gameplay, this is a mandatory fix. Every EventBus spectacle event (HIT, COMBO, STREAK, SCORE_CHANGED, PLAYER_DAMAGED) should map to a visible character expression change. Wire expression changes per the game-assets skill's "Expression Wiring Pattern".
+**Expression usage audit**: If public-figure characters exist but their expressions never change during gameplay, this is a mandatory fix. Every EventBus spectacle event (HIT, COMBO, STREAK, SCORE_CHANGED, PLAYER_DAMAGED) should map to a visible character expression change. Wire expression changes per `game-assets/character-pipeline.md` — Expression Wiring Pattern (or `meme-game/expression-wiring.md` for the workflow).
 
 ### Step 3: Implement improvements
 

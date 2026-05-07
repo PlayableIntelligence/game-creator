@@ -37,6 +37,7 @@ skills/
   record-promo/SKILL.md    # Record autonomous promo video (standalone command)
   monetize-game/SKILL.md   # Play.fun monetization (register, SDK, redeploy)
   scaffold-gateables/SKILL.md  # Add monetization-agnostic gateable features (isEntitled hooks + skin picker, continue, etc.)
+  meme-game/SKILL.md       # Public-figure pass: photo-composite characters of real people + expression wiring (auto-invoked by /viral-game when public figure detected; manual via /meme-game)
   add-multiplayer/SKILL.md # Add real-time or turn-based multiplayer via PartyKit (Cloudflare Durable Objects)
   qa-game/SKILL.md         # Add Playwright QA tests
   sub-games/SKILL.md       # Sub.games community platform for finding players and supporters
@@ -188,13 +189,13 @@ skills/phaser/
   performance.md              # Optimization tips, texture atlases, object pooling
 ```
 
-**Skills with companion files:** `phaser` (8), `game-qa` (7), `game-audio` (6), `add-multiplayer` (4), `meshyai` (3), `game-assets` (3), `threejs-game` (3+), `threejs-perf` (2 + templates/), `make-game` (3 + sub-pipelines/ + templates/), `viral-game` (3).
+**Skills with companion files:** `phaser` (8), `game-qa` (7), `game-audio` (6), `add-multiplayer` (4), `meshyai` (3), `game-assets` (3), `threejs-game` (3+), `threejs-perf` (2 + templates/), `make-game` (3 + sub-pipelines/ + templates/), `meme-game` (phases/ + sub-pipelines/), `viral-game` (phases/ + sub-pipelines/ + templates/).
 
 ## Reference vs User-Invocable Skills
 
 Skills come in two flavors with a deliberate separation of concerns:
 
-- **User-invocable skills** (20) — Triggered by slash commands (e.g., `/add-audio`). These handle the full user-facing workflow: detect the game, load reference skills, run the pipeline, validate output. They have `argument-hint` in frontmatter.
+- **User-invocable skills** (21) — Triggered by slash commands (e.g., `/add-audio`). These handle the full user-facing workflow: detect the game, load reference skills, run the pipeline, validate output. They have `argument-hint` in frontmatter.
 - **Reference skills** (11) — Deep domain knowledge loaded by other skills (or directly via `/load`). They contain patterns, code examples, and conventions but don't drive a workflow themselves.
 
 Four domains have both a reference and a user-invocable skill:
@@ -289,4 +290,4 @@ See `TROUBLESHOOTING.md` for common issues including:
 
 ## Trigger Test Suite
 
-See `tests/trigger-tests.md` for manual test prompts (5-7 per skill) verifying correct trigger behavior. Covers all 19 user-invocable skills plus negative tests for prompts that should NOT trigger any skill.
+See `tests/trigger-tests.md` for manual test prompts (5-7 per skill) verifying correct trigger behavior. Covers all 20 user-invocable skills plus negative tests for prompts that should NOT trigger any skill.

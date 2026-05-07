@@ -60,25 +60,46 @@ Launch a `Task` subagent with these instructions:
 > - **Minimum 7-8% canvas width for collectibles/hazards**: Items smaller than 7% of `GAME.WIDTH` become unrecognizable blobs on phone screens. Size attacks at ~9%, power-ups at ~7%, player character at 12-15%.
 > - Wire spectacle events: emit `SPECTACLE_ENTRANCE` in `create()`, `SPECTACLE_ACTION` on every player input, `SPECTACLE_HIT` on score/destroy, `SPECTACLE_COMBO` on consecutive hits (pass `{ combo }` ), `SPECTACLE_STREAK` at milestones (5, 10, 25 — pass `{ streak }`), `SPECTACLE_NEAR_MISS` on close calls
 >
-> **Visual identity — push the pose:**
-> - If the player character represents a real person or brand, build visual recognition into the entity from the start. Don't use generic circles/rectangles as placeholders — use descriptive colors, proportions, and features that communicate identity even before pixel art is added.
-> - Named opponents/NPCs must have visual presence on screen — never text-only. At minimum use distinct colored shapes that suggest the brand. Better: simple character forms with recognizable features.
-> - Collectibles and hazards must be visually self-explanatory. Avoid abstract concepts ("imagination blocks", "creativity sparks"). Use concrete objects players instantly recognize (polaroids, trophies, lightning bolts, money bags, etc.).
-> - Think: "Could someone screenshot this and immediately know what the game is about?"
-> - **NEVER** use a single letter (C, G, O) as a character's visual identity
-> - **NEVER** differentiate two characters only by fill color — they must have distinct silhouettes and features
-> - When a company is featured (OpenAI, Anthropic, xAI, etc.), use the CEO as the character: Altman for OpenAI, Amodei for Anthropic, Musk for xAI, Zuckerberg for Meta, Nadella for Microsoft, Pichai for Google, Huang for NVIDIA
-> - Add entrance sequence in `create()`: player starts off-screen, tweens into position with `Bounce.easeOut`, landing shake + particle burst
-> - Add combo tracking to GameState: `combo` (current streak, resets on miss), `bestCombo` (session high), both reset in `reset()`
-> - Ensure restart is clean — test mentally that 3 restarts in a row would work identically
-> - Add `isMuted` to GameState for mute support
+> **Visual identity (generic):**
+> - Each entity needs a distinct silhouette and proportions. Never differentiate two entities only by fill color.
+> - Never use a single letter (C, G, O) as an entity's visual identity.
+> - Collectibles and hazards must be visually self-explanatory at a glance — concrete shapes the player can read in peripheral vision (gem, coin, skull, bomb), not abstract concepts.
+> - Use descriptive colors and shape language up front; pixel art / models come in Step 1.5. The scaffold should already feel readable with primitives.
+> - Add entrance sequence in `create()`: player starts off-screen, tweens into position with `Bounce.easeOut`, landing shake + particle burst.
+> - Add combo tracking to GameState: `combo` (current streak, resets on miss), `bestCombo` (session high), both reset in `reset()`.
+> - Ensure restart is clean — test mentally that 3 restarts in a row would work identically.
+> - Add `isMuted` to GameState for mute support.
+>
+> **Public figures — conditional scaffolding (only when `hasPublicFigures = true`):**
+>
+> The orchestrator passes a `publicFigureSlugs` list when Step 0's Public Figure Detection fired (e.g. `['trump', 'altman']`). If that list is empty, ignore this whole block — the game is purely generic, no real-person scaffolding at any layer. Defaults stay clean for prompts like "maze-tank" or "asteroid dodge".
+>
+> When the list is non-empty, lean into the public figures explicitly named in the user's prompt:
+>
+> - Use the public-figure slug as the entity name (e.g. `class TrumpPlayer extends Phaser.GameObjects.Container` or `enemies['altman']`). The slug needs to match because Step 1.6's `/meme-game` pass will look it up and overlay a photo-composite head on top of whatever pixel art Step 1.5 produced for that entity. (Step 1.6 only touches the public-figure-named entities; everything else uses Step 1.5's art unchanged.)
+> - Use placeholder colors and proportions that hint at the public figure's visual identity so the scaffold reads correctly even before Step 1.5 (pixel art / GLB) and Step 1.6 (photo-composite overlay) refine it:
+>   - **Trump** — blonde combover hint, dark navy box for suit, red rectangle for tie
+>   - **Musk** — dark casual block (t-shirt or leather jacket tone), short brown hair hint
+>   - **Altman** — short brown hair, neutral casual button-down tone
+>   - **Amodei** — curly dark hair hint, glasses suggestion, casual shirt tone
+>   - **Huang** — black leather jacket tone, short black hair
+>   - **Zuckerberg** — short brown hair, plain t-shirt tone
+>   - **Pichai** — neutral business-casual tone, short dark hair
+>   - **Nadella** — neutral business-casual tone, short dark hair, glasses suggestion
+>   - **Karpathy** — long dark hair hint, casual hoodie/t-shirt tone
+> - Make the named entity prominent — `GAME.WIDTH * 0.12` to `GAME.WIDTH * 0.15` (12–15% of screen width) for player characters, with caricature proportions (large head ~40–50% of sprite height) so Step 1.6's photo-composite head fits naturally on top of it.
+> - Do NOT add `EXPRESSION` constants, expression frames, photo-composite spritesheet loading, or `assets/characters/` paths in this step. That's owned by `/meme-game` and runs in Step 1.6 — don't preempt it.
+> - Do NOT add an Expression Map to `design-brief.md`. Step 1.6's `/meme-game` adds it additively if needed.
+>
+> Note: even when `publicFigureSlugs` is non-empty, **Step 1.5 (pixel art / GLB) still runs between Step 1 and Step 1.6**. Step 1.5 is mandatory for every game — it produces art for the public-figure-named entity placeholders AND for all other entities (enemies, items, tiles). Step 1.6 only overlays photo-composite heads onto the public-figure entities; everything else relies on the Step 1.5 art.
+>
+> When `publicFigureSlugs` is empty, follow only the generic visual-identity rules above. Don't introduce real people, CEOs, or company branding — even if it would be thematically interesting.
 >
 > **CRITICAL — Preserve the button pattern:**
 > - The template's `GameOverScene.js` contains a working `createButton()` helper (Container + Graphics + Text). **Do NOT rewrite this method.** Keep it intact or copy it into any new scenes that need buttons. The correct z-order is: Graphics first (background), Text second (label), Container interactive. If you put Graphics on top of Text, the text becomes invisible. If you make the Graphics interactive instead of the Container, hover/press states break.
 >
 > **Character & entity sizing:**
 > - Character WIDTH from `GAME.WIDTH * ratio`, HEIGHT from `WIDTH * SPRITE_ASPECT` (where `const SPRITE_ASPECT = 1.5` for 200x300 spritesheets). **Never** define character HEIGHT as `GAME.HEIGHT * ratio` — on mobile portrait, `GAME.HEIGHT` is much larger than `GAME.WIDTH`, squishing characters.
-> - For character-driven games (named personalities, mascots, famous figures): make the main character prominent — `GAME.WIDTH * 0.12` to `GAME.WIDTH * 0.15` (12-15% of screen width). Use caricature proportions (large head = 40-50% of sprite height, exaggerate distinguishing features) for personality games.
 > - Non-character entities (projectiles, collectibles, squares) can use `GAME.WIDTH * ratio` for both dimensions since they have no intrinsic aspect ratio to preserve.
 >
 > **Play.fun safe zone:**
@@ -132,43 +153,18 @@ Launch a `Task` subagent with these instructions:
 > ## Entity Interactions
 > For each visible entity (enemies, projectiles, collectibles, environmental objects):
 > - **Name**: what it is
-> - **Visual identity**: what it should LOOK like and why (reference real logos, people, objects — not abstract concepts)
-> - **Distinguishing feature**: the ONE exaggerated feature visible at thumbnail size (e.g., "curly dark hair + glasses" for Amodei, "leather jacket" for Jensen Huang)
-> - **Real image asset**: logo URL to download, or "pixel art" if no real image applies
+> - **Visual identity**: a concrete shape language the player can read at a glance (e.g., "spiked red ball", "blue diamond", "tall green cactus"). Avoid abstract concepts ("creativity sparks") — pick concrete, recognizable shapes.
+> - **Distinguishing feature**: the ONE feature that separates this entity from any other on screen (size, silhouette, color, or motion).
 > - **Behavior**: what it does (moves, falls, spawns, etc.)
 > - **Player interaction**: how the player interacts with it (dodge, collect, tap, block, or "none — background/decoration")
-> - **AI/opponent interaction**: how the opponent interacts with it, if applicable
->
-> For named people: describe hair, glasses, facial hair, clothing. For companies: specify logo to download. NEVER use a letter or text label as visual identity.
->
-> ## Expression Map
->
-> For each personality character, map game events to expressions:
->
-> ### Player: [Name]
-> | Game Event | Expression | Why |
-> |---|---|---|
-> | Idle/default | normal | Resting state |
-> | Score point / collect item | happy | Positive reinforcement |
-> | Take damage / lose life | angry | Visceral reaction |
-> | Power-up / special event | surprised | Excitement |
-> | Win / game over (high score) | happy | Celebration |
-> | Lose / game over (low score) | angry | Defeat |
->
-> ### Opponent: [Name]
-> | Game Event | Expression | Why |
-> |---|---|---|
-> | Idle/default | normal | Resting state |
-> | Player scores | angry | Frustrated at losing |
-> | Opponent scores | happy | Gloating |
-> | Near-miss / close call | surprised | Tension |
+> - **AI/opponent interaction**: how the opponent interacts with it, if applicable.
 > ```
 >
 > Do NOT start a dev server or run builds — the orchestrator handles that.
 
 ### After Subagent Returns
 
-Run the Verification Protocol (see verification-protocol.md).
+Run the Verification Protocol (see verification.md).
 
 **Create `progress.md`** at the game's project root. Read the game's actual source files to populate it accurately:
 - Read `src/core/EventBus.js` for the event list
@@ -258,7 +254,7 @@ Launch a `Task` subagent with these instructions:
 
 ### Verification
 
-**After subagent returns**, run the Verification Protocol (see [verification-protocol.md](verification-protocol.md)).
+**After subagent returns**, run the Verification Protocol (see [verification.md](verification.md)).
 
 Build verification must pass. Runtime verification should show the game behaves as it did after Step 1 — the gateables are all locked, so nothing visible should change unless a gateable entry point (like a "Skins" button on GameOverScene) was added. That's fine; confirm it renders but is greyed/locked.
 
@@ -286,71 +282,18 @@ Mark the gateables task as `completed`.
 
 Mark the assets task as `in_progress`.
 
-### Pre-step: Character Library Check
+### Step 1.5 is mandatory and runs for every game
 
-Before launching the asset subagent, check if the game uses personality characters. For each personality, resolve their sprites using this **tiered fallback** (try each tier in order, stop at the first success):
+**This step is not optional and is not replaced by Step 1.6 even when `hasPublicFigures = true`.** Step 1.5 produces pixel art (2D) or GLB models (3D) for **every** entity in `src/entities/` plus background tiles. The non-public-figure entities (enemies, items, projectiles, tiles, decorations) get their visuals **nowhere else** — if Step 1.5 is skipped, they have no art at all.
 
-**1. Read `design-brief.md`** to identify personality characters and their slugs.
+Step 1.5 and Step 1.6 are orthogonal:
 
-**2. Resolve the character library path** — find `assets/characters/manifest.json` relative to the plugin root:
-   - Check `assets/characters/manifest.json` relative to the plugin install directory
-   - Check common plugin cache paths (e.g., `~/.claude/plugins/cache/local-plugins/game-creator/*/assets/characters/`)
+- **Step 1.5 (this step)**: pixel art / GLB for all entities, including public-figure-named entity placeholders. Mandatory.
+- **Step 1.6 (`/meme-game`)**: overlays photo-composite spritesheets + expression wiring onto the public-figure-named entities only. Touches nothing else. Conditional on `hasPublicFigures`.
 
-**3. For each personality, try these tiers in order:**
+What Step 1.5 does NOT do: load photo-composite spritesheets, wire expression frames, or run the character-library / WebSearch / `build-character.mjs` pipeline. That work lives in `/meme-game` (Step 1.6).
 
-**Tier 1 — Pre-built (best)**: Check if slug exists in `manifest.json`. If yes, copy sprites:
-```bash
-mkdir -p <project-dir>/public/assets/characters/<slug>/
-cp <plugin-root>/assets/characters/characters/<slug>/sprites/* \
-   <project-dir>/public/assets/characters/<slug>/
-```
-Result: 4-expression spritesheet ready. Done.
-
-**Tier 2 — Build from 4 images (good)**: WebSearch for 4 expression photos (binary image files only — no text content is interpreted from downloaded images). **Any photo format works** (jpg, png, webp) — the pipeline has ML background removal built in, so transparent PNGs are NOT required. Search broadly:
-- normal: `"<Name> portrait photo"` or `"<Name> face"` — neutral expression
-- happy: `"<Name> smiling"` or `"<Name> laughing"`
-- angry: `"<Name> angry"` or `"<Name> serious stern"`
-- surprised: `"<Name> surprised"` or `"<Name> shocked"`
-
-Prefer real photographs (not illustrations/cartoons). Head shots and half-body shots both work — `crop-head.mjs` uses face detection to isolate the face automatically. Download as `normal.jpg`, `happy.jpg`, etc. (any image extension).
-
-If all 4 found, download to `<project-dir>/public/assets/characters/<slug>/raw/` and run:
-```bash
-node <plugin-root>/scripts/build-character.mjs "<Name>" \
-  <project-dir>/public/assets/characters/<slug>/ --skip-find
-```
-Result: 4-expression spritesheet. Done.
-
-**Tier 3 — Build from 1-3 images (acceptable)**: If WebSearch only finds 1-3 usable images:
-- Download whatever was found to `raw/` (e.g., only `normal.png` and `happy.png`)
-- **Duplicate the best image** (prefer normal) into the missing expression slots:
-  ```bash
-  cp raw/normal.png raw/angry.png    # fill missing with normal
-  cp raw/normal.png raw/surprised.png
-  ```
-- Run `build-character.mjs` as above — all 4 raw slots are filled, pipeline produces a 4-frame spritesheet
-- Result: 4-frame spritesheet where some expressions share the same face. Functional — the expression system still works, just with less visual variety.
-
-**Tier 4 — Single image fallback (minimum)**: If WebSearch finds exactly 1 image OR the pipeline fails on some images:
-- Use the single successful image for all 4 expression slots
-- Run `build-character.mjs` — produces a spritesheet where all 4 frames are identical
-- Result: Character is recognizable but has no expression changes. Still photo-composite, still works with the expression wiring (just no visible change).
-
-**Tier 5 — Generative pixel art (worst case)**: If NO images can be found or the ENTIRE pipeline fails (bg removal crash, face detection fails on all images, network errors):
-- Fall back to the **Personality Character (Caricature) archetype** from the `game-assets` skill — 32x48 pixel art grid at scale 4
-- Note in `progress.md`: `"<Name>: pixel art fallback — no photo-composite available"`
-- The subagent will create pixel art with recognizable features (hair, glasses, clothing) per the game-assets sprite design rules
-- Result: No photo-composite, but the character is still visually distinct via pixel art caricature.
-
-**4. Record results** for each character in `progress.md`:
-```
-## Characters
-- trump: Tier 1 (pre-built, 4 expressions)
-- karpathy: Tier 3 (1 image found, duplicated to 4 slots)
-- some-ceo: Tier 5 (pixel art fallback)
-```
-
-**5. Pass to subagent**: the list of character slugs, which tier each resolved to, and how many unique expressions each has. The subagent needs this to know whether to wire full expression changes or skip expression logic for Tier 5 characters.
+The Step 1 subagent has already named the player and named entities using public-figure slugs and given them placeholder colors that hint at the figure's identity (see Step 1's conditional block). Your job in Step 1.5 is to upgrade ALL of those placeholders — public-figure-named and not — to recognizable pixel art / models. Step 1.6 then overlays photo-composite heads onto the public-figure-named entities. Until Step 1.6 runs, the public-figure-named entity displays your pixel art (which is also the Tier-5 fallback if `/meme-game`'s photo lookup fails).
 
 ### 2D Subagent (Phaser 3)
 
@@ -362,11 +305,11 @@ Launch a `Task` subagent with these instructions:
 > **Engine**: 2D (Phaser 3)
 > **Skill to load**: `game-assets`
 >
+> **MANDATORY OUTPUTS — produce pixel art for EVERY entity in `src/entities/`** (player, enemies, items, projectiles) plus background tiles. This is the only step in the pipeline that does this work; if you skip an entity, the game has no art for it. Public-figure-named entities (e.g. `TrumpPlayer`, `enemies['altman']`) are NOT exceptions — produce pixel art for them too. Step 1.6 will later overlay photo-composite heads onto the public-figure entities only, but it does not run unless this step completes its full output. **Even if `hasPublicFigures = true`, you do all the pixel art here; Step 1.6 is additive, not a replacement.**
+>
 > **Read `progress.md`** at the project root before starting. It describes the game's entities, events, constants, and scoring system from Step 1.
 >
-> **Character library sprites are already copied** to `public/assets/characters/<slug>/`. For personality characters, load the spritesheet and wire expression changes per the game-assets skill's "Expression Wiring Pattern". Add `EXPRESSION` and `EXPRESSION_HOLD_MS` to Constants.js. Wire expression changes to EventBus events per the Expression Map in `design-brief.md`.
->
-> Follow the game-assets skill fully for non-personality entities:
+> Follow the game-assets skill fully:
 > 1. Read all entity files (`src/entities/`) to find `generateTexture()` / `fillCircle()` calls
 > 2. Choose the palette that matches the game's theme (DARK, BRIGHT, or RETRO)
 > 3. Create `src/core/PixelRenderer.js` — the `renderPixelArt()` + `renderSpriteSheet()` utilities
@@ -378,22 +321,20 @@ Launch a `Task` subagent with these instructions:
 > 9. Add Phaser animations for entities with multiple frames
 > 10. Adjust physics bodies for new sprite dimensions
 >
-> **Character prominence**: If the game features a real person or named personality, use the Personality Character (Caricature) archetype — 32x48 grid at scale 4 (renders to 128x192px, ~35% of canvas height). The character must be the visually dominant element on screen. Supporting entities stay at Medium (16x16) or Small (12x12) to create clear visual hierarchy.
+> **Visual hierarchy:**
+> - The player character should be visually dominant — pick a sprite size that's clearly the largest gameplay entity on screen.
+> - Supporting entities (enemies, projectiles, collectibles) sit at Medium (16x16) or Small (12x12) to create clear hierarchy.
+> - Each entity needs a distinct silhouette — never differentiate two entities by fill color alone.
 >
-> **Push the pose — thematic expressiveness:**
-> - Sprites must visually embody who/what they represent. A sprite for "Grok AI" should look like Grok (logo features, brand colors, xAI aesthetic) — not a generic robot or colored circle.
-> - For real people: exaggerate their most recognizable features (signature hairstyle, glasses, facial hair, clothing). Recognition IS the meme hook.
-> - For brands/products: incorporate logo shapes, brand colors, and distinctive visual elements into the sprite design.
-> - For game objects: make them instantly recognizable. A "power-up" should look like the specific thing it represents in the theme, not a generic star or diamond.
-> - Opponents should be visually distinct from each other — different colors, shapes, sizes, and personality. A player should tell them apart at a glance.
+> **Self-audit before returning:**
+> - Did you produce pixel art for **every** entity in `src/entities/`, including any named after a public figure? (Count the entity files; count your sprite files. They should match.)
+> - Does every entity use `renderPixelArt()` or `renderSpriteSheet()` (no raw `fillCircle()` left)?
+> - Are sprites readable at game scale — bold silhouettes, 2px outline on small sprites, palette indices used consistently?
+> - Are physics bodies adjusted to match new sprite dimensions?
+> - Is any `scene.add.text()` being used as the primary visual identity for an entity? If so, remove it and add a real sprite.
 >
-> **Self-audit before returning** — check every personality sprite against these:
-> - Does each sprite have distinct hair (not a solid-color dome)?
-> - Does each sprite have facial features beyond just eyes (glasses, facial hair, or clothing details if applicable)?
-> - Would two character sprites look different if rendered in the same color?
-> - Is any `scene.add.text()` being used as the primary identifier? If so, remove it and add physical features instead.
-> - Does the head region (rows 0-28) use at least 4 distinct palette indices?
-> - For brand entities: was a real logo downloaded and loaded? If not, why?
+> **Scope guardrails — what you do NOT touch:**
+> - Do NOT load `public/assets/characters/`, photo-composite spritesheets, `EXPRESSION` constants, or expression-wiring code. That's owned by `/meme-game` and runs in Step 1.6 as an **overlay** on top of your public-figure-named entities (it does not replace this step). Even when public figures are named in the game concept, your job is generic pixel art with caricature proportions for them, AND full pixel art for every other entity. The photo-composite head goes on top later — your art for the body and for non-public-figure entities is the canonical art for the game.
 >
 > **After completing your work**, append a `## Step 1.5: Assets` section to `progress.md` with: palette used, sprites created, any dimension changes to entities.
 >
@@ -467,9 +408,9 @@ After this completes you have 3 files per character:
 
 **NEVER generate humanoid characters without rigging.** Static models require hacky programmatic animation that looks artificial.
 
-For named personalities, be specific: `"a cartoon caricature of Trump, blonde hair, suit, red tie, low poly game character, full body"`.
-
 For multiple characters, generate each with a distinct description for visual variety. Run generate->rig in parallel for different characters to save time.
+
+**Note on public figures (still mandatory in Step 1.5):** The Step 1.6 `/meme-game` pass owns caricature Meshy generation for named real people (Trump, Musk, Altman, etc. — see `meme-game/3d-public-figures.md`). That does NOT mean Step 1.5 can skip them. In Step 1.5, when `hasPublicFigures = true`, you **still** generate or load a generic humanoid placeholder for each named slot — `"a stylized human in a dark suit"` for the player slot named `trump`, etc. — so the scene composes correctly between Step 1.5 and Step 1.6, and so the world objects (props, items, scenery) for non-public-figure entities still get models. Step 1.6 then replaces only the public-figure character slots with caricature-specific Meshy generations; everything else relies on Step 1.5's models. When `hasPublicFigures = false`, ignore real people entirely and stick to the game concept's generic archetypes (fantasy classes, sci-fi roles, animals, abstract shapes).
 
 **Tier 2 — Pre-built in `assets/3d-characters/`** (Meshy unavailable): Check `manifest.json` for a name/theme match. Copy the GLB:
 ```bash
@@ -527,6 +468,8 @@ node <plugin-root>/scripts/find-3d-asset.mjs --query "<entity description>" \
 > **Project path**: `<project-dir>`
 > **Engine**: 3D (Three.js)
 > **Skill to load**: `game-3d-assets` and `meshyai`
+>
+> **MANDATORY OUTPUTS — load and wire GLB models for EVERY entity in `src/entities/`** plus world props referenced in `design-brief.md`. This is the only step that does this work; if you skip an entity, the scene has no model for it. Public-figure-named entity slots (e.g. `trump`, `altman`) are NOT exceptions — load a generic humanoid placeholder for them so the scene composes correctly. Step 1.6 will later replace those specific slots with caricature-specific Meshy generations, but it does not run unless this step completes its full output. **Even if `hasPublicFigures = true`, you load all the models here; Step 1.6 is additive (replaces public-figure slots only), not a replacement for this step.**
 >
 > **Read `progress.md`** at the project root before starting. It lists generated/downloaded models, character details, and any World Labs environment.
 >

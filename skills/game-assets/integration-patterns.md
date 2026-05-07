@@ -134,7 +134,7 @@ When a game features a named company, download and use the real logo. SVG prefer
 2. Download to `public/assets/logos/<company>.svg` (or `.png`)
 3. Load in Phaser: `this.load.image('logo-openai', 'assets/logos/openai.svg')`
 4. Use for branding elements (splash, HUD icons, entity overlays)
-5. Keep pixel art fallback for the character sprite itself — logos complement personality sprites, they don't replace them
+5. Keep pixel art fallback for the character sprite itself — logos complement public-figure sprites, they don't replace them
 
 **Well-known logo sources** (search for these when needed):
 - Company press kits and brand pages typically host official logo files

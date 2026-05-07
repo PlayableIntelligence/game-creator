@@ -24,7 +24,7 @@ You are an expert pixel art game artist. You create recognizable, stylish charac
 
 For detailed reference, see companion files in this directory:
 - `sprite-catalog.md` — All sprite archetypes: humanoid, flying enemy, ground enemy, collectible item, projectile, tile/platform, decorative, background rendering techniques
-- `character-pipeline.md` — South Park character system, expression constants, bobblehead body pattern, building new characters (4-tier fallback)
+- `character-pipeline.md` — Photo-composite character system (consumed by `/meme-game`, not by this skill standalone): character library structure, expression constants, bobblehead body pattern, building new characters (4-tier fallback)
 - `pixel-renderer.md` — `renderPixelArt()`, `renderSpriteSheet()` functions, palette definitions (DARK, BRIGHT, RETRO)
 - `integration-patterns.md` — Replacing geometric entities with pixel art, animation wiring, multiple enemy types, external asset download, logo/meme integration
 
@@ -36,24 +36,19 @@ Procedural circles and rectangles are fast to scaffold, but players can't tell a
 
 | Tier | Use for | Source |
 |------|---------|--------|
-| **South Park characters** (default for personalities) | Named people / CEO characters | Character library at `assets/characters/` (relative to plugin root) — photo heads composited onto cartoon bodies with expression spritesheets |
-| **Real images** (logos, photos) | Company logos, brand marks when game features a named company | Download to `public/assets/` with pixel art fallback |
-| **Meme/reference images** | Source tweet `image_url` — embed as background, splash, or texture when it enhances thematic identity | Download to `public/assets/` |
-| **Pixel art** (fallback) | Non-personality characters, items, game objects, enemies | Code-only 2D arrays rendered at runtime |
+| **Pixel art** (default) | All characters, enemies, items, projectiles, game objects | Code-only 2D arrays rendered at runtime via `renderPixelArt()` / `renderSpriteSheet()` |
+| **Real logos / images** | Company logos, brand marks, source-tweet images that enhance thematic identity | Download to `public/assets/` with pixel-art fallback |
+| **Photo-composite characters** | Real public figures (politicians, tech CEOs, world leaders, entertainers) — **only when a public-figure pass is running** | Character library at `assets/characters/` (plugin root). Loaded by `/meme-game`, **not** by this skill standalone. |
 
-**South Park characters** are the default for named personalities (Altman, Amodei, Musk, Zuckerberg, Nadella, Pichai, Huang, Karpathy, Trump, Biden, Obama). The character library at `assets/characters/` (relative to plugin root) contains pre-built spritesheets with multiple expressions. Each spritesheet has frames for: normal (0), happy (1), angry (2), surprised (3). Games load these as Phaser spritesheets and wire expression changes to game events.
+**Pixel art is the default for everything.** Whether the game features a named character or not, this skill produces pixel art. Public-figure / photo-composite work is an opt-in pass owned by `/meme-game` — when invoked, it swaps public-figure entities into the spots scaffolded here.
 
-**Pixel art** is the fallback for personality characters not yet in the library and the default for non-personality entities (enemies, items, game objects).
-
-**Real logos** are preferred for brand identity. When a game features OpenAI, Anthropic, Google, etc., download their logo and use it.
-
-**Meme images** from the source tweet (`image_url` in thread.json) should be downloaded and incorporated when they enhance visual identity.
+**Real logos** are preferred for brand identity when a brand is genuinely part of the game's theme. Download the logo, use it; fall back to pixel art if download fails.
 
 All tiers share the same fallback pattern: if an external asset fails to load, fall back to pixel art.
 
-## South Park Character System
+## Photo-Composite Characters (loaded by `meme-game`)
 
-See `character-pipeline.md` for the full South Park character system: character library structure, expression constants, expression wiring pattern, bobblehead body pattern, and building new characters (4-tier fallback from full expression build to generative pixel art).
+The `character-pipeline.md` companion file documents the photo-composite character system: character library structure, expression constants, expression wiring pattern, bobblehead body pattern, and building new characters (4-tier fallback from full expression build to generative pixel art). This material is consumed by the `/meme-game` skill — not by `/add-assets` or by this skill's standalone Process flow below. Read it when you are running a public-figure pass; otherwise stay in pure-pixel-art mode.
 
 ## Pixel Art Rendering System
 
@@ -109,9 +104,9 @@ At small scales, subtle changes read as smooth motion:
 | Small (items, collectibles) | 12x12 | 3 | 36x36px | 7% |
 | Medium (enemies, obstacles) | 16x16 | 3 | 48x48px | 9% |
 | Large (boss, vehicle) | 24x24 or 32x32 | 3 | 72-96px | 13-18% |
-| **Personality (named character)** | **32x48** | **4** | **128x192px** | **35%** |
+| Caricature (Tier 5 public-figure fallback) | 32x48 | 4 | 128x192px | 35% |
 
-**Character-driven games** (games starring named characters, personalities, or mascots): Use the Personality archetype. The main character should dominate the screen (~35% of canvas height). Use **caricature proportions** — large head (60%+ of sprite height) with exaggerated features, compact body — for maximum personality at any scale. Adjust `PLAYER.WIDTH` and `PLAYER.HEIGHT` in Constants.js to match.
+The Caricature archetype is reserved for the `/meme-game` Tier 5 fallback (when no photo can be sourced for a named public figure). Don't reach for it in `/add-assets` standalone — pick Medium or Large for an oversized player character instead.
 
 When replacing geometric shapes with pixel art, match the rendered sprite size to the entity's `WIDTH`/`HEIGHT` in Constants.js. If the Constants values are too small for the art style, increase them — the sprite and the physics body should agree.
 

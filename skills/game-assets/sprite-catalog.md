@@ -1,6 +1,6 @@
 # Sprite Catalog
 
-Complete catalog of sprite archetypes for pixel art game assets. Grid sizes vary by archetype — from 8x8 for tiny pickups to 32x48 for personality characters. The default scale is 3 (each pixel becomes 3x3 on screen).
+Complete catalog of sprite archetypes for pixel art game assets. Grid sizes vary by archetype — from 8x8 for tiny pickups to 32x48 for public-figure caricatures. The default scale is 3 (each pixel becomes 3x3 on screen).
 
 When creating sprites for a game, match the archetype to the entity type.
 
@@ -8,16 +8,16 @@ When creating sprites for a game, match the archetype to the entity type.
 
 Before choosing an archetype, consider what each entity represents thematically:
 
-- **Real people** → Always use the Personality Character archetype. Exaggerate their most recognizable feature until it's almost a caricature. Recognition is everything.
+- **Real public figures** → Always use the Public-Figure Character archetype. Exaggerate their most recognizable feature until it's almost a caricature. Recognition is everything. (Loaded by `/meme-game`, not by `/add-assets`.)
 - **Companies/brands** → Incorporate logo shapes into the sprite. Use brand colors as the primary palette. Consider anthropomorphizing the logo (add limbs, face, expressions).
 - **Game objects** → Must be instantly recognizable real-world objects, never abstract shapes. A collectible representing "creative output" could be a painting, a polaroid, a film reel — not a generic diamond or spark.
 - **Opponents** → Each must be visually distinct. Different silhouettes, color palettes, and proportions. If they represent specific entities (rival companies, other people), build that identity into the sprite.
 
 When in doubt, make it MORE recognizable, MORE exaggerated, MORE character-driven. We dial back, never up.
 
-## Personality Character (South Park Photo-Composite)
+## Public-Figure Character (South Park Photo-Composite)
 
-For games featuring real people or named personalities (Altman, Amodei, Musk, Zuckerberg, etc.). Photo heads composited onto South Park-style cartoon bodies — instantly recognizable, no hand-drawn pixel art needed.
+For games featuring real public figures (Altman, Amodei, Musk, Zuckerberg, Trump, Biden, etc.). Photo heads composited onto South Park-style cartoon bodies — instantly recognizable, no hand-drawn pixel art needed.
 
 - **Dimensions**: 200x300 per frame (frameWidth: 200, frameHeight: 300)
 - **Spritesheet**: Horizontal strip with all expressions

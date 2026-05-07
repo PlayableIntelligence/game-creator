@@ -1,6 +1,6 @@
 ---
 name: add-assets
-description: Replace geometric shapes with pixel art sprites — recognizable characters, enemies, and items with optional animation. Use when the user says "add sprites", "replace the shapes with real art", "add pixel art", "make the characters look real", or "add game assets". For 3D games, use add-3d-assets instead. Do NOT use for 3D models (use add-3d-assets) or gameplay changes (use add-feature).
+description: Replace geometric shapes (circles, rectangles) with pixel art sprites — generic characters, enemies, items, and projectiles. Use when the user says "add sprites", "add pixel art", "convert shapes to art", "replace the shapes with sprites", or "add game assets". For 3D games, use add-3d-assets instead. Do NOT use for: 3D models (use add-3d-assets), gameplay changes (use add-feature), or swapping in **real public figures** like Trump/Musk/Altman/CEOs as photo-composite characters (use `/meme-game`).
 argument-hint: "[path-to-game]"
 license: MIT
 metadata:
@@ -39,19 +39,18 @@ Present a table of sprites to create:
 
 | Entity | Archetype | Grid | Frames | Description |
 |--------|-----------|------|--------|-------------|
-| Player (personality) | Personality | 32x48 | 1-4 | Caricature of [name], scale 4 |
-| Player (generic) | Humanoid | 16x16 | 4 | ... |
-| Enemy X | Flying | 16x16 | 2 | ... |
-| Pickup | Item | 8x8 | 1 | ... |
-
-If the game features a real person or named personality, default to the **Personality** archetype for the player character. This uses a 32x48 grid at scale 4 (128x192px rendered, ~35% of canvas height) — large enough to recognize the personality at a glance.
+| Player | Humanoid | 16x16 | 4 | Idle + walk frames |
+| Enemy X | Flying | 16x16 | 2 | Wings up/down |
+| Pickup | Item | 8x8 | 1 | Bobs in place |
 
 Choose the palette that best matches the game's existing color scheme:
 - **DARK** — gothic, horror, dark fantasy
 - **BRIGHT** — arcade, platformer, casual
 - **RETRO** — NES-style, muted tones
 
-Grid sizes range from 8x8 (tiny pickups) through 16x16 (standard entities) to 32x48 (personality characters). Named characters always use the Personality archetype to ensure the meme hook — recognizing the person — lands immediately.
+Grid sizes range from 8x8 (tiny pickups) through 16x16 (standard entities) to 24x24 / 32x32 (boss / vehicle). For an oversized hero, push to 32x32; otherwise stick with 16x16.
+
+**Public-figure / photo-composite characters are out of scope for this skill.** If the user wants real public figures (Trump, Musk, Altman, etc.) as recognizable photo-composite characters with reactive expressions, redirect them to `/meme-game [path] [name1,name2,...]`. That skill owns the character library, the WebSearch + face-detection pipeline, the bobblehead body pattern, and the expression wiring. `/add-assets` stays focused on generic pixel art for fictional or unnamed entities.
 
 ### Step 3: Implement
 
@@ -84,11 +83,11 @@ Grid sizes range from 8x8 (tiny pickups) through 16x16 (standard entities) to 32
 ```
 Result: Audits all entities using geometric shapes → creates `src/sprites/` with player, asteroids, and gem pixel art → replaces `fillCircle()`/`fillRect()` with `renderPixelArt()` → collision bounds adjusted.
 
-### Personality game (from tweet)
+### Public-figure / meme game
 ```
-/add-assets examples/nick-land-dodger
+/meme-game examples/nick-land-dodger trump,musk
 ```
-Result: Detects named personality → uses 32x48 Personality archetype at scale 4 → recognizable caricature as player character → enemies and items get themed pixel art.
+For real public figures, use `/meme-game` instead of `/add-assets`. It handles the photo-composite character pipeline, expression wiring, and the bobblehead body pattern.
 
 ## Troubleshooting
 
