@@ -28,3 +28,6 @@ gallery/thumbnails/
 
 # Deployment artifacts
 .herenow/
+
+# eval-game output (per-run BH bench artifacts)
+eval-output/
