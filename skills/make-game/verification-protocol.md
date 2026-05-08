@@ -51,8 +51,9 @@ Launch a `Task` subagent with these instructions:
 > **Phase 4 — Architecture Validation**
 > ```bash
 > cd <project-dir> && node scripts/validate-architecture.mjs
+> cd <project-dir> && node scripts/validate-debug-protocol.mjs
 > ```
-> Report any warnings but don't fail on architecture issues alone.
+> Report any warnings but don't fail on architecture issues alone. The debug-protocol pass is a fast cross-file consistency check (Phaser scene keys registered, asset/animation key references match registries — adapted from leigest519/OpenGame, Apache-2.0). Both scripts are skippable if the project is missing the relevant structure (e.g., asset-pack.json absent → ASSET_KEY_CONSISTENCY skipped, not failed).
 >
 > **Phase 5 — Visual Review via Playwright MCP**
 > Use Playwright MCP to visually review the game. If MCP tools are not available, fall back to reading iterate screenshots from `output/iterate/`.

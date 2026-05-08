@@ -1,0 +1,128 @@
+{
+  "_attribution": "Adapted from leigest519/OpenGame (Apache-2.0). Original: https://github.com/leigest519/OpenGame/blob/main/agent-test/debug-skill/seed-protocol/protocol.json",
+  "_notes": "TypeScript-only entries from the original (TS2307, TS2339, IMPORT_TYPE_KEYWORD, OVERRIDE_VISIBILITY) are dropped. game-creator templates ship as ES modules in plain JS — these signatures are not applicable.",
+  "version": 1,
+  "createdAt": "2026-05-08T00:00:00.000Z",
+  "entries": [
+    {
+      "id": "reactive-typeerror-undefined",
+      "kind": "reactive",
+      "signature": {
+        "stage": "runtime",
+        "errorCode": "TypeError",
+        "messagePattern": "Cannot read propert(y|ies) of undefined",
+        "fileContext": "src/**/*.js"
+      },
+      "rootCause": "Object accessed before initialization. Common in Phaser create() where an object is used before being constructed, or in Three.js render() where a mesh is referenced before it's added to the scene.",
+      "tags": ["runtime", "initialization-order", "undefined"],
+      "fix": {
+        "description": "Reorder creation statements so that the object is initialized before it is accessed. In Phaser scenes: move construction above first usage in create(). In Three.js: ensure objects are added to scene before render loop touches them."
+      }
+    },
+    {
+      "id": "reactive-texture-not-found",
+      "kind": "reactive",
+      "signature": {
+        "stage": "runtime",
+        "errorCode": "TextureNotFound",
+        "messagePattern": "Texture '(.+)' not found",
+        "fileContext": "src/**/*.js"
+      },
+      "rootCause": "Phaser texture key used in code does not match a key registered in asset-pack.json or loaded via this.load.image/spritesheet. Often a spelling difference or missing frame number suffix.",
+      "tags": ["asset", "texture", "key-mismatch"],
+      "fix": {
+        "description": "Compare the texture key in code with public/assets/asset-pack.json (or Phaser .load calls in the boot/preload scene). Use the exact key from the asset registry."
+      }
+    },
+    {
+      "id": "reactive-animation-not-found",
+      "kind": "reactive",
+      "signature": {
+        "stage": "runtime",
+        "errorCode": "AnimationNotFound",
+        "messagePattern": "Animation '(.+)' (doesn't exist|not found)",
+        "fileContext": "src/**/*.js"
+      },
+      "rootCause": "Phaser animation key referenced via .play() does not exist in animations.json or was never registered via this.anims.create. Key may have been renamed or never created.",
+      "tags": ["asset", "animation", "key-mismatch"],
+      "fix": {
+        "description": "Cross-reference with public/assets/animations.json or wherever this.anims.create is called. Confirm the animation key exists before play()."
+      }
+    },
+    {
+      "id": "reactive-scene-not-found",
+      "kind": "reactive",
+      "signature": {
+        "stage": "runtime",
+        "errorCode": "SceneNotFound",
+        "messagePattern": "Scene '(.+)' not found",
+        "fileContext": "src/main.js"
+      },
+      "rootCause": "Scene class not registered in Phaser game config. scene.start() or scene.launch() targets a key that was never added via the GameConfig.scene[] array or game.scene.add().",
+      "tags": ["scene", "registration", "wiring"],
+      "fix": {
+        "description": "Import the scene class in main.js or core/GameConfig.js and add it to the Phaser game config's scene[] array."
+      }
+    },
+    {
+      "id": "reactive-rangeerror-recursion",
+      "kind": "reactive",
+      "signature": {
+        "stage": "runtime",
+        "errorCode": "RangeError",
+        "messagePattern": "Maximum call stack size exceeded",
+        "fileContext": "src/**/*.js"
+      },
+      "rootCause": "Infinite recursion. Common patterns: a method calling itself without a base case, circular scene transitions (Scene A starts B starts A), or an event handler that emits the event it listens for.",
+      "tags": ["runtime", "recursion", "infinite-loop"],
+      "fix": {
+        "description": "Trace the call stack to identify the recursive loop. Add a termination condition or break the circular dependency in scene/event flow."
+      }
+    },
+    {
+      "id": "proactive-asset-key-consistency",
+      "kind": "proactive",
+      "signature": {
+        "stage": "build",
+        "errorCode": "ASSET_KEY_CONSISTENCY",
+        "messagePattern": "Asset key '(.+)' used in code but not found in asset-pack.json",
+        "fileContext": "src/**/*.js"
+      },
+      "rootCause": "Code references texture/audio keys via this.add.image/sprite/audio or this.load.* that do not exist in the asset registry. Caught by scanning code for string literals and cross-referencing with public/assets/asset-pack.json.",
+      "tags": ["proactive", "asset", "consistency"],
+      "fix": {
+        "description": "Either add the missing key to asset-pack.json or correct the key in source. The check is no-op when asset-pack.json is absent, which is correct for shape-only games."
+      }
+    },
+    {
+      "id": "proactive-scene-registration-consistency",
+      "kind": "proactive",
+      "signature": {
+        "stage": "build",
+        "errorCode": "SCENE_REGISTRATION_CONSISTENCY",
+        "messagePattern": "Scene key '(.+)' used in scene\\.start\\(\\) but not registered",
+        "fileContext": "src/**/*.js"
+      },
+      "rootCause": "scene.start() or scene.launch() targets a scene key that is not in the Phaser game config's scene[] array nor added via game.scene.add(). Will fail at runtime with 'Scene not found'.",
+      "tags": ["proactive", "scene", "registration", "wiring"],
+      "fix": {
+        "description": "Register the missing scene in src/main.js or src/core/GameConfig.js. Greppable: every key used in scene.start/launch must appear in either the GameConfig.scene array or a scene.add() call."
+      }
+    },
+    {
+      "id": "proactive-animation-key-consistency",
+      "kind": "proactive",
+      "signature": {
+        "stage": "build",
+        "errorCode": "ANIMATION_KEY_CONSISTENCY",
+        "messagePattern": "Animation key '(.+)' referenced in code but not defined",
+        "fileContext": "src/**/*.js"
+      },
+      "rootCause": "Code plays an animation by key that doesn't exist in animations.json or anims.create. Caught by scanning .play() string-literal arguments and cross-referencing.",
+      "tags": ["proactive", "animation", "asset", "consistency"],
+      "fix": {
+        "description": "Verify the chain: spritesheet frames exist in asset-pack.json → animation defined in animations.json or anims.create() → code uses the exact key. No-op when animations.json is absent."
+      }
+    }
+  ]
+}
