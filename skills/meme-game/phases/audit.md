@@ -5,7 +5,6 @@ Read the existing project, identify which entities are public-figure candidates,
 ## When to use
 
 - The user invoked `/meme-game [path] [name1,name2,...]` directly.
-- `/viral-game` is auto-invoking `/meme-game` after Step 1.5.
 - The user is iterating ("redo with karpathy as opponent") and the project already has a public-figure pass.
 
 ## Inputs
@@ -59,7 +58,7 @@ Append (or create) a `## Meme Pass — Audit` section to `docs/STATE.md`:
 - Source: $ARGUMENTS / detection / user-confirmed
 ```
 
-Falls back to appending to `progress.md` if `docs/STATE.md` does not exist (back-compat with games scaffolded by old viral-game).
+Falls back to appending to `progress.md` if `docs/STATE.md` does not exist (back-compat with games scaffolded by older tooling).
 
 ## Outputs
 

@@ -10,7 +10,7 @@ This is **game-creator**, the game studio for the agent internet. It provides sk
 .claude-plugin/
   plugin.json              # Plugin manifest (name, version, author)
   marketplace.json         # Marketplace metadata (owner: OpusGameLabs)
-settings.json              # Default settings (activates game-creator agent)
+settings.json              # Default settings (env vars, hooks)
 skills/
   phaser/SKILL.md          # 2D game patterns (Phaser 3, scene-based, multi-file)
   threejs-game/SKILL.md    # 3D game patterns (Three.js, event-driven)
@@ -25,7 +25,6 @@ skills/
   playdotfun/SKILL.md      # Play.fun monetization (git submodule → submodules/playdotfun)
   promo-video/SKILL.md     # Autonomous 50 FPS gameplay recording (Playwright + FFmpeg)
   make-game/SKILL.md       # Multi-session game-dev pipeline: idea → scaffold → development phases with milestones, ADRs, docs/STATE.md
-  viral-game/SKILL.md      # One-shot viral pipeline: tweet/story/concept → scaffold → assets → design → promo video → audio → deploy (here.now) → monetize (QA every step, ~10 min)
   improve-game/SKILL.md    # Holistic audit + implement highest-impact improvements
   design-game/SKILL.md     # Visual design audit + improvements
   add-feature/SKILL.md     # Add feature following patterns
@@ -37,7 +36,7 @@ skills/
   record-promo/SKILL.md    # Record autonomous promo video (standalone command)
   monetize-game/SKILL.md   # Play.fun monetization (register, SDK, redeploy)
   scaffold-gateables/SKILL.md  # Add monetization-agnostic gateable features (isEntitled hooks + skin picker, continue, etc.)
-  meme-game/SKILL.md       # Public-figure pass: photo-composite characters of real people + expression wiring (auto-invoked by /viral-game when public figure detected; manual via /meme-game)
+  meme-game/SKILL.md       # Public-figure pass: photo-composite characters of real people + expression wiring (run with /meme-game [path] [names])
   add-multiplayer/SKILL.md # Add real-time or turn-based multiplayer via PartyKit (Cloudflare Durable Objects)
   qa-game/SKILL.md         # Add Playwright QA tests
   sub-games/SKILL.md       # Sub.games community platform for finding players and supporters
@@ -70,7 +69,6 @@ site/
 submodules/
   playdotfun/              # Git submodule: github.com/OpusGameLabs/skills
 agents/
-  game-creator.md          # Autonomous game creation pipeline with build/visual gates
   game-deploy.md           # Deployment automation (preloads game-deploy skill)
   game-qa-runner.md        # Test runner + autofix (preloads game-qa, game-architecture)
   game-reviewer.md         # Code review agent (preloads game-architecture)
@@ -81,7 +79,7 @@ examples/
   maze-tanks/              # 4-player multiplayer demo (PartyKit + Cloudflare DOs) — exercises the add-multiplayer skill
 ```
 
-**Game creation directory**: When `/make-game` or `/viral-game` is launched from within the `game-creator` repository (i.e., the current working directory is `game-creator/` or a subdirectory), new games **must be created in `examples/`** (e.g., `examples/<game-name>/`). This keeps the repo organized and ensures example games are versioned alongside the plugin. When launched from any other directory, games are created in the current working directory as normal.
+**Game creation directory**: When `/make-game` is launched from within the `game-creator` repository (i.e., the current working directory is `game-creator/` or a subdirectory), new games **must be created in `examples/`** (e.g., `examples/<game-name>/`). This keeps the repo organized and ensures example games are versioned alongside the plugin. When launched from any other directory, games are created in the current working directory as normal.
 
 ## Architecture Rules
 
@@ -101,7 +99,7 @@ All games built with this plugin follow these mandatory patterns:
 
 7. **`advanceTime(ms)`** — Every game exposes `window.advanceTime(ms)` in `main.js`. Returns a Promise that resolves after `ms` milliseconds of real time, allowing test scripts to advance the game in controlled increments. For frame-precise control in `@playwright/test`, prefer `page.clock.install()` + `runFor()`.
 
-8. **`progress.md`** — Created at the project root by the game-creator agent. Records the original user prompt, TODOs, decisions, gotchas, and loose ends after each pipeline step. Enables multi-session continuity and agent handoff.
+8. **`docs/STATE.md` + `docs/gameplan.md`** — Created at the project root by `/make-game`. `docs/STATE.md` is the single-file session handoff (last action, current milestone, next step); `docs/gameplan.md` is the source of truth for the game's loop, rules, art style, and tech stack. `progress.md` may exist as a back-compat copy on older projects.
 
 ## Example Game: Flappy Bird
 
@@ -189,23 +187,23 @@ skills/phaser/
   performance.md              # Optimization tips, texture atlases, object pooling
 ```
 
-**Skills with companion files:** `phaser` (8), `game-qa` (7), `game-audio` (6), `add-multiplayer` (4), `meshyai` (3), `game-assets` (3), `threejs-game` (3+), `threejs-perf` (2 + templates/), `make-game` (3 + sub-pipelines/ + templates/), `meme-game` (phases/ + sub-pipelines/), `viral-game` (phases/ + sub-pipelines/ + templates/).
+**Skills with companion files:** `phaser` (8), `game-qa` (7), `game-audio` (6), `add-multiplayer` (4), `meshyai` (3), `game-assets` (3), `threejs-game` (3+), `threejs-perf` (2 + templates/), `make-game` (3 + sub-pipelines/ + templates/), `meme-game` (phases/ + sub-pipelines/).
 
 ## Reference vs User-Invocable Skills
 
 Skills come in two flavors with a deliberate separation of concerns:
 
-- **User-invocable skills** (21) — Triggered by slash commands (e.g., `/add-audio`). These handle the full user-facing workflow: detect the game, load reference skills, run the pipeline, validate output. They have `argument-hint` in frontmatter.
+- **User-invocable skills** (20) — Triggered by slash commands (e.g., `/add-audio`). These handle the full user-facing workflow: detect the game, load reference skills, run the pipeline, validate output. They have `argument-hint` in frontmatter.
 - **Reference skills** (11) — Deep domain knowledge loaded by other skills (or directly via `/load`). They contain patterns, code examples, and conventions but don't drive a workflow themselves.
 
 Four domains have both a reference and a user-invocable skill:
 
 | Reference Skill | User-Invocable Skill | Why Both Exist                                                                            |
 | --------------- | -------------------- | ----------------------------------------------------------------------------------------- |
-| `game-audio`    | `add-audio`          | `game-audio` has Web Audio API patterns reused by `add-audio` AND `viral-game` step 3      |
-| `game-qa`       | `qa-game`            | `game-qa` has Playwright patterns reused by `qa-game` AND the QA subagent in `viral-game`  |
-| `game-assets`   | `add-assets`         | `game-assets` has pixel art patterns reused by `add-assets` AND `viral-game` step 1.5      |
-| `game-designer` | `design-game`        | `game-designer` has visual polish patterns reused by `design-game` AND `viral-game` step 2 |
+| `game-audio`    | `add-audio`          | `game-audio` has Web Audio API patterns reused by `add-audio` AND the `/make-game` development phase |
+| `game-qa`       | `qa-game`            | `game-qa` has Playwright patterns reused by `qa-game` AND the `/make-game` development phase |
+| `game-assets`   | `add-assets`         | `game-assets` has pixel art patterns reused by `add-assets` AND the `/make-game` development phase |
+| `game-designer` | `design-game`        | `game-designer` has visual polish patterns reused by `design-game` AND the `/make-game` development phase |
 
 This separation avoids duplicating domain knowledge across multiple skills. The reference skill is the single source of truth; the user-invocable skill orchestrates the workflow and loads the reference skill for domain knowledge.
 
@@ -239,7 +237,7 @@ The site is built from `site/` and output to `_site/`. Two pages: landing page (
 
 **Capture thumbnails**: `npm run capture:thumbnails` (runs `node site/capture-screenshots.js`). For each template, reuses existing QA screenshots from `output/` or boots the game in headless Chromium. Output: 400x225 PNGs in `site/thumbnails/`.
 
-**Clone a template**: `/use-template <template-id> [project-name]` — copies template source, updates package.json/title, runs npm install. 10-second copy vs 10-minute `/viral-game` pipeline.
+**Clone a template**: `/use-template <template-id> [project-name]` — copies template source, updates package.json/title, runs npm install. 10-second copy vs the full `/make-game` pipeline when you just want a working starting point.
 
 **Adding a new template to the gallery**: Add an entry to `site/manifest.json`, run `npm run capture:thumbnails`, then `npm run build:site`.
 
@@ -266,7 +264,7 @@ Anonymous, append-only telemetry tracks template usage (clones and clicks). No u
 
 ## Play.fun (OpenGameProtocol) Integration
 
-The `/monetize-game` command (and Step 5 of `/viral-game`) registers games on [Play.fun](https://play.fun) and integrates the browser SDK.
+The `/monetize-game` command registers games on [Play.fun](https://play.fun) and integrates the browser SDK.
 
 **Flow**: Auth → Register game → Add SDK to `index.html` + create `src/playfun.js` → Rebuild → Redeploy (here.now or GitHub Pages) → Share play.fun URL on Moltbook
 
@@ -290,4 +288,4 @@ See `TROUBLESHOOTING.md` for common issues including:
 
 ## Trigger Test Suite
 
-See `tests/trigger-tests.md` for manual test prompts (5-7 per skill) verifying correct trigger behavior. Covers all 20 user-invocable skills plus negative tests for prompts that should NOT trigger any skill.
+See `tests/trigger-tests.md` for manual test prompts (5-7 per skill) verifying correct trigger behavior. Covers all 19 user-invocable skills plus negative tests for prompts that should NOT trigger any skill.

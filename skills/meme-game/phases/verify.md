@@ -1,6 +1,6 @@
 # Verify phase
 
-Run a focused verification pass on the public-figure work. This is lighter than `/viral-game`'s full pipeline QA — meme-game changes only entity rendering and expression wiring, so the QA scope narrows accordingly.
+Run a focused verification pass on the public-figure work. The QA scope is narrow on purpose — meme-game changes only entity rendering and expression wiring, so the verification stays scoped to that.
 
 ## When to use
 
@@ -24,7 +24,7 @@ Build must succeed. If it fails, fix before continuing — common causes are imp
 
 **2. Runtime check.**
 
-If the project has `scripts/verify-runtime.mjs` (added by viral-game), run it. Otherwise, boot the dev server and confirm the page returns 200 + the canvas mounts without console errors.
+If the project has `scripts/verify-runtime.mjs` (some templates ship it), run it. Otherwise, boot the dev server and confirm the page returns 200 + the canvas mounts without console errors.
 
 **3. Visual review (Playwright MCP).**
 
@@ -62,7 +62,7 @@ Append a `## Meme Pass — Done` section to `docs/STATE.md` summarizing the run:
 - Expression events: SCORE_CHANGED → HAPPY, PLAYER_DAMAGED → ANGRY, SPECTACLE_STREAK → SURPRISED (1000ms)
 - Visual snapshots: updated (2 files)
 - Tests passing: 15/15
-- Next step: hand back to user / continue with /viral-game ship phase
+- Next step: hand back to user (mention `/game-deploy` and `/monetize-game` if they want to ship)
 ```
 
 Falls back to `progress.md` if `docs/STATE.md` does not exist.

@@ -1,16 +1,15 @@
-# Public-Figure Detection (shared)
+# Public-Figure Detection
 
-Single source of truth for detecting whether a game concept names a public figure or a public company. Both `/viral-game` (during its concept phase, for both Form A and Form B) and `/meme-game` (when called without an explicit name list) consume this. Keep the logic in this one file; both skills should reference it rather than duplicating.
+Detection logic for the `/meme-game` audit phase: when the user invokes `/meme-game <path>` without an explicit name list, scan the project's documentation to figure out which public figures (if any) the game already features, before asking the user.
 
 ## When to run
 
-- `/viral-game` — once during concept parsing, before any code-writing step. Sets `hasPublicFigures` and `publicFigureSlugs` on the pipeline.
-- `/meme-game` — only if the user invoked it without explicit names (`/meme-game <path>` with no name list). When the user *did* pass names, skip detection and trust the input.
-- Autonomous `agents/game-creator.md` orchestrator — once during pipeline init.
+Only inside the [audit phase](../phases/audit.md), and only when `$ARGUMENTS` did not include explicit names. When the user *did* pass names (`/meme-game <path> trump,musk`), skip detection and trust the input.
 
 ## Inputs
 
-- The user's prompt text (Form A in viral-game), OR the abstracted tweet concept + raw tweet text (Form B), OR the `progress.md` / `docs/gameplan.md` contents (meme-game when invoked on an existing project).
+- `docs/gameplan.md` (or legacy `design-brief.md`) — describes the game concept; usually the strongest signal.
+- `docs/STATE.md` (or legacy `progress.md`) — may already record detected slugs from a prior session.
 - Plugin root path so the manifest can be resolved.
 
 ## Detection tiers
@@ -59,7 +58,7 @@ Unknown company → no mapping; skip silently. Do not invent CEOs for companies 
 - `hasPublicFigures: boolean` — true if at least one slug was matched, false otherwise.
 - `publicFigureSlugs: string[]` — deduplicated, in input order. May be empty.
 
-Pass both into the rest of the pipeline (Step 1 conditional scaffolding hints, Step 1.6 hand-off, etc.).
+Pass both back into the audit phase. If `hasPublicFigures` is true, the resolve and wire phases proceed against `publicFigureSlugs`. If false, the audit phase falls through to a single `AskUserQuestion` asking the user which characters to feature.
 
 ## Hard rules
 

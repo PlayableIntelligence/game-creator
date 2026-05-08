@@ -1,6 +1,6 @@
 # 3D Public-Figure Characters
 
-For 3D games (Three.js), public-figure characters need rigged caricature models with walk/run animations. The 4-tier flow below mirrors the 2D resolution but produces GLB models instead of spritesheets. The generic 3D asset pipeline (rig, SkeletonUtils.clone, world props, AssetLoader) is owned by `viral-game` Step 1.5 and the `game-3d-assets` skill — this file covers only the public-figure-specific pieces.
+For 3D games (Three.js), public-figure characters need rigged caricature models with walk/run animations. The 4-tier flow below mirrors the 2D resolution but produces GLB models instead of spritesheets. The generic 3D asset pipeline (rig, SkeletonUtils.clone, world props, AssetLoader) is owned by the `game-3d-assets` skill (also reachable via `/add-3d-assets`) — this file covers only the public-figure-specific pieces. Run that skill against the project before this one if non-named entities still need 3D assets.
 
 ## Prerequisite
 

@@ -1,6 +1,6 @@
 ---
 name: use-template
-description: Clone a game template from the gallery as a starting point. Use when the user says "use a template", "start from a template", "clone flappy-bird", "use the platformer template", or wants to quickly bootstrap a game from an existing example. Do NOT use for creating a game from scratch (use viral-game for one-shot builds or make-game for milestone-driven projects).
+description: Clone a game template from the gallery as a starting point. Use when the user says "use a template", "start from a template", "clone flappy-bird", "use the platformer template", or wants to quickly bootstrap a game from an existing example. Do NOT use for creating a game from scratch (use make-game).
 argument-hint: "[template-id] [project-name]"
 license: MIT
 metadata:
@@ -157,6 +157,6 @@ if (!process.env.DO_NOT_TRACK && !process.env.DISABLE_TELEMETRY) {
 - **Telemetry**: Anonymous, opt-out usage telemetry sends only the template ID and event type (no PII, paths, or user data). Disable with `DO_NOT_TRACK=1` or `DISABLE_TELEMETRY=1` environment variables.
 - **Template source**: Templates are copied from the local `site/manifest.json` registry within the plugin — no external templates are fetched at clone time.
 
-## Key Difference from /viral-game and /make-game
+## Key Difference from /make-game
 
-`/use-template` is a **10-second copy**. You get working, runnable code instantly and customize it manually. `/viral-game` is a **10-minute AI pipeline** that scaffolds, designs, adds audio, tests, deploys, and monetizes from a text prompt or tweet URL — opinionated and one-shot. `/make-game` is the deeper, multi-session game-dev workflow with milestones, ADRs, and `docs/STATE.md` for projects that need to evolve over time.
+`/use-template` is a **10-second copy**. You get working, runnable code instantly and customize it manually. `/make-game` is the multi-session game-dev workflow with milestones, ADRs, and `docs/STATE.md` for projects that need to evolve over time.

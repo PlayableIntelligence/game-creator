@@ -90,6 +90,4 @@ Tell the user:
 
 > Your game looks much better now! Next, run `/game-creator:add-audio` to add chiptune background music and retro sound effects — all procedurally generated, no audio files needed.
 >
-> **Pipeline progress:** ~~/viral-game~~ → ~~/design-game~~ → `/add-audio` → `/qa-game` → `/review-game`
->
-> *(This is the `/viral-game` one-shot pipeline — not the `/make-game` multi-session, milestone-driven workflow.)*
+> **Pipeline progress:** ~~/make-game~~ → ~~/design-game~~ → `/add-audio` → `/qa-game` → `/review-game`

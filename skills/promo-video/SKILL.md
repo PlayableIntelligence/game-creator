@@ -106,7 +106,7 @@ const pauseMs = 50 + Math.floor(Math.random() * 250);
 
 ### 3. Game Boot Detection
 
-All Phaser games built with the `/viral-game` or `/make-game` pipelines expose these globals:
+All Phaser games built with the `/make-game` pipeline expose these globals:
 
 - `window.__GAME__` — Phaser.Game instance
 - `window.__GAME_STATE__` — GameState singleton
