@@ -1,0 +1,11 @@
+{
+  "name": "anvil",
+  "prompt": "a stylized stone anvil with iron horn",
+  "files": { "glb": "anvil.glb" },
+  "license": "Meshy Generated",
+  "source": "meshy",
+  "model": "text-to-3d preview",
+  "task_id": "019dd5db-fe28-7700-8fe1-41c8c34e4f6c",
+  "art_style": "realistic",
+  "createdAt": "2026-04-28T20:52:50Z"
+}

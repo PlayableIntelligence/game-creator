@@ -50,14 +50,18 @@
  */
 
 import { writeFileSync, readFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
-import { resolve, join, basename, dirname, fileURLToPath } from 'node:path';
+import { resolve, join, basename, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
+import { homedir } from 'node:os';
+import { randomUUID } from 'node:crypto';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const API_BASE = 'https://api.meshy.ai/openapi';
+const DIRECT_API_BASE = 'https://api.meshy.ai/openapi';
+const DEFAULT_PROXY   = 'https://plus.gamecreator.dev';
 const POLL_INTERVAL_MS = 5000;
 const MAX_POLL_ATTEMPTS = 360; // 30 minutes max
 
@@ -94,13 +98,41 @@ const noPoll = hasFlag('no-poll');
 const noOptimize = hasFlag('no-optimize');
 const optimizeTextureSize = parseInt(getArg('texture-size', '1024'), 10);
 
-const API_KEY = process.env.MESHY_API_KEY;
+// Routing — Plus proxy if GCPLUS_TOKEN is set or ~/.gcplus/token exists,
+// else direct upstream with MESHY_API_KEY. Proxy mode pays through Plus
+// credits; direct mode hits Meshy with your own API key.
+const TOKEN_PATH = join(homedir(), '.gcplus', 'token');
+const GCPLUS_TOKEN =
+  process.env.GCPLUS_TOKEN ||
+  (existsSync(TOKEN_PATH) ? readFileSync(TOKEN_PATH, 'utf8').trim() : null);
+const GCPLUS_PROXY = process.env.GCPLUS_PROXY || DEFAULT_PROXY;
+const API_KEY      = process.env.MESHY_API_KEY;
+
+const useProxy = !!GCPLUS_TOKEN;
+const API_BASE = useProxy ? `${GCPLUS_PROXY}/v1/meshy` : DIRECT_API_BASE;
+
+/**
+ * Map an upstream Meshy path to the Plus proxy path. Direct mode keeps the
+ * full version-prefixed path. The proxy strips the leading /v1 or /v2
+ * since its versioning is at /v1/meshy/<endpoint>. Meshy uses /v2 for
+ * text-to-3d and /v1 for image-to-3d, rigging, animations, retexture,
+ * remesh — all need the prefix stripped in proxy mode.
+ *
+ * PR-21-AUDIT 1.2: prior implementation stripped only /v2, so /v1
+ * endpoints resolved to /v1/meshy/v1/image-to-3d etc. and silently 404'd.
+ */
+function resolvePath(path) {
+  if (!useProxy) return path;
+  return path.replace(/^\/v[12]/, '');
+}
 
 function requireApiKey() {
+  if (useProxy) return;
   if (!API_KEY) {
     throw new Error(
-      'MESHY_API_KEY environment variable is required.\n' +
-      'Get an API key at: https://app.meshy.ai → Settings → API Keys'
+      'No credentials. Set GCPLUS_TOKEN (proxy mode) or MESHY_API_KEY (direct).\n' +
+      '  - Plus proxy: node scripts/plus-auth.mjs signup --email <you@example.com>\n' +
+      '  - Direct API: get a key at https://app.meshy.ai → Settings → API Keys',
     );
   }
 }
@@ -155,27 +187,45 @@ function formatBytes(bytes) {
 
 function headers() {
   return {
-    Authorization: `Bearer ${API_KEY}`,
+    // Same Bearer header for both modes — direct uses MESHY_API_KEY, proxy
+    // uses GCPLUS_TOKEN. Server-side the proxy validates and re-signs.
+    Authorization: `Bearer ${useProxy ? GCPLUS_TOKEN : API_KEY}`,
     'Content-Type': 'application/json',
   };
 }
 
 async function apiPost(path, body) {
-  const url = `${API_BASE}${path}`;
+  const url = `${API_BASE}${resolvePath(path)}`;
+  const reqHeaders = headers();
+  // Plus proxy honors Idempotency-Key for billed endpoints. Match either
+  // /v1 or /v2 prefix — see resolvePath comment for the version split.
+  // PR-21-AUDIT 1.2: prior version only matched /v2, so /v1/* retries
+  // could double-bill.
+  if (useProxy && /\/v[12]\/(text-to-3d|image-to-3d|rigging|animations|retexture|remesh)\b/.test(path)) {
+    reqHeaders['Idempotency-Key'] = randomUUID();
+  }
   const res = await fetch(url, {
     method: 'POST',
-    headers: headers(),
+    headers: reqHeaders,
     body: JSON.stringify(body),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
+    if (useProxy && res.status === 402) {
+      let parsed;
+      try { parsed = JSON.parse(text); } catch {}
+      throw new Error(
+        `Out of credits. Need ${parsed?.needed ?? '?'} cr, have ${parsed?.balance ?? '?'} cr.\n` +
+        `Top up: node scripts/plus-auth.mjs topup --amount 20`,
+      );
+    }
     throw new Error(`POST ${path} → HTTP ${res.status}: ${text}`);
   }
   return res.json();
 }
 
 async function apiGet(path) {
-  const url = `${API_BASE}${path}`;
+  const url = `${API_BASE}${resolvePath(path)}`;
   const res = await fetch(url, { headers: headers() });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
@@ -185,7 +235,7 @@ async function apiGet(path) {
 }
 
 async function apiDelete(path) {
-  const url = `${API_BASE}${path}`;
+  const url = `${API_BASE}${resolvePath(path)}`;
   const res = await fetch(url, { method: 'DELETE', headers: headers() });
   if (!res.ok) {
     const text = await res.text().catch(() => '');

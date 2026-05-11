@@ -28,3 +28,6 @@ gallery/thumbnails/
 
 # Deployment artifacts
 .herenow/
+
+# Local dev artifacts
+_dev-screenshots/

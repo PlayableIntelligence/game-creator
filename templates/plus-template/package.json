@@ -1,0 +1,21 @@
+{
+  "name": "plus-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plus template — Marble splat + Meshy assets + Rapier physics + Three.js. Foundation for any 3D game (souls battle, RuneScape-style, TCG sim, etc.).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3001",
+    "build": "vite build",
+    "preview": "vite preview --port 3001"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.14.0",
+    "@pixiv/three-vrm": "^3.5.2",
+    "@sparkjsdev/spark": "^2.0.0",
+    "three": "^0.183.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}

@@ -169,8 +169,13 @@ npm run build      # Production build to dist/
 |----------|--------|----------|
 | `phaser-2d` | Phaser 3 | Boot/Game/GameOver scenes, Player entity, ScoreSystem, arcade physics, high-DPI support |
 | `threejs-3d` | Three.js | Game orchestrator, Player mesh, LevelBuilder, HTML overlays, InputSystem (touch + keyboard) |
+| `plus-template` | Three.js + Spark 2 | **AI-generated 3D worlds** (Marble Labs splats + Meshy AI assets). Cathedral pattern, fake-floor physics, kinematic capsule, spring-arm camera, lightness bake, splat fog. Pairs with `game-creator-plus` skill + backend proxy. |
 
-Both templates ship with `scripts/verify-runtime.mjs` (headless runtime check), `scripts/iterate-client.js` (action replay + screenshots), `scripts/validate-architecture.mjs` (pattern validator), and `scripts/example-actions.json` (default test actions).
+Both 2D/3D templates ship with `scripts/verify-runtime.mjs` (headless runtime check), `scripts/iterate-client.js` (action replay + screenshots), `scripts/validate-architecture.mjs` (pattern validator), and `scripts/example-actions.json` (default test actions).
+
+## Premium Tier: game-creator-plus
+
+For AI-generated 3D *worlds* and *characters*, the optional **`game-creator-plus`** skill calls Marble Labs (Gaussian splat environments) and Meshy AI (3D models + auto-rig + animations) on your behalf, routing through our hosted proxy at `gamecreator.dev`. Pay-as-you-go credits via Stripe; no subscription, no rev share. See [`skills/game-creator-plus/`](./skills/game-creator-plus/) for the skill and [`templates/plus-template/`](./templates/plus-template/) for the runtime. The proxy backend itself (NestJS + TypeORM + Stripe) lives in a separate private repo.
 
 ## Tech Stack
 
