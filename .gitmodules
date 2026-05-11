@@ -7,4 +7,3 @@
 [submodule "submodules/unity-mcp"]
 	path = submodules/unity-mcp
 	url = https://github.com/CoplayDev/unity-mcp.git
-	branch = beta

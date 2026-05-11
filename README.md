@@ -107,6 +107,7 @@ src/
 | `game-architecture` | Reference architecture patterns for event-driven games |
 | `game-deploy` | Deployment — here.now (default), GitHub Pages, Vercel, Netlify, itch.io |
 | `playdotfun` | Play.fun (OpenGameProtocol) — SDK, API, auth, leaderboards |
+| `unity-mcp` | Unity Editor automation via MCP (CoplayDev/unity-mcp, beta) |
 | `fetch-tweet` | Fetch tweet content for tweet-to-game conversion |
 
 ### Slash Commands (user-invocable)
