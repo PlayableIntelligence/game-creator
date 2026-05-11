@@ -39,7 +39,7 @@
  */
 
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'node:fs';
-import { resolve, extname } from 'node:path';
+import { resolve } from 'node:path';
 
 const API_BASE = 'https://api.retrodiffusion.ai/v1';
 const API_KEY = process.env.RETRODIFFUSION_API_KEY || process.env.RD_API_KEY;
@@ -233,7 +233,8 @@ async function runAnimate() {
   const data = await apiCall('/inferences', payload);
   console.log(`  cost: $${data.balance_cost?.toFixed(3) ?? '?'}  remaining: $${data.remaining_balance?.toFixed(2) ?? '?'}`);
   // Animation styles return GIF or spritesheet PNG depending on the style.
-  const ext = (data.base64_images?.[0]?.length ?? 0) > 0 && style.includes('gif') ? 'gif' : 'png';
+  // Sniff the base64 magic bytes — PNG → "iVBORw0K", GIF → "R0lGOD".
+  const ext = data.base64_images?.[0]?.startsWith('R0lGOD') ? 'gif' : 'png';
   writeImages(data.base64_images || [], baseSlug, ext);
   writeMeta(baseSlug, {
     mode: 'animate',

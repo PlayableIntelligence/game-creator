@@ -118,6 +118,7 @@ src/
 | `/design-game [path]` | Audit and improve visual polish |
 | `/add-feature [description]` | Add a gameplay feature following architecture patterns |
 | `/add-assets [path]` | Replace geometric shapes with pixel art sprites |
+| `/retrodiffusion [prompt]` | Generate true pixel art sprites/tilesets/animations via Retro Diffusion API (paid) |
 | `/add-audio [path]` | Add Strudel.cc music and sound effects |
 | `/monetize-game [path]` | Register on Play.fun, add SDK, get monetized URL |
 | `/qa-game [path]` | Add Playwright QA tests |
