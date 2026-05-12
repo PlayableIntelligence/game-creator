@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copyright Policy — Game Creator</title>
+  <meta name="description" content="Copyright Policy and DMCA information for Game Creator." />
+  <style>
+    
+    :root {
+      --bg: #06080f;
+      --bg-raised: #0d1117;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --red: #ff4444;
+      --red-soft: #ff6b6b;
+      --red-glow: rgba(255,68,68,0.15);
+      --coral: #ff7b72;
+      --orange: #fb923c;
+      --green: #4ade80;
+      --blue: #60a5fa;
+      --yellow: #fbbf24;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(6,8,15,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(30,41,59,0.5);
+    }
+    .nav-logo {
+      font-weight: 800; font-size: 18px; color: #fff;
+      text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--red); }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .nav-right { display: flex; gap: 10px; align-items: center; }
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--red); color: #fff; }
+    .nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 10px;
+      font-size: 15px; font-weight: 700; text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red), var(--red-soft));
+      color: #fff; box-shadow: 0 4px 24px rgba(255,68,68,0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 32px rgba(255,68,68,0.45); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-secondary:hover { border-color: var(--text-muted); }
+
+    /* BADGES */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-2d { background: rgba(74,222,128,0.12); color: var(--green); }
+    .badge-3d { background: var(--red-glow); color: var(--red); }
+    .badge-starter { background: rgba(96,165,250,0.2); color: var(--blue); }
+    .badge-beginner { background: rgba(74,222,128,0.2); color: var(--green); }
+    .badge-intermediate { background: rgba(251,191,36,0.2); color: var(--yellow); }
+    .badge-advanced { background: rgba(255,68,68,0.2); color: var(--red); }
+
+    /* CARD */
+    .card {
+      background: var(--bg-raised); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,68,68,0.3);
+      box-shadow: 0 12px 40px rgba(255,68,68,0.08);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 32px 24px;
+      color: var(--text-dim); font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--coral); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* LEGAL */
+    .legal-main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 120px 24px 72px;
+    }
+    .legal-main h1 {
+      color: #fff;
+      font-size: 42px;
+      line-height: 1.12;
+      margin-bottom: 12px;
+    }
+    .legal-main h2 {
+      color: #fff;
+      font-size: 22px;
+      line-height: 1.3;
+      margin: 42px 0 14px;
+      padding-top: 8px;
+    }
+    .legal-main p,
+    .legal-main li {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    .legal-main p { margin: 0 0 18px; }
+    .legal-main ul {
+      margin: 0 0 22px 24px;
+      padding: 0;
+    }
+    .legal-main li { margin-bottom: 10px; }
+    .legal-main a {
+      color: var(--coral);
+      text-decoration: none;
+    }
+    .legal-main a:hover { text-decoration: underline; }
+    .legal-main strong { color: var(--text); }
+
+    /* RESPONSIVE BASE */
+    @media (max-width: 768px) {
+      nav { padding: 12px 16px; }
+      .nav-links { display: none; }
+      .legal-main { padding: 96px 18px 56px; }
+      .legal-main h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="../">game<span>-creator</span></a>
+    <div class="nav-links">
+      <a href="../">Home</a>
+      <a href="../#pipeline">Pipeline</a>
+      <a href="../#features">Features</a>
+      <a href="../gallery/">Gallery</a>
+    </div>
+    <a class="nav-btn" href="https://github.com/OpusGameLabs/game-creator" target="_blank">
+      <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </nav>
+  <main class="legal-main">
+      <h1><strong>Copyright Policy</strong></h1>
+      <p>Last updated: May 11, 2026</p>
+      <p>StoryverseCo Inc. (“we,” “us,” or “our”), operator of Game Creator, respects the intellectual property rights of others and expects users of the Game Creator platform to do the same. This policy explains how we handle copyright infringement claims under the Digital Millennium Copyright Act (“DMCA”).</p>
+      <h2><strong>How Game Creator handles content</strong></h2>
+      <p>Game Creator allows users to generate AI-produced game assets via upstream providers (currently Marble Labs and Meshy AI). Generated assets are returned to the user and may be mirrored on our infrastructure for the user’s convenience. We do not pre-screen prompts or outputs. Users are responsible for ensuring their prompts and use of generated assets comply with all applicable laws and third-party rights, as set out in our Terms of Service and Acceptable Use Policy.</p>
+      <h2><strong>Filing a DMCA takedown notice</strong></h2>
+      <p>If you believe that content available on or through the Service infringes your copyright, you may submit a written notification to our designated Copyright Agent. Your notice must include:</p>
+      <ul>
+      <li>A physical or electronic signature of the copyright owner or a person authorized to act on their behalf.</li>
+      <li>Identification of the copyrighted work claimed to have been infringed.</li>
+      <li>Identification of the infringing material and information reasonably sufficient to permit us to locate it on the Service (e.g., a URL or asset identifier).</li>
+      <li>Your contact information: name, address, telephone number, and email address.</li>
+      <li>A statement that you have a good faith belief that use of the material is not authorized by the copyright owner, its agent, or the law.</li>
+      <li>A statement, made under penalty of perjury, that the information in the notification is accurate and that you are the copyright owner or are authorized to act on their behalf.</li>
+      </ul>
+      <h2><strong>Copyright Agent</strong></h2>
+      <p>DMCA notices should be sent to:</p>
+      <p>StoryverseCo Inc. (Game Creator) Attn: Copyright Agent Email: <a href="mailto:copyright@gamecreator.dev">copyright@gamecreator.dev</a></p>
+      <h2><strong>What happens after we receive a notice</strong></h2>
+      <ul>
+      <li>We will review the notice for compliance with DMCA requirements.</li>
+      <li>If the notice is valid, we will remove or disable access to the allegedly infringing material promptly.</li>
+      <li>We will make a good faith attempt to notify the user who generated or stored the material.</li>
+      <li>We will provide the affected user with information on how to submit a counter-notification.</li>
+      </ul>
+      <h2><strong>Counter-Notification</strong></h2>
+      <p>If you believe that material you posted was removed by mistake or misidentification, you may submit a counter-notification to our Copyright Agent containing:</p>
+      <ul>
+      <li>Your physical or electronic signature.</li>
+      <li>Identification of the material removed and the location where it appeared before removal.</li>
+      <li>A statement under penalty of perjury that you have a good faith belief that the material was removed as a result of mistake or misidentification.</li>
+      <li>Your name, address, and telephone number, and a statement that you consent to the jurisdiction of the federal courts in the State of Delaware and will accept service of process from the original complainant.</li>
+      </ul>
+      <p>Upon receiving a valid counter-notification, we will provide a copy to the original complainant. If the original complainant does not file a court action within ten (10) business days, we may restore the removed material.</p>
+      <h2><strong>AI-Generated Content</strong></h2>
+      <p>AI-generated outputs may, in some cases, resemble copyrighted works. We will respond to valid DMCA notices targeting AI-generated assets in the same manner as for any other content. The legal status of AI-generated outputs is unsettled in many jurisdictions, and we make no representation about whether a particular output is or is not infringing.</p>
+      <p>If you are a Game Creator user whose generated asset is the subject of a DMCA notice, you remain responsible under our Terms of Service and Acceptable Use Policy for the prompts you submitted and for your use of any output.</p>
+      <h2><strong>Repeat Infringers</strong></h2>
+      <p>We reserve the right to terminate the accounts of users or Creators who are determined to be repeat infringers, at our sole discretion.</p>
+      <h2><strong>Good Faith</strong></h2>
+      <p>Please be aware that under 17 U.S.C. § 512(f), any person who knowingly materially misrepresents that material is infringing, or that material was removed by mistake, may be subject to liability for damages, including costs and attorney’s fees.</p>
+  </main>
+  <footer>
+    Built by <a href="https://github.com/OpusGameLabs">OpusGameLabs</a> &middot;
+    <a href="../">Home</a> &middot;
+    <a href="../gallery/">Gallery</a> &middot;
+    <a href="../terms/">Terms</a> &middot;
+    <a href="../privacy/">Privacy</a> &middot;
+    <a href="../copyright/">Copyright</a> &middot;
+    <a href="https://github.com/OpusGameLabs/game-creator">Source</a>
+  </footer>
+</body>
+</html>

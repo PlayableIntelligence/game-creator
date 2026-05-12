@@ -15,6 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
+    
     :root {
       --bg: #06080f;
       --bg-raised: #0d1117;
@@ -28,6 +29,8 @@
       --coral: #ff7b72;
       --orange: #fb923c;
       --green: #4ade80;
+      --blue: #60a5fa;
+      --yellow: #fbbf24;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -58,7 +61,7 @@
       color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
       transition: color 0.2s;
     }
-    .nav-links a:hover { color: #fff; }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
     .nav-right { display: flex; gap: 10px; align-items: center; }
     .nav-btn {
       display: inline-flex; align-items: center; gap: 8px;
@@ -69,6 +72,104 @@
     }
     .nav-btn:hover { border-color: var(--red); color: #fff; }
     .nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 10px;
+      font-size: 15px; font-weight: 700; text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red), var(--red-soft));
+      color: #fff; box-shadow: 0 4px 24px rgba(255,68,68,0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 32px rgba(255,68,68,0.45); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-secondary:hover { border-color: var(--text-muted); }
+
+    /* BADGES */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-2d { background: rgba(74,222,128,0.12); color: var(--green); }
+    .badge-3d { background: var(--red-glow); color: var(--red); }
+    .badge-starter { background: rgba(96,165,250,0.2); color: var(--blue); }
+    .badge-beginner { background: rgba(74,222,128,0.2); color: var(--green); }
+    .badge-intermediate { background: rgba(251,191,36,0.2); color: var(--yellow); }
+    .badge-advanced { background: rgba(255,68,68,0.2); color: var(--red); }
+
+    /* CARD */
+    .card {
+      background: var(--bg-raised); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,68,68,0.3);
+      box-shadow: 0 12px 40px rgba(255,68,68,0.08);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 32px 24px;
+      color: var(--text-dim); font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--coral); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* LEGAL */
+    .legal-main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 120px 24px 72px;
+    }
+    .legal-main h1 {
+      color: #fff;
+      font-size: 42px;
+      line-height: 1.12;
+      margin-bottom: 12px;
+    }
+    .legal-main h2 {
+      color: #fff;
+      font-size: 22px;
+      line-height: 1.3;
+      margin: 42px 0 14px;
+      padding-top: 8px;
+    }
+    .legal-main p,
+    .legal-main li {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    .legal-main p { margin: 0 0 18px; }
+    .legal-main ul {
+      margin: 0 0 22px 24px;
+      padding: 0;
+    }
+    .legal-main li { margin-bottom: 10px; }
+    .legal-main a {
+      color: var(--coral);
+      text-decoration: none;
+    }
+    .legal-main a:hover { text-decoration: underline; }
+    .legal-main strong { color: var(--text); }
+
+    /* RESPONSIVE BASE */
+    @media (max-width: 768px) {
+      nav { padding: 12px 16px; }
+      .nav-links { display: none; }
+      .legal-main { padding: 96px 18px 56px; }
+      .legal-main h1 { font-size: 32px; }
+    }
 
     /* HERO */
     .hero {
@@ -110,24 +211,6 @@
       color: var(--text-muted); max-width: 640px; margin: 0 auto 40px; line-height: 1.7;
     }
     .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-
-    /* BUTTONS */
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 14px 28px; border-radius: 10px;
-      font-size: 15px; font-weight: 700; text-decoration: none;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .btn:hover { transform: translateY(-2px); }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--red), var(--red-soft));
-      color: #fff; box-shadow: 0 4px 24px rgba(255,68,68,0.3);
-    }
-    .btn-primary:hover { box-shadow: 0 8px 32px rgba(255,68,68,0.45); }
-    .btn-secondary {
-      background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text);
-    }
-    .btn-secondary:hover { border-color: var(--text-muted); }
 
     /* SECTION */
     section { max-width: 1140px; margin: 0 auto; padding: 100px 24px 0; }
@@ -262,7 +345,7 @@
     }
     .copybox-btn:hover { background: rgba(255,68,68,0.2); }
 
-    /* INSTALL TABS (inside onboard) */
+    /* INSTALL TABS */
     .itabs {
       display: flex; gap: 0; margin-bottom: 0;
       max-width: 640px; margin-left: auto; margin-right: auto;
@@ -352,43 +435,20 @@
 
     /* GAMES */
     .games { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 20px; }
-    .card {
-      background: var(--bg-raised); border: 1px solid var(--border);
-      border-radius: 14px; overflow: hidden;
-      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
-    }
-    .card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(255,68,68,0.3);
-      box-shadow: 0 12px 40px rgba(255,68,68,0.08);
-    }
+    .games .card { display: flex; flex-direction: column; }
+    .games .card:hover { transform: translateY(-6px); }
     .card-thumb {
       width: 100%; height: 180px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 56px; position: relative; overflow: hidden;
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #0d1117, #1a1a2e);
     }
-    .card-thumb::before { content: ''; position: absolute; inset: 0; }
-    .card:nth-child(1) .card-thumb::before { background: linear-gradient(135deg, #1a0a0a, #2a1515); }
-    .card:nth-child(2) .card-thumb::before { background: linear-gradient(135deg, #1a0f0e, #2d1b1a); }
-    .card:nth-child(3) .card-thumb::before { background: linear-gradient(135deg, #1a1208, #2e2210); }
-    .card:nth-child(4) .card-thumb::before { background: linear-gradient(135deg, #150a0a, #2a1210); }
-    .card:nth-child(5) .card-thumb::before { background: linear-gradient(135deg, #120f0a, #221a10); }
-    .card:nth-child(6) .card-thumb::before { background: linear-gradient(135deg, #1a0a0f, #2a1520); }
-    .card:nth-child(7) .card-thumb::before { background: linear-gradient(135deg, #0a0a1a, #151530); }
-    .card:nth-child(8) .card-thumb::before { background: linear-gradient(135deg, #050510, #0f0a20); }
-    .card:nth-child(9) .card-thumb::before { background: linear-gradient(135deg, #0a1a0a, #0f2f0f); }
-    .card:nth-child(10) .card-thumb::before { background: linear-gradient(135deg, #001a00, #003300); }
-    .card:nth-child(11) .card-thumb::before { background: linear-gradient(135deg, #1a0a00, #2a1500); }
-    .card-thumb span { position: relative; z-index: 1; }
+    .card-thumb img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
     .card-body { padding: 22px; }
     .card-body h2 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 100px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
-      margin-bottom: 12px; text-transform: uppercase;
-    }
-    .badge-2d { background: rgba(74,222,128,0.12); color: var(--green); }
-    .badge-3d { background: var(--red-glow); color: var(--red); }
+    .card-body .badge { margin-bottom: 12px; }
     .card-body p { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 18px; }
     .play-btn {
       display: inline-flex; align-items: center; gap: 6px;
@@ -399,6 +459,14 @@
       box-shadow: 0 4px 16px rgba(255,68,68,0.2);
     }
     .play-btn:hover { transform: scale(1.04); box-shadow: 0 6px 24px rgba(255,68,68,0.35); }
+
+    .view-all-link {
+      text-align: center; margin-top: 32px;
+    }
+    .view-all-link a {
+      color: var(--red); font-weight: 700; text-decoration: none; font-size: 15px;
+    }
+    .view-all-link a:hover { text-decoration: underline; }
 
     /* STACK */
     .stack { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
@@ -432,19 +500,19 @@
       color: var(--red); margin-bottom: 32px;
     }
 
-    /* FOOTER */
-    footer {
-      text-align: center; padding: 32px 24px;
-      color: var(--text-dim); font-size: 13px;
-      border-top: 1px solid var(--border);
+    /* BENCHMARKS */
+    .benchmarks-grid {
+      display: flex; flex-wrap: wrap; gap: 20px;
     }
-    footer a { color: var(--coral); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    .bench-item {
+      padding: 24px 32px; background: var(--bg-raised);
+      border: 1px solid var(--border); border-radius: 14px; text-align: center;
+    }
+    .bench-value { font-size: 32px; font-weight: 900; color: var(--red); margin-bottom: 4px; }
+    .bench-label { font-size: 13px; color: var(--text-muted); }
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
-      nav { padding: 12px 16px; }
-      .nav-links { display: none; }
       .hero { padding: 130px 8px 60px; }
       .onboard { padding: 0 8px; }
       .onboard-inner { overflow: hidden; }
@@ -478,14 +546,13 @@
 </head>
 <body>
 
-  <!-- NAV -->
   <nav>
-    <a class="nav-logo" href="#">game<span>-creator</span></a>
+    <a class="nav-logo" href="">game<span>-creator</span></a>
     <div class="nav-links">
-      <a href="#install">Install</a>
+      <a href="" class="active">Home</a>
       <a href="#pipeline">Pipeline</a>
       <a href="#features">Features</a>
-      <a href="#games">Games</a>
+      <a href="gallery/">Gallery</a>
     </div>
     <a class="nav-btn" href="https://github.com/OpusGameLabs/game-creator" target="_blank">
       <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -493,7 +560,7 @@
     </a>
   </nav>
 
-  <!-- HERO + INSTALL (single section) -->
+  <!-- HERO + INSTALL -->
   <div class="hero" id="install">
     <div class="onboard">
       <div class="onboard-inner">
@@ -559,7 +626,6 @@
             </div>
           </div>
 
-          <!-- 3 steps -->
           <div class="steps">
             <div class="step">
               <div class="step-num">1</div>
@@ -629,7 +695,6 @@
             </div>
           </div>
 
-          <!-- 3 steps -->
           <div class="steps">
             <div class="step">
               <div class="step-num">1</div>
@@ -761,115 +826,144 @@
     </p>
     <div class="games">
       <div class="card">
-        <div class="card-thumb"><span>&#x1F426;</span></div>
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/flappy-bird.png" alt="Flappy Bird" loading="lazy" onerror="this.style.display='none'" />
+        </div>
         <div class="card-body">
           <span class="badge badge-2d">Phaser 2D</span>
           <h2>Flappy Bird</h2>
-          <p>Classic side-scroller with parallax clouds, chiptune BGM, retro SFX, and scene-based architecture. Tap to flap.</p>
-          <a class="play-btn" href="flappy-bird/">PLAY &#x2192;</a>
+          <p>Classic pipe-dodging game with parallax clouds, chiptune BGM, retro SFX, and full Playwright test suite. Architecture reference game.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/flappy-bird/" target="_blank">PLAY &#x2192;</a>
         </div>
       </div>
       <div class="card">
-        <div class="card-thumb"><span>&#x1F9DB;</span></div>
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/asteroid-dodger.png" alt="Asteroid Dodger" loading="lazy" onerror="this.style.display='none'" />
+        </div>
+        <div class="card-body">
+          <span class="badge badge-2d">Phaser 2D</span>
+          <h2>Asteroid Dodger</h2>
+          <p>Dodge falling asteroids in a spaceship. Pixel art sprites, parallax starfield, screen shake, slow-motion death, and chiptune audio.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/asteroid-dodger/" target="_blank">PLAY &#x2192;</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/gem-catcher.png" alt="Gem Catcher" loading="lazy" onerror="this.style.display='none'" />
+        </div>
+        <div class="card-body">
+          <span class="badge badge-2d">Phaser 2D</span>
+          <h2>Gem Catcher</h2>
+          <p>Catch falling gems, avoid skulls. 3 lives, difficulty escalation, pixel art sprites, parallax stars, shooting stars, and magical audio.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/gem-catcher/" target="_blank">PLAY &#x2192;</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/vampire-survivors.png" alt="Vampire Survivors" loading="lazy" onerror="this.style.display='none'" />
+        </div>
         <div class="card-body">
           <span class="badge badge-2d">Phaser 2D</span>
           <h2>Vampire Survivors</h2>
-          <p>Top-down survival with 5 enemy types, 4 auto-attacking weapons, XP/leveling, and a 5-minute survival timer.</p>
-          <a class="play-btn" href="vampire-survivors/">PLAY &#x2192;</a>
+          <p>Survivor-style roguelike with wave-based enemy spawning, auto-targeting projectiles, upgrade system, and scaling difficulty.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/vampire-survivors/" target="_blank">PLAY &#x2192;</a>
         </div>
       </div>
       <div class="card">
-        <div class="card-thumb"><span>&#x1F3DA;&#xFE0F;</span></div>
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/barn-defense.png" alt="Barn Defense" loading="lazy" onerror="this.style.display='none'" />
+        </div>
         <div class="card-body">
           <span class="badge badge-2d">Phaser 2D</span>
           <h2>Barn Defense</h2>
-          <p>Tower defense with 5 enemy types, 5 farm-themed towers, splash damage, pixel art sprites, and 5 levels.</p>
-          <a class="play-btn" href="barn-defense/">PLAY &#x2192;</a>
+          <p>Tower defense with grid-based building, 5 enemy types, 5 farm-themed towers, splash damage, and resource management.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/barn-defense/" target="_blank">PLAY &#x2192;</a>
         </div>
       </div>
       <div class="card">
-        <div class="card-thumb"><span>&#x1F3F0;</span></div>
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/mog-showdown.png" alt="Mog Showdown" loading="lazy" onerror="this.style.display='none'" />
+        </div>
+        <div class="card-body">
+          <span class="badge badge-2d">Phaser 2D</span>
+          <h2>Mog Showdown</h2>
+          <p>Looksmaxxing arena dodge game. Photo-composite bobblehead characters, projectile attacks, Frame Mog mechanic, combo tracking.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/mog-showdown/" target="_blank">PLAY &#x2192;</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/castle-siege.png" alt="Castle Siege Defense" loading="lazy" onerror="this.style.display='none'" />
+        </div>
         <div class="card-body">
           <span class="badge badge-3d">Three.js 3D</span>
-          <h2>Castle Siege</h2>
-          <p>3D tower defense with dual castles, wave-based enemies, parabolic projectiles, particles, and epic medieval audio.</p>
-          <a class="play-btn" href="castle-siege/">PLAY &#x2192;</a>
+          <h2>Castle Siege Defense</h2>
+          <p>3D tower defense. Launch parabolic projectiles at marching enemies. Wave system, splash damage, medieval atmosphere, torch lighting.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/castle-siege/" target="_blank">PLAY &#x2192;</a>
         </div>
       </div>
       <div class="card">
-        <div class="card-thumb"><span>&#x2708;&#xFE0F;</span></div>
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/crowd-dash.png" alt="Crowd Dash" loading="lazy" onerror="this.style.display='none'" />
+        </div>
         <div class="card-body">
           <span class="badge badge-3d">Three.js 3D</span>
-          <h2>Flight Simulator</h2>
-          <p>Fly through rings in a 3D sky with exhaust particles, speed lines, and procedural audio.</p>
-          <a class="play-btn" href="flight-simulator/">PLAY &#x2192;</a>
+          <h2>Crowd Dash</h2>
+          <p>Neon endless runner through crowded NYC streets. Swerve to dodge crowds, collect hearts, synthwave BGM, particle trails.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/crowd-dash/" target="_blank">PLAY &#x2192;</a>
         </div>
       </div>
       <div class="card">
-        <div class="card-thumb"><span>&#x1F425;</span></div>
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/flappy-bird-3d.png" alt="Flappy Bird 3D" loading="lazy" onerror="this.style.display='none'" />
+        </div>
         <div class="card-body">
           <span class="badge badge-3d">Three.js 3D</span>
           <h2>Flappy Bird 3D</h2>
           <p>Flappy Bird in 3D with cylinder pipes, gradient sky, particles, camera shake, and chiptune music.</p>
-          <a class="play-btn" href="flappy-bird-3d/">PLAY &#x2192;</a>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/flappy-bird-3d/" target="_blank">PLAY &#x2192;</a>
         </div>
       </div>
       <div class="card">
-        <div class="card-thumb"><span>&#x1F7E0;</span></div>
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/flight-simulator.png" alt="Flight Simulator" loading="lazy" onerror="this.style.display='none'" />
+        </div>
+        <div class="card-body">
+          <span class="badge badge-3d">Three.js 3D</span>
+          <h2>Flight Simulator</h2>
+          <p>Fly through rings with 6DOF controls. HUD instrument panel, altitude warnings, procedural ring spawning, and crash detection.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/flight-simulator/" target="_blank">PLAY &#x2192;</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/labyrinth.png" alt="Labyrinth" loading="lazy" onerror="this.style.display='none'" />
+        </div>
         <div class="card-body">
           <span class="badge badge-3d">Three.js 3D</span>
           <h2>Labyrinth</h2>
-          <p>3D marble labyrinth puzzle. Tilt through mazes, collect gems, find the exit. Gyroscope on mobile.</p>
-          <a class="play-btn" href="labyrinth/">PLAY &#x2192;</a>
+          <p>Roll a marble through a 3D maze. Collect gems, find the exit. Gyroscope controls on mobile, WASD on desktop.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/labyrinth/" target="_blank">PLAY &#x2192;</a>
         </div>
       </div>
       <div class="card">
-        <div class="card-thumb"><span>&#x2604;&#xFE0F;</span></div>
-        <div class="card-body">
-          <span class="badge badge-2d">Phaser 2D</span>
-          <h2>Asteroid Dodger</h2>
-          <p>Dodge falling asteroids in a spaceship. Increasing speed and frequency, pixel art sprites, chiptune audio, and tap controls.</p>
-          <a class="play-btn" href="asteroid-dodger/">PLAY &#x2192;</a>
+        <div class="card-thumb">
+          <img src="gallery/thumbnails/singularity-run.png" alt="Singularity Run" loading="lazy" onerror="this.style.display='none'" />
         </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><span>&#x1F3D9;&#xFE0F;</span></div>
-        <div class="card-body">
-          <span class="badge badge-3d">Three.js 3D</span>
-          <h2>Crowd Dash</h2>
-          <p>Neon-lit endless runner through crowded city streets. Dodge waves of people, collect hearts, synthwave BGM, particle effects.</p>
-          <a class="play-btn" href="crowd-dash/">PLAY &#x2192;</a>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><span>&#x1F48E;</span></div>
-        <div class="card-body">
-          <span class="badge badge-2d">Phaser 2D</span>
-          <h2>Gem Catcher</h2>
-          <p>Catch falling gems in a basket under a night sky. Avoid skulls, 3 lives, pixel art sprites, particle effects, chiptune audio.</p>
-          <a class="play-btn" href="gem-catcher/">PLAY &#x2192;</a>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><span>&#x1F7E2;</span></div>
         <div class="card-body">
           <span class="badge badge-3d">Three.js 3D</span>
           <h2>Singularity Run</h2>
-          <p>Matrix-themed endless runner. Dodge obstacles in a digital corridor with matrix rain, neon trails, and synthwave audio.</p>
-          <a class="play-btn" href="singularity-run/">PLAY &#x2192;</a>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-thumb"><span>&#x1F4AA;</span></div>
-        <div class="card-body">
-          <span class="badge badge-2d">Phaser 2D</span>
-          <h2>Mog Showdown</h2>
-          <p>Looksmaxxing arena dodge game. Play as Clavicular, dodge Androgenic's attacks, collect power-ups, trigger Frame Mog bursts. Photo-composite bobblehead characters.</p>
-          <a class="play-btn" href="mog-showdown/">PLAY &#x2192;</a>
+          <p>Matrix-themed endless runner. Dodge obstacles in a digital corridor with matrix rain, neon trails, and terminal aesthetics.</p>
+          <a class="play-btn" href="https://opusgamelabs.github.io/game-creator/singularity-run/" target="_blank">PLAY &#x2192;</a>
         </div>
       </div>
     </div>
+    <div class="view-all-link">
+      <a href="gallery/">View all 20 templates in the Gallery &#x2192;</a>
+    </div>
   </section>
+
+  
 
   <!-- STACK -->
   <section id="stack">
@@ -900,11 +994,13 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
   <footer>
     Built by <a href="https://github.com/OpusGameLabs">OpusGameLabs</a> &middot;
-    Works with <a href="https://skills.dev">40+ AI agents</a> &middot;
-    <a href="https://www.moltbook.com/">Moltbook</a> &middot;
+    
+    <a href="gallery/">Gallery</a> &middot;
+    <a href="terms/">Terms</a> &middot;
+    <a href="privacy/">Privacy</a> &middot;
+    <a href="copyright/">Copyright</a> &middot;
     <a href="https://github.com/OpusGameLabs/game-creator">Source</a>
   </footer>
 

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — Game Creator</title>
+  <meta name="description" content="Terms of Service for Game Creator." />
+  <style>
+    
+    :root {
+      --bg: #06080f;
+      --bg-raised: #0d1117;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --red: #ff4444;
+      --red-soft: #ff6b6b;
+      --red-glow: rgba(255,68,68,0.15);
+      --coral: #ff7b72;
+      --orange: #fb923c;
+      --green: #4ade80;
+      --blue: #60a5fa;
+      --yellow: #fbbf24;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(6,8,15,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(30,41,59,0.5);
+    }
+    .nav-logo {
+      font-weight: 800; font-size: 18px; color: #fff;
+      text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--red); }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .nav-right { display: flex; gap: 10px; align-items: center; }
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--red); color: #fff; }
+    .nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 10px;
+      font-size: 15px; font-weight: 700; text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red), var(--red-soft));
+      color: #fff; box-shadow: 0 4px 24px rgba(255,68,68,0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 32px rgba(255,68,68,0.45); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-secondary:hover { border-color: var(--text-muted); }
+
+    /* BADGES */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-2d { background: rgba(74,222,128,0.12); color: var(--green); }
+    .badge-3d { background: var(--red-glow); color: var(--red); }
+    .badge-starter { background: rgba(96,165,250,0.2); color: var(--blue); }
+    .badge-beginner { background: rgba(74,222,128,0.2); color: var(--green); }
+    .badge-intermediate { background: rgba(251,191,36,0.2); color: var(--yellow); }
+    .badge-advanced { background: rgba(255,68,68,0.2); color: var(--red); }
+
+    /* CARD */
+    .card {
+      background: var(--bg-raised); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,68,68,0.3);
+      box-shadow: 0 12px 40px rgba(255,68,68,0.08);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 32px 24px;
+      color: var(--text-dim); font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--coral); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* LEGAL */
+    .legal-main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 120px 24px 72px;
+    }
+    .legal-main h1 {
+      color: #fff;
+      font-size: 42px;
+      line-height: 1.12;
+      margin-bottom: 12px;
+    }
+    .legal-main h2 {
+      color: #fff;
+      font-size: 22px;
+      line-height: 1.3;
+      margin: 42px 0 14px;
+      padding-top: 8px;
+    }
+    .legal-main p,
+    .legal-main li {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    .legal-main p { margin: 0 0 18px; }
+    .legal-main ul {
+      margin: 0 0 22px 24px;
+      padding: 0;
+    }
+    .legal-main li { margin-bottom: 10px; }
+    .legal-main a {
+      color: var(--coral);
+      text-decoration: none;
+    }
+    .legal-main a:hover { text-decoration: underline; }
+    .legal-main strong { color: var(--text); }
+
+    /* RESPONSIVE BASE */
+    @media (max-width: 768px) {
+      nav { padding: 12px 16px; }
+      .nav-links { display: none; }
+      .legal-main { padding: 96px 18px 56px; }
+      .legal-main h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="../">game<span>-creator</span></a>
+    <div class="nav-links">
+      <a href="../">Home</a>
+      <a href="../#pipeline">Pipeline</a>
+      <a href="../#features">Features</a>
+      <a href="../gallery/">Gallery</a>
+    </div>
+    <a class="nav-btn" href="https://github.com/OpusGameLabs/game-creator" target="_blank">
+      <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </nav>
+  <main class="legal-main">
+      <h1><strong>Terms of Service</strong></h1>
+      <p>Last updated: May 11, 2026</p>
+      <p>These Terms of Service (“Terms”) govern your access to and use of the Game Creator platform, website, and related services (collectively, the “Service”), operated by StoryverseCo Inc., a Delaware corporation (“Company,” “we,” “us,” or “our”). By accessing or using the Service, you agree to be bound by these Terms, our Privacy Policy, and our Copyright Policy, each of which is incorporated herein by reference. If you do not agree, do not use the Service.</p>
+      <p>These Terms govern the paid features of Game Creator, including the game-creator-plus skill, subscription plans, and on-demand credit purchases. The free, open-source game-creator skill distributed via GitHub is governed by the license file in that repository and is not subject to these Terms.</p>
+      <h2><strong>1. Eligibility</strong></h2>
+      <p>You must be at least 18 years old (or the age of majority in your jurisdiction, if higher) and legally able to enter into a contract. If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization to these Terms, and “you” refers to both you and that organization.</p>
+      <p>You may not use the Service if you are located in, or are a resident of, a jurisdiction subject to comprehensive US sanctions, or if you are on any US government restricted-party list.</p>
+      <h2><strong>2. Account Registration</strong></h2>
+      <p>To access paid features of the Service, you must create an account. You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account. You agree to notify us immediately at <a href="mailto:support@gamecreator.dev">support@gamecreator.dev</a> of any unauthorized use of your account.</p>
+      <h2><strong>3. Description of Service</strong></h2>
+      <p>Game Creator lets you spend credits to generate AI-produced game assets, currently including photorealistic environments via Marble Labs (“Marble”) and rigged 3D characters via Meshy AI (“Meshy”). We act as an intermediary: you submit prompts through our skill, we forward them to the relevant upstream provider, and we return and (where applicable) mirror the results to you.</p>
+      <p>Credits may be obtained by (a) subscribing to a Game Creator subscription plan, which provides a recurring monthly credit allowance, or (b) purchasing on-demand credit top-ups. We may add, modify, or remove upstream providers, plans, and credit allocations over time. We will give reasonable notice of material changes that affect your purchased credits or active subscription.</p>
+      <h2><strong>4. Subscriptions and Auto-Renewal</strong></h2>
+      <p><strong>4.1. Subscription plans.</strong> Game Creator subscription plans are billed in advance on a recurring monthly basis. Pricing and credit allocation for each plan are shown on our pricing page at gamecreator.dev/pricing.</p>
+      <p><strong>4.2. Auto-renewal.</strong> Your subscription will automatically renew at the end of each billing period for successive periods of the same length, at the then-current price, until you cancel. By starting a subscription, you provide your express affirmative consent to these recurring charges and to the auto-renewal terms. You may cancel at any time as described in Section 6. Where required by applicable law, we will send you renewal reminders before charges are made.</p>
+      <p><strong>4.3. Price changes.</strong> We reserve the right to change subscription pricing at any time. Price changes will not affect your current billing period. You will be notified of price changes before they take effect on your next renewal.</p>
+      <p><strong>4.4. Payment.</strong> Payments are processed by Stripe. By providing payment information, you authorize us (and our payment processor) to charge your chosen payment method for all subscription fees and credit purchases on a recurring basis where applicable. We do not store full card numbers.</p>
+      <p><strong>4.5. Taxes.</strong> Stated prices exclude any sales tax, VAT, GST, or similar taxes, which we may collect and remit where required.</p>
+      <h2><strong>5. Credits</strong></h2>
+      <p>5.1. <strong>Subscription credits.</strong> Each subscription plan includes a monthly credit allowance, deposited into your account at the start of each billing period. Subscription credits expire at the end of the billing period in which they are issued and do not roll over to subsequent periods. Unused subscription credits have no cash value and are not refundable.</p>
+      <p>5.2. <strong>Top-up credits.</strong> You may purchase additional credit top-ups at any time, in the amounts shown on our pricing page. Top-up credits do not expire so long as your account remains active.</p>
+      <p>5.3. <strong>Credit consumption order.</strong> When you submit a job, we deduct from your subscription credits first, then from your top-up balance.</p>
+      <p>5.4. <strong>Nature of credits.</strong> Credits are denominated in US dollars solely for accounting purposes and are not a cash equivalent, security, or stored-value instrument. Credits are non-transferable between accounts and are not redeemable for cash except as required by these Terms or applicable law.</p>
+      <h2><strong>6. Cancellation</strong></h2>
+      <p>You may cancel your subscription at any time through the Stripe customer portal accessible from your account settings, without additional steps, fees, or required interaction with customer service. Upon cancellation, your subscription will remain active until the end of the current billing period, after which you will not be charged for subsequent periods. Subscription credits not used by the end of your final billing period will be forfeited per Section 5.1. Your top-up credit balance is unaffected by cancellation and remains subject to Section 5.2 and Section 7.</p>
+      <h2><strong>7. Refunds</strong></h2>
+      <p><strong>7.1. Failed jobs — automatic refund.</strong> If a job fails for technical reasons attributable to us or to an upstream provider (for example, the provider returns an error, the job times out, or the result is corrupted and unusable), the credits spent on that job are automatically refunded to your credit balance. No request is required. A job that completes successfully but does not match your subjective expectations does not qualify as a failed job.</p>
+      <p><strong>7.2. Successful jobs — non-refundable.</strong> Once a job completes successfully and an asset is delivered to you, the credits spent on that job are non-refundable. The underlying compute cost has been incurred with the upstream provider.</p>
+      <p><strong>7.3. Subscription credits.</strong> Subscription credits are issued as part of an active subscription plan and are not separately refundable. They expire at the end of the billing period in which they are issued and do not roll over.</p>
+      <p><strong>7.4. Subscription cancellation.</strong> Upon cancellation, your subscription remains active through the end of the current billing period and you will not be charged for subsequent periods. No partial-period refunds are provided for the current billing period, except where required by applicable law.</p>
+      <p><strong>7.5. Top-up credit balances.</strong> Top-up credits do not expire so long as your account remains active. You may request a refund of an unused top-up balance as follows:</p>
+      <ul>
+      <li><strong>Within 14 days of purchase.</strong> If you have not consumed any credits from a particular top-up, you may request a full refund of that top-up to the original payment method within 14 days of purchase, less any non-recoverable processing fees. Email <a href="mailto:billing@gamecreator.dev">billing@gamecreator.dev</a>  to request.</li>
+      <li><strong>California residents — sub-$15 balances.</strong> If you are a California resident and your unused top-up credit balance is less than $15, you may request a cash refund of that balance at any time, in accordance with California Civil Code § 1749.5.</li>
+      </ul>
+      <p><strong>7.6. Chargebacks.</strong> If you believe a charge was made in error, please contact us at <a href="mailto:billing@gamecreator.dev">billing@gamecreator.dev</a> before initiating a chargeback. We will review and resolve legitimate disputes promptly.</p>
+      <p>7.7. Mandatory refunds. Nothing in this Section limits any non-waivable refund rights you have under applicable consumer protection law, including the California Automatic Renewal Law (Cal. Bus. &amp; Prof. Code § 17600 et seq.), California Civil Code § 1749.5, the Australian Consumer Law, or equivalent laws in your jurisdiction.</p>
+      <h2><strong>8. Acceptable Use</strong></h2>
+      <p>8.1. <strong>Prohibited prompts and content.</strong> You may not submit prompts to, or use outputs from, the Service to generate, store, or distribute content that:</p>
+      <ul>
+      <li>Depicts a real, identifiable person without their consent, including likenesses of celebrities, public figures, or private individuals.</li>
+      </ul>
+      <ul>
+      <li>Infringes copyrights, trademarks, or other intellectual property rights of third parties, including prompts that solicit reproductions of copyrighted characters, branded IP, or licensed media.</li>
+      </ul>
+      <ul>
+      <li>Depicts minors in a sexual or sexualized context, or constitutes child sexual abuse material. This is a hard prohibition with no exceptions.</li>
+      </ul>
+      <ul>
+      <li>Is sexually explicit, pornographic, or designed for adult audiences.</li>
+      </ul>
+      <ul>
+      <li>Is gratuitously violent, gory, or designed to harass, defame, or threaten a specific person or group.</li>
+      </ul>
+      <ul>
+      <li>Promotes terrorism, violent extremism, or imminent unlawful violence.</li>
+      </ul>
+      <ul>
+      <li>Is intended to facilitate fraud, deception, or unlawful activity.</li>
+      </ul>
+      <ul>
+      <li>Is otherwise illegal under applicable law.</li>
+      </ul>
+      <p>8.2. <strong>Prohibited conduct.</strong> You may not:</p>
+      <ul>
+      <li>Attempt to bypass safety filters or content restrictions of the Service or any upstream provider.</li>
+      </ul>
+      <ul>
+      <li>Reverse engineer, decompile, or attempt to extract the source code of the Service.</li>
+      </ul>
+      <ul>
+      <li>Use bots, scrapers, or automated tools to access the Service in a manner inconsistent with our intended interface, except as permitted by an open-source license we publish.</li>
+      </ul>
+      <ul>
+      <li>Use the Service to train a competing AI model or asset-generation pipeline.</li>
+      </ul>
+      <ul>
+      <li>Resell or redistribute access to the Service outside the scope permitted in these Terms.</li>
+      </ul>
+      <ul>
+      <li>Create multiple accounts to abuse free trials, promotions, or platform features.</li>
+      </ul>
+      <ul>
+      <li>Submit fraudulent DMCA takedown notices or copyright claims.</li>
+      </ul>
+      <ul>
+      <li>Use the Service to send spam or unsolicited communications.</li>
+      </ul>
+      <p>8.3. <strong>Responsibility for outputs.</strong> You are responsible for ensuring that your prompts and use of generated assets comply with all applicable laws and third-party rights. The fact that the Service generates an output in response to a prompt does not mean that output is free of legal restrictions. Outputs may resemble copyrighted, trademarked, or otherwise protected material in ways that are not always predictable.</p>
+      <p>8.4. <strong>Enforcement.</strong> We may investigate and take action against any violations, including removing content, suspending or terminating accounts, and reporting conduct to law enforcement. Decisions regarding enforcement are made at our sole discretion.</p>
+      <h2><strong>9. Your Prompts and Generated Assets</strong></h2>
+      <p>9.1. <strong>Prompts.</strong> You retain ownership of the prompts and inputs you submit. You grant Game Creator a worldwide, royalty-free license to process those inputs for the purpose of providing the Service, including transmitting them to upstream providers. We do not use your prompts to train our own models.</p>
+      <p>9.2. <strong>Generated assets.</strong> Subject to your compliance with these Terms and the upstream providers’ terms, you own the AI-generated assets that the Service delivers to you, with the broadest rights the upstream provider permits us to pass through. You may use, modify, and commercialize those assets in your games and other projects.</p>
+      <p>You acknowledge that:</p>
+      <ul>
+      <li>AI-generated outputs may be similar or substantially identical to outputs delivered to other users, and we make no claim of exclusivity for any individual output.</li>
+      </ul>
+      <ul>
+      <li>The copyrightability of AI-generated content is unsettled in many jurisdictions, and we make no representation about your ability to register copyright in any output.</li>
+      </ul>
+      <ul>
+      <li>The upstream providers’ terms apply to your use of their outputs and may impose additional restrictions.</li>
+      </ul>
+      <h2><strong>7. Creator Content and Content Aggregation</strong></h2>
+      <p>7.1. Creator Responsibility. Creators are solely responsible for the content they make available through the Service. We do not pre-screen, endorse, or guarantee any Creator content.</p>
+      <p>7.2. No Guarantees. We do not guarantee that any Creator will continue to produce content, maintain a certain frequency of content, or remain on the platform. Subscriptions provide access to content as it is made available.</p>
+      <p>7.3. Publicly Available Content. The Service may display Creator profiles that reference or link to publicly available content from third-party platforms (such as social media posts, game pages, or other public web content). In these cases, sub.games does not reproduce or host the underlying content; it provides links, references, and metadata directing users to the original source. This activity is similar to how search engines and social platforms reference publicly available material. sub.games makes no claim of ownership over any third-party content referenced in this manner.</p>
+      <p>7.4. Claimed Creator Accounts. When a Creator claims their account on sub.games, they enter into a Creator Agreement with sub.games. By claiming an account, the Creator grants sub.games a non-exclusive, worldwide, royalty-free license to display, distribute, promote, and make available their content through the Service, including any content the Creator uploads directly or authorizes sub.games to aggregate from third-party platforms. This license is limited to the operation of the Service and does not transfer ownership of Creator content.</p>
+      <p>7.5. Unclaimed Profiles. sub.games may create preliminary profiles for Creators based on publicly available information. These profiles link to publicly available content and do not reproduce or host third-party content. If you are a Creator and wish to claim your profile, you may do so through the account claiming process. If you are a Creator and wish to have an unclaimed profile removed, you may submit a removal request to <a href="mailto:support@sub.games">support@sub.games</a> or use the takedown procedure described in our Copyright Policy.</p>
+      <p>7.6. Content Removal by Creators. Creators who have claimed their accounts may remove their content from the Service at any time through their account settings. Upon removal, sub.games will cease displaying the removed content within a commercially reasonable timeframe. Removal of content does not affect any licenses granted to Subscribers for content previously accessed during an active subscription period.</p>
+      <h2><strong>10. Third-Party Services</strong></h2>
+      <p>The Service depends on third-party providers, including Marble Labs and Meshy AI. These providers have their own terms of service and privacy policies, and your use of the Service constitutes your acceptance of those terms to the extent applicable to outputs generated on your behalf. We are not responsible for the acts or omissions of third-party providers, but we will use reasonable efforts to select reputable providers and to provide refunds under Section 7 when their failures cause yours.</p>
+      <h2><strong>11. Asset Mirroring</strong></h2>
+      <p>Some upstream providers host generated assets on infrastructure with a limited time-to-live. For your convenience, we mirror your delivered assets on our infrastructure for an extended period. You are responsible for downloading and backing up assets you wish to retain long-term. We may discontinue or modify mirroring with reasonable notice.</p>
+      <h2><strong>12. Intellectual Property</strong></h2>
+      <p>The Service, including its design, code, branding, and all related intellectual property, is owned by us. You are granted a limited, non-exclusive, non-transferable license to access and use the Service for personal or internal business purposes in accordance with these Terms.</p>
+      <h2><strong>13. Privacy</strong></h2>
+      <p>Your use of the Service is subject to our Privacy Policy at gamecreator.dev/privacy, which is incorporated into these Terms by reference.</p>
+      <h2><strong>14. Copyright</strong></h2>
+      <p>We respect intellectual property rights and expect users to do the same. Our Copyright Policy at gamecreator.dev/copyright, which is incorporated into these Terms by reference, explains how we handle claims of copyright infringement, the procedure for filing takedown notices and counter-notifications, and how we handle AI-generated content claims.</p>
+      <h2><strong>15. Disclaimer of Warranties</strong></h2>
+      <p>THE SERVICE AND ALL GENERATED CONTENT ARE PROVIDED “AS IS” AND “AS AVAILABLE” WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND ACCURACY. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR SECURE, OR THAT ANY SPECIFIC OUTPUT WILL MEET YOUR EXPECTATIONS OR BE SUITABLE FOR YOUR INTENDED USE.</p>
+      <h2><strong>16. Limitation of Liability</strong></h2>
+      <p>TO THE FULLEST EXTENT PERMITTED BY LAW, WE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, REVENUE, DATA, OR GOODWILL, ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF THE SERVICE. OUR TOTAL AGGREGATE LIABILITY SHALL NOT EXCEED THE AMOUNTS YOU HAVE PAID TO US IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.</p>
+      <h2><strong>17. Indemnification</strong></h2>
+      <p>You agree to indemnify, defend, and hold harmless StoryverseCo Inc., its officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, and expenses (including reasonable attorney’s fees) arising out of or in connection with your use of the Service, your prompts or generated assets, your violation of these Terms, or your violation of any third-party right.</p>
+      <h2><strong>18. Termination</strong></h2>
+      <p>We reserve the right to suspend or terminate your account and access to the Service at our sole discretion, with or without cause, and with or without notice. You may stop using the Service at any time by cancelling your subscription (Section 6) and ceasing use. Sections that by their nature should survive termination (including Sections 9, 12, 15, 16, 17, and 19) will survive.</p>
+      <h2><strong>19. Governing Law and Disputes</strong></h2>
+      <p>These Terms are governed by the laws of the State of Delaware, without regard to its conflict of laws principles. Any disputes arising from or relating to these Terms or the Service shall be resolved exclusively in the state or federal courts located in Delaware. You consent to personal jurisdiction in such courts. If you are a consumer located outside the United States, you may have non-waivable rights to bring proceedings in the courts of your country of residence, and nothing in these Terms limits those rights.</p>
+      <h2><strong>20. Modification to Terms</strong></h2>
+      <p>We may modify these Terms at any time by posting the revised Terms on the Service. Material changes will be communicated via email or a prominent notice on the Service before they take effect. Your continued use of the Service after such changes constitutes acceptance.</p>
+      <h2><strong>21. Miscellaneous</strong></h2>
+      <p>21.1. <strong>Entire agreement.</strong> These Terms, together with the Privacy Policy and Copyright Policy, constitute the entire agreement between you and us regarding the Service.</p>
+      <p>21.2. <strong>Severability.</strong> If any provision of these Terms is found unenforceable, the remaining provisions will continue in full force and effect.</p>
+      <p>21.3. <strong>Waiver.</strong> Our failure to enforce any right or provision of these Terms shall not constitute a waiver of such right or provision.</p>
+      <p>21.4. <strong>Assignment.</strong> You may not assign your rights or obligations under these Terms without our prior written consent. We may assign our rights and obligations without restriction.</p>
+      <p>21.5. <strong>Force majeure.</strong> Neither party is liable for delays or failures caused by events beyond reasonable control, including upstream provider outages.</p>
+      <h2><strong>22. Contact</strong></h2>
+      <p>If you have questions about these Terms, please contact us at:</p>
+      <p>General support: <a href="mailto:support@gamecreator.dev">support@gamecreator.dev</a></p>
+      <p>Billing and refunds: <a href="mailto:billing@gamecreator.dev">billing@gamecreator.dev</a></p>
+      <p>Privacy inquiries: <a href="mailto:privacy@gamecreator.dev">privacy@gamecreator.dev</a></p>
+      <p>Copyright inquiries: <a href="mailto:copyright@gamecreator.dev">copyright@gamecreator.dev</a></p>
+      <p>#</p>
+  </main>
+  <footer>
+    Built by <a href="https://github.com/OpusGameLabs">OpusGameLabs</a> &middot;
+    <a href="../">Home</a> &middot;
+    <a href="../gallery/">Gallery</a> &middot;
+    <a href="../terms/">Terms</a> &middot;
+    <a href="../privacy/">Privacy</a> &middot;
+    <a href="../copyright/">Copyright</a> &middot;
+    <a href="https://github.com/OpusGameLabs/game-creator">Source</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Game Creator</title>
+  <meta name="description" content="Privacy Policy for Game Creator." />
+  <style>
+    
+    :root {
+      --bg: #06080f;
+      --bg-raised: #0d1117;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --red: #ff4444;
+      --red-soft: #ff6b6b;
+      --red-glow: rgba(255,68,68,0.15);
+      --coral: #ff7b72;
+      --orange: #fb923c;
+      --green: #4ade80;
+      --blue: #60a5fa;
+      --yellow: #fbbf24;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(6,8,15,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(30,41,59,0.5);
+    }
+    .nav-logo {
+      font-weight: 800; font-size: 18px; color: #fff;
+      text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--red); }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .nav-right { display: flex; gap: 10px; align-items: center; }
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--red); color: #fff; }
+    .nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 10px;
+      font-size: 15px; font-weight: 700; text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red), var(--red-soft));
+      color: #fff; box-shadow: 0 4px 24px rgba(255,68,68,0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 32px rgba(255,68,68,0.45); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-secondary:hover { border-color: var(--text-muted); }
+
+    /* BADGES */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-2d { background: rgba(74,222,128,0.12); color: var(--green); }
+    .badge-3d { background: var(--red-glow); color: var(--red); }
+    .badge-starter { background: rgba(96,165,250,0.2); color: var(--blue); }
+    .badge-beginner { background: rgba(74,222,128,0.2); color: var(--green); }
+    .badge-intermediate { background: rgba(251,191,36,0.2); color: var(--yellow); }
+    .badge-advanced { background: rgba(255,68,68,0.2); color: var(--red); }
+
+    /* CARD */
+    .card {
+      background: var(--bg-raised); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,68,68,0.3);
+      box-shadow: 0 12px 40px rgba(255,68,68,0.08);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 32px 24px;
+      color: var(--text-dim); font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--coral); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* LEGAL */
+    .legal-main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 120px 24px 72px;
+    }
+    .legal-main h1 {
+      color: #fff;
+      font-size: 42px;
+      line-height: 1.12;
+      margin-bottom: 12px;
+    }
+    .legal-main h2 {
+      color: #fff;
+      font-size: 22px;
+      line-height: 1.3;
+      margin: 42px 0 14px;
+      padding-top: 8px;
+    }
+    .legal-main p,
+    .legal-main li {
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    .legal-main p { margin: 0 0 18px; }
+    .legal-main ul {
+      margin: 0 0 22px 24px;
+      padding: 0;
+    }
+    .legal-main li { margin-bottom: 10px; }
+    .legal-main a {
+      color: var(--coral);
+      text-decoration: none;
+    }
+    .legal-main a:hover { text-decoration: underline; }
+    .legal-main strong { color: var(--text); }
+
+    /* RESPONSIVE BASE */
+    @media (max-width: 768px) {
+      nav { padding: 12px 16px; }
+      .nav-links { display: none; }
+      .legal-main { padding: 96px 18px 56px; }
+      .legal-main h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="../">game<span>-creator</span></a>
+    <div class="nav-links">
+      <a href="../">Home</a>
+      <a href="../#pipeline">Pipeline</a>
+      <a href="../#features">Features</a>
+      <a href="../gallery/">Gallery</a>
+    </div>
+    <a class="nav-btn" href="https://github.com/OpusGameLabs/game-creator" target="_blank">
+      <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </nav>
+  <main class="legal-main">
+      <h1><strong>Privacy Policy</strong></h1>
+      <p>Last updated: May 11, 2026</p>
+      <p>Game Creator is operated by StoryverseCo Inc. (“we,” “us,” or “our”). This Privacy Policy explains how we collect, use, disclose, and protect your personal information when you use the Game Creator platform and related services (the “Service”).</p>
+      <h2><strong>1. Information We Collect</strong></h2>
+      <p><strong>Account Information.</strong> When you create an account, we collect your name, email address, and payment information.</p>
+      <p><strong>Usage Data.</strong> We automatically collect information about your interactions with the Service, including pages viewed, features used, jobs submitted, credits consumed, IP address, browser type, and device information.</p>
+      <p><strong>Payment Data.</strong> Payment processing is handled by Stripe. We do not store your full credit card number. Please review Stripe’s privacy policy for details on their data practices.</p>
+      <p><strong>Prompts and Generated Content.</strong> We collect the prompts you submit, the outputs returned by upstream providers, and metadata about each job (such as timing, status, and credit cost). We process this information to deliver the Service and mirror generated assets to your account. We do not use your prompts or outputs to train our own AI models.</p>
+      <p><strong>Communications.</strong> If you contact us, we may retain your correspondence and any information you provide.</p>
+      <h2><strong>2. How We Use Your Information</strong></h2>
+      <ul>
+      <li>To provide, maintain, and improve the Service.</li>
+      </ul>
+      <ul>
+      <li>To process subscriptions, credit purchases, and refunds.</li>
+      </ul>
+      <ul>
+      <li>To deliver prompts to upstream providers (Marble Labs, Meshy AI) and return outputs to you.</li>
+      </ul>
+      <ul>
+      <li>To communicate with you about your account, updates, and promotions (with opt-out options).</li>
+      </ul>
+      <ul>
+      <li>To detect and prevent fraud, abuse, and security incidents.</li>
+      </ul>
+      <ul>
+      <li>To comply with legal obligations.</li>
+      </ul>
+      <h2><strong>3. How We Share Your Information</strong></h2>
+      <p>We do not sell your personal information. We may share your information with:</p>
+      <ul>
+      <li>Upstream AI providers (currently Marble Labs and Meshy AI) — your prompts and any required metadata are transmitted to these providers to generate your assets. Their privacy practices govern their handling of that data.</li>
+      </ul>
+      <ul>
+      <li>Service providers (e.g., Stripe for payment processing, hosting and email infrastructure providers) who assist us in operating the Service, subject to confidentiality obligations.</li>
+      </ul>
+      <ul>
+      <li>Law enforcement or government bodies, when required by law or to protect our rights.</li>
+      </ul>
+      <ul>
+      <li>In connection with a merger, acquisition, or sale of assets, where your information may be transferred to the acquiring entity.</li>
+      </ul>
+      <h2><strong>4. Data Retention</strong></h2>
+      <p>We retain your personal information for as long as your account is active or as needed to provide the Service. We may retain certain information after account deletion as required by law or for legitimate business purposes (e.g., resolving disputes, enforcing agreements, tax records). Prompts and generated assets are retained as described in our Terms of Service.</p>
+      <h2><strong>5. Security</strong></h2>
+      <p>We implement reasonable technical and organizational measures to protect your personal information. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.</p>
+      <h2><strong>6. Your Rights</strong></h2>
+      <p>Depending on your jurisdiction, you may have the right to access, correct, delete, or port your personal data, or to object to certain processing. To exercise these rights, contact us at <a href="mailto:privacy@gamecreator.dev">privacy@gamecreator.dev</a>. We will respond within the timeframe required by applicable law.</p>
+      <h2><strong>7. Cookies and Tracking</strong></h2>
+      <p>We use cookies and similar technologies to operate the Service, remember your preferences, and analyze usage patterns. You can manage cookie preferences through your browser settings, though disabling cookies may affect functionality.</p>
+      <h2><strong>8. Children’s Privacy</strong></h2>
+      <p>The Service is not directed to individuals under 18. We do not knowingly collect personal information from minors. If we become aware that we have collected such information, we will take steps to delete it promptly.</p>
+      <h2><strong>9. International Users</strong></h2>
+      <p>The Service is operated from the United States. If you access the Service from outside the United States, you consent to the transfer of your information to the United States, where data protection laws may differ from those in your jurisdiction.</p>
+      <h2><strong>10. Changes to This Policy</strong></h2>
+      <p>We may update this Privacy Policy from time to time. We will notify you of material changes by posting the revised policy on the Service and updating the “Last updated” date. Your continued use of the Service after changes constitutes acceptance.</p>
+      <h2><strong>11. Contact</strong></h2>
+      <p>For privacy-related inquiries, contact us at:</p>
+      <p>Game Creator</p>
+      <p>Email: <a href="mailto:privacy@gamecreator.dev">privacy@gamecreator.dev</a></p>
+  </main>
+  <footer>
+    Built by <a href="https://github.com/OpusGameLabs">OpusGameLabs</a> &middot;
+    <a href="../">Home</a> &middot;
+    <a href="../gallery/">Gallery</a> &middot;
+    <a href="../terms/">Terms</a> &middot;
+    <a href="../privacy/">Privacy</a> &middot;
+    <a href="../copyright/">Copyright</a> &middot;
+    <a href="https://github.com/OpusGameLabs/game-creator">Source</a>
+  </footer>
+</body>
+</html>
