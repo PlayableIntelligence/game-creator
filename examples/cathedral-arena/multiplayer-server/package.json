@@ -1,0 +1,13 @@
+{
+  "name": "cathedral-arena-multiplayer",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "partykit dev",
+    "deploy": "partykit deploy"
+  },
+  "devDependencies": {
+    "partykit": "^0.0.115",
+    "typescript": "^5.6.0"
+  }
+}

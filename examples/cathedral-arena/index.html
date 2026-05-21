@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Cathedral Arena — multiplayer souls demo</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+  body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #ccd; touch-action: none; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+
+  .hud {
+    position: fixed;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    padding: 1rem;
+    max-width: 50vw;
+  }
+  #hud-tl { top: 0; left: 0; }
+  #hud-tr { top: 0; right: 0; text-align: right; }
+  #hud-bl { bottom: 0; left: 0; }
+  #hud-br { bottom: 0; right: 0; text-align: right; }
+
+  /* Re-enable pointer events on individual widgets — Game.js installs HP bar
+     etc. into the slots and they need to remain interactive. */
+  .hud > * { pointer-events: auto; }
+
+  #hud-fps { color: #c0e0a0; }
+  #hud-fps.warn { color: #e0c080; }
+  #hud-fps.bad  { color: #e08080; }
+
+  #boot {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #0a0a14 0%, #000 70%);
+    gap: 1rem;
+    z-index: 100;
+    transition: opacity 0.4s ease;
+  }
+  #boot.gone { opacity: 0; pointer-events: none; }
+  #boot h1 {
+    font-size: 1rem; font-weight: 500; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #586278; margin: 0;
+  }
+  #boot-status { font-size: 0.8rem; color: #8090b8; min-height: 1.2em; }
+</style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div id="boot">
+    <h1>Cathedral Arena</h1>
+    <div id="boot-status">Initializing…</div>
+  </div>
+
+  <div id="hud-tl" class="hud">
+    <div id="hud-fps"></div>
+  </div>
+  <div id="hud-tr" class="hud"></div>
+  <div id="hud-bl" class="hud"></div>
+  <div id="hud-br" class="hud"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

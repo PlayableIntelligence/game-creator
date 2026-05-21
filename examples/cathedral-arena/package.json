@@ -1,0 +1,25 @@
+{
+  "name": "cathedral-arena",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multiplayer souls-style PvP arena set in a Marble Labs splat cathedral. Showcase for the add-multiplayer skill + game-creator-plus pipeline.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5180",
+    "build": "vite build",
+    "preview": "vite preview --port 5180",
+    "server": "cd multiplayer-server && npx partykit dev"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.14.0",
+    "@pixiv/three-vrm": "^3.5.2",
+    "@sparkjsdev/spark": "^2.0.0",
+    "partysocket": "^1.0.2",
+    "three": "^0.180.0",
+    "three-mesh-bvh": "^0.9.9",
+    "three-stdlib": "^2.30.4"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
