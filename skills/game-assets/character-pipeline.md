@@ -11,7 +11,7 @@ The library contains pre-built characters with photo-realistic heads composited 
 - A horizontal spritesheet with all expressions
 - Metadata in `manifest.json`
 
-**Check the library first** before creating any personality sprite. If the character exists, copy their sprites into the game — no pixel art needed.
+**Check the library first** before creating any public-figure sprite. If the character exists, copy their sprites into the game — no pixel art needed.
 
 ```
 assets/characters/
@@ -67,7 +67,7 @@ preload() {
 
 ### Expression Wiring Pattern
 
-Every personality character must have reactive expressions. Wire them to game events:
+Every public-figure character must have reactive expressions. Wire them to game events:
 
 ```js
 // In the player/character entity constructor:
@@ -198,7 +198,7 @@ See `examples/trump-mog/src/entities/Character.js` for the complete reference im
 
 ### Building New Characters
 
-If a personality is needed but not in the library, build it using the project-level pipeline scripts. Follow the **tiered fallback** — try each tier in order, stop at first success:
+If a public figure is needed but not in the library, build them using the project-level pipeline scripts. Follow the **tiered fallback** — try each tier in order, stop at first success:
 
 #### Tier 1: Full 4-expression build (best)
 
@@ -278,9 +278,9 @@ Result: All 4 frames are identical. Character is photo-recognizable but has no e
 If NO usable images are found (WebSearch returns nothing, all downloads fail, pipeline crashes):
 
 - Skip the photo-composite pipeline entirely
-- Use the **Personality Character (Caricature) archetype** — 32x48 pixel art grid at scale 4 (renders to 128x192px)
+- Use the **Public-Figure Caricature archetype** — 32x48 pixel art grid at scale 4 (renders to 128x192px)
 - Design the pixel art with recognizable features: signature hairstyle, glasses, facial hair, clothing color
 - Create 2-4 animation frames (idle + walk minimum) using `renderSpriteSheet()`
 - Wire as a standard pixel art entity — no expression system, no spritesheet loading
 
-This is the **absolute last resort**. Always exhaust image search first — even a single photo produces a better result than pixel art for personality characters.
+This is the **absolute last resort**. Always exhaust image search first — even a single photo produces a better result than pixel art for public-figure characters.

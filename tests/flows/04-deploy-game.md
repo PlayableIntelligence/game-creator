@@ -4,7 +4,7 @@
 Test the full deployment flow for a built game.
 
 ## Prerequisites
-- A game built with `/viral-game` or `/quick-game` (e.g., from flow 01)
+- A game built with `/make-game` or `/quick-game` (e.g., from flow 01)
 - Game has a working `npm run build` producing `dist/`
 - Internet access for here.now deployment
 

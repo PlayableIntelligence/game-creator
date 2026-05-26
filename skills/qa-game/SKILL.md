@@ -136,6 +136,4 @@ Tell the user:
 
 > Your game now has automated tests! Finally, run `/game-creator:review-game` for a full architecture review — it checks your code structure, performance patterns, and gives you a score with specific improvement suggestions.
 >
-> **Pipeline progress:** ~~/viral-game~~ → ~~/design-game~~ → ~~/add-audio~~ → ~~/qa-game~~ → `/review-game`
->
-> *(This is the `/viral-game` one-shot pipeline — not the `/make-game` multi-session, milestone-driven workflow.)*
+> **Pipeline progress:** ~~/make-game~~ → ~~/design-game~~ → ~~/add-audio~~ → ~~/qa-game~~ → `/review-game`

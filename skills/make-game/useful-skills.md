@@ -116,6 +116,5 @@ Install once the gameplay loop is solid and the project is moving toward release
 
 These skills bypass parts of the `make-game` pipeline. Reach for them when the user wants speed over rigor.
 
-- **viral-game** — One-shot end-to-end pipeline (~10 minutes): tweet/story/concept → scaffold → assets → design → promo video → audio → deploy to here.now → monetize on Play.fun. Trades milestone planning, ADRs, and multi-session iteration for time-to-deploy. Reach for it when the user wants a sharable, monetized game *now* and is fine with an opinionated stack (Phaser 3 / Three.js).
 - **use-template** — Clone an existing game from the template gallery as a starting point. ~10-second copy vs full-pipeline scaffold.
 - **quick-game** — Rapidly scaffold a playable game with no assets/design/audio/deploy/monetize. For prototypes only.

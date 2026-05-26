@@ -47,7 +47,7 @@ Score each area 1-5 and present as a table:
 | Typography | | |
 | Game Feel / Juice | | |
 | Game Over | | |
-| Expression Usage | | If personality characters exist, score how reactively expressions change to game events. Score 1 if expressions never change. |
+| Expression Usage | | If public-figure characters exist (added by `/meme-game`), score how reactively expressions change to game events. Score 1 if expressions never change. |
 
 Then list the top improvements ranked by visual impact, with a plain-English description of what each one does (e.g., "Add a sky gradient so the background looks like a real sky instead of a flat color").
 
@@ -90,6 +90,4 @@ Tell the user:
 
 > Your game looks much better now! Next, run `/game-creator:add-audio` to add chiptune background music and retro sound effects — all procedurally generated, no audio files needed.
 >
-> **Pipeline progress:** ~~/viral-game~~ → ~~/design-game~~ → `/add-audio` → `/qa-game` → `/review-game`
->
-> *(This is the `/viral-game` one-shot pipeline — not the `/make-game` multi-session, milestone-driven workflow.)*
+> **Pipeline progress:** ~~/make-game~~ → ~~/design-game~~ → `/add-audio` → `/qa-game` → `/review-game`

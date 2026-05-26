@@ -25,7 +25,7 @@ Do not use this skill when:
 
 - The user's request is unrelated to game development (general web apps, CLI tools, libraries, infrastructure, data work, etc.)
 - The user explicitly asks for a non-game artifact (e.g. "build me a chat app")
-- The user wants a **one-shot viral game** from a tweet, news story, or short prompt — shipped end-to-end in a single session with no milestone planning. Use [`/viral-game`](../viral-game/SKILL.md) instead. That pipeline is opinionated (Phaser/Three.js, here.now, Play.fun) and trades the planning rigor of this skill for ~10-minute time-to-deploy. If a `/viral-game` session outgrows itself (the user starts asking for milestones, ADRs, or long-term iteration), they should switch back to this skill.
+- The user wants a quick prototype with no doc rigor — use [`/quick-game`](../quick-game/SKILL.md) for a fast scaffold + core loop only. If the project grows beyond a prototype (the user starts asking for milestones, ADRs, or long-term iteration), switch back to this skill.
 
 # Table of Contents
 

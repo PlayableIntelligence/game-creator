@@ -209,7 +209,7 @@ PLAYER: {
 }
 ```
 
-For **character-driven games** (named characters, personalities, mascots), make characters prominent — use 12–15% of `GAME.WIDTH` for the player width. Use **caricature proportions** (large head ~40–50% of sprite height with exaggerated features, compact body) for personality games to maximize character recognition at any scale. Never define character HEIGHT as `GAME.HEIGHT * ratio` — on mobile portrait, `GAME.HEIGHT` is much larger than `GAME.WIDTH`, breaking the aspect ratio and squishing heads vertically.
+For **character-driven games** (named characters, mascots, or public figures via `/meme-game`), make characters prominent — use 12–15% of `GAME.WIDTH` for the player width. Use **caricature proportions** (large head ~40–50% of sprite height with exaggerated features, compact body) for public-figure games to maximize character recognition at any scale. Never define character HEIGHT as `GAME.HEIGHT * ratio` — on mobile portrait, `GAME.HEIGHT` is much larger than `GAME.WIDTH`, breaking the aspect ratio and squishing heads vertically.
 
 **HTML boilerplate** (required for proper scaling):
 

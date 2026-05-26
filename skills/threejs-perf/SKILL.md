@@ -1,6 +1,6 @@
 ---
 name: threejs-perf
-description: Three.js performance optimization patterns for draw calls, scene traversal, and instancing. Use when optimizing 3D scenes with 100+ repeated objects, thousands of moving entities, or draw calls above 500. Loaded by threejs-game, viral-game, and make-game for performance guidance.
+description: Three.js performance optimization patterns for draw calls, scene traversal, and instancing. Use when optimizing 3D scenes with 100+ repeated objects, thousands of moving entities, or draw calls above 500. Loaded by threejs-game and make-game for performance guidance.
 argument-hint: "[topic]"
 license: MIT
 metadata:

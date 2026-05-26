@@ -127,7 +127,7 @@ MESHY_API_KEY=<key> node scripts/meshy-generate.mjs \
 ```
 After rigging, the model comes with basic walk/run animations. Log clip names to build the `clipMap`.
 
-For named personalities, be descriptive: `"a cartoon caricature of <Name>, <hair/glasses/suit details>, low poly game character"`.
+For named public figures, be descriptive: `"a cartoon caricature of <Name>, <hair/glasses/suit details>, low poly game character"`. (This caricature work is owned by `/meme-game` — see `meme-game/3d-public-figures.md`. Don't run it from this skill standalone unless explicitly asked.)
 
 **Tier 2 — Pre-built in `assets/3d-characters/`**: If Meshy is unavailable, check `manifest.json` for a name/theme match. Copy the GLB. Done.
 

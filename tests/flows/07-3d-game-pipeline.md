@@ -1,10 +1,10 @@
 # Flow Test 07: Make a 3D Game with Three.js
 
 ## Objective
-Test the full `/viral-game` pipeline for a 3D game using Three.js.
+Test the full `/make-game` pipeline for a 3D game using Three.js.
 
 ## Test Prompt
-"/viral-game 3d space-explorer"
+"/make-game 3d space-explorer"
 
 ## Steps
 

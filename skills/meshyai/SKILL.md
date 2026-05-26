@@ -33,7 +33,7 @@ You are an expert at generating custom 3D models with Meshy AI and integrating t
 
 - **Exact match**: Generate precisely the character, prop, or scenery your game needs — no compromises
 - **Consistent style**: All assets from the same generation pipeline share a cohesive look
-- **Custom characters**: Named personalities, branded characters, unique creatures — all generated to spec
+- **Custom characters**: Named public figures, branded characters, unique creatures — all generated to spec
 - **Full pipeline**: Generate → rig → animate, all from one tool
 - **Game-ready**: Control polycount, topology, and PBR textures for optimal Three.js performance
 
