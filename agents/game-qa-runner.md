@@ -1,6 +1,6 @@
 ---
 name: game-qa-runner
-description: Runs Playwright test suites for browser games, diagnoses failures, fixes game code, and re-runs until green. Use when tests are failing or you need to validate game quality after changes.
+description: Runs browser test suites (node --test with Chrome over the DevTools protocol) for browser games, diagnoses failures, fixes game code, and re-runs until green. Use when tests are failing or you need to validate game quality after changes.
 skills:
   - game-qa
   - game-architecture
@@ -25,7 +25,7 @@ Also load **`phaser`** or **`threejs-game`** based on the engine detected from `
 |-------|----------|-------------|
 | Game path | Yes | Path to the game project root |
 | Test file | No | Specific test file to run (defaults to all tests) |
-| Visual inspection | No | Whether to use Playwright MCP for screenshots |
+| Visual inspection | No | Whether to take screenshots with the iterate client and review them |
 
 ## Process
 
@@ -34,7 +34,7 @@ Also load **`phaser`** or **`threejs-game`** based on the engine detected from `
 Before running anything, understand the project:
 
 - Read `package.json` for engine, dependencies, and test scripts
-- Read `playwright.config.js` or `playwright.config.ts` for test configuration
+- Read `browser.config.mjs` for test configuration (settings for `scripts/browser-test.mjs`)
 - Scan `tests/` directory structure to understand test organization
 - Read core game files (`EventBus.js`, `GameState.js`, `Constants.js`) to understand game state and events
 - Identify the dev server command and port
@@ -44,7 +44,8 @@ Before running anything, understand the project:
 Run the test suite:
 
 ```bash
-npx playwright test [optional-test-file] --reporter=list
+npm test                                                   # all tests
+node --test --test-concurrency=1 [optional-test-file]      # one spec file
 ```
 
 Capture the full output including pass/fail counts and error details.
@@ -88,16 +89,16 @@ After fixing, run `npm run build` to verify the fix doesn't break the build.
 Run the full test suite again:
 
 ```bash
-npx playwright test --reporter=list
+npm test
 ```
 
 If tests still fail, repeat steps 3-6. **Maximum 3 iterations.** If tests still fail after 3 rounds, stop and report the remaining failures.
 
 ### 7. Visual Inspection (Optional)
 
-If visual inspection was requested and Playwright MCP is available:
+If visual inspection was requested:
 
-- Take screenshots of each major game state (gameplay, game over)
+- Take screenshots of each major game state (gameplay, game over) with `node scripts/iterate-client.js` (see `game-qa/visual-inspection.md`) and view them with the Read tool
 - Compare against visual expectations
 - Flag any visual issues not caught by automated tests
 

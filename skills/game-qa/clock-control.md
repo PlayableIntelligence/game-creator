@@ -1,8 +1,8 @@
 # Clock Control for Frame-Precise Testing
 
-Playwright's Clock API controls `requestAnimationFrame`, giving you frame-precise game control.
+`page.clock` (from `scripts/cdp.mjs`) controls `requestAnimationFrame`, giving you frame-precise game control.
 
-## Playwright Clock API Pattern
+## Clock API Pattern
 
 ```js
 test('bird falls after 1 second without input', async ({ page }) => {

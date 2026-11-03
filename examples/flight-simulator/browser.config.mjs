@@ -1,6 +1,6 @@
-import { defineConfig, devices } from '@playwright/test';
-
-export default defineConfig({
+// Settings for scripts/browser-test.mjs (node --test with the Chrome on this machine), in Playwright's config shape.
+// Not used by it: retries, fullyParallel, forbidOnly, workers, reporter, trace and video.
+export default {
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -23,7 +23,7 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'chromium', use: { viewport: { width: 1280, height: 720 } } },
   ],
 
   webServer: {
@@ -32,4 +32,4 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 30000,
   },
-});
+};

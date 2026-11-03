@@ -2,7 +2,7 @@
   {
     "id": "phaser-2d-starter",
     "name": "Phaser 2D Starter",
-    "description": "Production-ready 2D game template with EventBus, GameState, Constants, high-DPI rendering, Strudel audio, and Playwright tests.",
+    "description": "Production-ready 2D game template with EventBus, GameState, Constants, high-DPI rendering, Strudel audio, and browser tests.",
     "engine": "2d",
     "genre": ["template"],
     "complexity": "starter",
@@ -14,7 +14,7 @@
   {
     "id": "threejs-3d-starter",
     "name": "Three.js 3D Starter",
-    "description": "Production-ready 3D game template with AssetLoader, SkeletonUtils, EventBus, GameState, Strudel audio, and Playwright tests.",
+    "description": "Production-ready 3D game template with AssetLoader, SkeletonUtils, EventBus, GameState, Strudel audio, and browser tests.",
     "engine": "3d",
     "genre": ["template"],
     "complexity": "starter",
@@ -26,7 +26,7 @@
   {
     "id": "flappy-bird",
     "name": "Flappy Bird",
-    "description": "Classic pipe-dodging game with parallax clouds, chiptune BGM, retro SFX, and full Playwright test suite. Architecture reference game.",
+    "description": "Classic pipe-dodging game with parallax clouds, chiptune BGM, retro SFX, and full browser test suite. Architecture reference game.",
     "engine": "2d",
     "genre": ["arcade", "side-scroller"],
     "complexity": "beginner",

@@ -1,18 +1,18 @@
 ---
 name: game-qa
-description: Game QA testing with Playwright — visual regression, gameplay verification, performance, and accessibility for browser games. Use when writing or running game tests, debugging test failures, or building QA infrastructure. This is the reference skill — use qa-game for the user-facing command.
+description: Game QA testing with browser tests (Chrome over the DevTools protocol, no npm dependency) — visual regression, gameplay verification and performance for browser games. Use when writing or running game tests, debugging test failures, or building QA infrastructure. This is the reference skill — use qa-game for the user-facing command.
 argument-hint: "[topic]"
 license: MIT
-compatibility: Requires Node.js and Playwright for browser-based game testing.
+compatibility: Requires Node.js 22+ (or Bun) and Google Chrome for browser-based game testing.
 metadata:
   author: OpusGameLabs
   version: 1.3.0
-  tags: [game, qa, testing, playwright]
+  tags: [game, qa, testing, cdp]
 ---
 
-# Game QA with Playwright
+# Game QA with Browser Tests
 
-You are an expert QA engineer for browser games. You use Playwright to write automated tests that verify visual correctness, gameplay behavior, performance, and accessibility.
+You are an expert QA engineer for browser games. You use the plugin's dependency-free browser helpers (`scripts/cdp.mjs` and `scripts/browser-test.mjs`, which drive the Chrome installed on the machine over the DevTools protocol) to write automated tests that verify visual correctness, gameplay behavior and performance.
 
 ## Performance Notes
 
@@ -26,27 +26,27 @@ You are an expert QA engineer for browser games. You use Playwright to write aut
 For detailed reference, see companion files in this directory:
 - `test-patterns.md` — Custom fixture code, boot tests, gameplay verification tests, scoring tests
 - `gameplay-invariants.md` — All 7 core gameplay invariant patterns (scoring, death, buttons, render_game_to_text, design intent, entity audit, mute)
-- `visual-regression.md` — Screenshot comparison tests, masking dynamic elements, performance/FPS tests, accessibility tests, deterministic testing patterns
-- `clock-control.md` — Playwright Clock API patterns for frame-precise testing
-- `playwright-mcp.md` — MCP server setup, when to use MCP vs scripted tests, inspection flow
+- `visual-regression.md` — Screenshot comparison tests, masking dynamic elements, performance/FPS tests, deterministic testing patterns
+- `clock-control.md` — `page.clock` API patterns for frame-precise testing
+- `visual-inspection.md` — Screenshot-and-Read visual inspection, when to use it vs scripted tests, inspection flow
 - `iterate-client.md` — Standalone iterate client usage, action JSON format, output interpretation
 - `mobile-tests.md` — Mobile input simulation and responsive layout test patterns
 
 ## Tech Stack
 
-- **Test Runner**: Playwright Test (`@playwright/test`)
-- **Visual Regression**: Playwright built-in `toHaveScreenshot()`
-- **Accessibility**: `@axe-core/playwright`
+- **Test Runner**: `scripts/browser-test.mjs` (`test`/`expect` on `node --test`), driving Chrome through `scripts/cdp.mjs`
+- **Visual Regression**: `toHaveScreenshot()` from `browser-test.mjs`
+- **Accessibility**: no automated scan (axe-core is not available)
 - **Build Tool Integration**: Vite dev server via `webServer` config
 - **Language**: JavaScript ES modules
 
 ## Project Setup
 
-When adding Playwright to a game project:
+When adding browser tests to a game project, copy the helpers from the plugin (no npm install; needs Node 22+ or Bun and Google Chrome, or set `BOOP_CHROME=/path/to/chrome`):
 
 ```bash
-npm install -D @playwright/test @axe-core/playwright
-npx playwright install chromium
+mkdir -p scripts
+cp <plugin-root>/scripts/cdp.mjs <plugin-root>/scripts/browser-test.mjs scripts/
 ```
 
 Add to `package.json` scripts:
@@ -54,10 +54,9 @@ Add to `package.json` scripts:
 ```json
 {
   "scripts": {
-    "test": "npx playwright test",
-    "test:ui": "npx playwright test --ui",
-    "test:headed": "npx playwright test --headed",
-    "test:update-snapshots": "npx playwright test --update-snapshots"
+    "test": "node --test --test-concurrency=1 \"tests/**/*.spec.js\"",
+    "test:headed": "BROWSER_TEST_HEADED=1 node --test --test-concurrency=1 \"tests/**/*.spec.js\"",
+    "test:update-snapshots": "BROWSER_TEST_UPDATE_SNAPSHOTS=1 node --test --test-concurrency=1 \"tests/**/*.spec.js\""
   }
 }
 ```
@@ -75,27 +74,24 @@ tests/
 │   └── screenshot.css     # CSS to mask dynamic elements for visual tests
 ├── helpers/
 │   └── seed-random.js     # Seeded PRNG for deterministic game behavior
-playwright.config.js
+scripts/
+├── cdp.mjs                # Chrome over the DevTools protocol (copied from the plugin)
+└── browser-test.mjs       # test/expect on node --test (copied from the plugin)
+browser.config.mjs
 ```
 
-## Playwright Config
+## Browser Test Config
+
+`browser-test.mjs` reads `timeout`, `expect`, `use`, `projects` and `webServer` (retries, workers, reporters and traces are not supported).
 
 ```js
-import { defineConfig, devices } from '@playwright/test';
-
-export default defineConfig({
+export default {
   testDir: './tests',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: [['html', { open: 'never' }], ['list']],
+  timeout: 30000,
 
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
   },
 
   expect: {
@@ -106,17 +102,16 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile-chrome', use: { ...devices['Pixel 5'] } },
+    { name: 'chromium', use: { viewport: { width: 1280, height: 720 } } },
+    { name: 'mobile-chrome', use: { viewport: { width: 393, height: 851 }, deviceScaleFactor: 2.75, isMobile: true, hasTouch: true } },
   ],
 
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    reuseExistingServer: true,
   },
-});
+};
 ```
 
 Key points:
@@ -127,12 +122,12 @@ Key points:
 
 ## Testability Requirements
 
-For Playwright to inspect game state, the game MUST expose these globals on `window` in `main.js`:
+For browser tests to inspect game state, the game MUST expose these globals on `window` in `main.js`:
 
 ### 1. Core globals (required)
 
 ```js
-// Expose for Playwright QA
+// Expose for browser QA
 window.__GAME__ = game;
 window.__GAME_STATE__ = gameState;
 window.__EVENT_BUS__ = eventBus;
@@ -199,7 +194,7 @@ window.advanceTime = (ms) => {
 };
 ```
 
-For frame-precise control in `@playwright/test`, prefer `page.clock.install()` + `page.clock.runFor()`. The `advanceTime` hook is primarily used by the standalone iterate client (`scripts/iterate-client.js`).
+For frame-precise control in browser tests, prefer `page.clock.install()` + `page.clock.runFor()`. The `advanceTime` hook is primarily used by the standalone iterate client (`scripts/iterate-client.js`).
 
 For Three.js games, expose the `Game` orchestrator instance similarly.
 
@@ -209,8 +204,8 @@ See `gameplay-invariants.md` for all 7 core gameplay invariant patterns (scoring
 
 ## When Adding QA to a Game
 
-1. Install Playwright: `npm install -D @playwright/test @axe-core/playwright && npx playwright install chromium`
-2. Create `playwright.config.js` with the game's dev server port
+1. Copy the helpers: `cp <plugin-root>/scripts/cdp.mjs <plugin-root>/scripts/browser-test.mjs scripts/` (needs Node 22+ and Google Chrome)
+2. Create `browser.config.mjs` with the game's dev server port
 3. Expose `window.__GAME__`, `window.__GAME_STATE__`, `window.__EVENT_BUS__` in `main.js`
 4. Create `tests/fixtures/game-test.js` with the `gamePage` fixture
 5. Create `tests/helpers/seed-random.js` for deterministic behavior
@@ -218,13 +213,13 @@ See `gameplay-invariants.md` for all 7 core gameplay invariant patterns (scoring
    - `game.spec.js` — boot, scene flow, input, scoring, game over
    - `visual.spec.js` — screenshot regression for each scene
    - `perf.spec.js` — load time, FPS budget
-7. Add npm scripts: `test`, `test:ui`, `test:headed`, `test:update-snapshots`
+7. Add npm scripts: `test`, `test:headed`, `test:update-snapshots`
 8. Generate initial baselines: `npm run test:update-snapshots`
 
 ## What NOT to Test (Automated)
 
 - **Exact pixel positions** of animated objects (non-deterministic without clock control)
-- **Active gameplay screenshots** — moving objects make stable screenshots impossible; use MCP instead
-- **Audio playback** (Playwright has no audio inspection; test that audio objects exist via evaluate)
+- **Active gameplay screenshots** — moving objects make stable screenshots impossible; use visual inspection (screenshots + Read) instead
+- **Audio playback** (the browser helper has no audio inspection; test that audio objects exist via evaluate)
 - **External API calls** unless mocked (e.g., Play.fun SDK — mock with `page.route()`)
-- **Subjective visual quality** — use MCP for "does this look good?" evaluations
+- **Subjective visual quality** — use visual inspection for "does this look good?" evaluations

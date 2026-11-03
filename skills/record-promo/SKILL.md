@@ -6,7 +6,7 @@ license: MIT
 metadata:
   author: OpusGameLabs
   version: 1.3.0
-  tags: [game, video, promo, recording, playwright, ffmpeg]
+  tags: [game, video, promo, recording, cdp, ffmpeg]
 ---
 
 # Record Promo Video
@@ -21,7 +21,7 @@ Record a promo video of the game at `$ARGUMENTS` (or the current directory if no
 
 Verify these are available:
 - **Dev server**: Check if one is already running (`curl -s http://localhost:3000/`). If not, start one with `npm run dev` in the background. Note the port.
-- **Playwright**: `npx playwright --version`. If not installed: `npm install -D @playwright/test && npx playwright install chromium`
+- **Browser helper**: `test -f scripts/cdp.mjs`. If missing: `cp <plugin-root>/scripts/cdp.mjs scripts/`. It needs Node 22+ (or Bun) and Google Chrome (or `BOOP_CHROME=/path/to/chrome`); no npm install
 - **FFmpeg**: `ffmpeg -version | head -1`. If not found, tell the user to install it (`brew install ffmpeg` on macOS) and stop.
 
 ### 2. Generate the capture script

@@ -33,7 +33,6 @@ Clone a game template from the gallery into a new project. This is a fast copy â
    - `.herenow/`
    - `progress.md`
    - `test-results/`
-   - `playwright-report/`
 
 5. **Update project metadata**:
    - In `package.json`: set `"name"` to the project name
@@ -95,7 +94,7 @@ if (!path.resolve(target).startsWith(path.resolve(expectedParent))) {
 }
 
 // Copy with exclusions
-const EXCLUDE = ['node_modules', 'dist', 'output', '.herenow', 'progress.md', 'test-results', 'playwright-report'];
+const EXCLUDE = ['node_modules', 'dist', 'output', '.herenow', 'progress.md', 'test-results'];
 
 function copyDir(src, dst) {
   fs.mkdirSync(dst, { recursive: true });

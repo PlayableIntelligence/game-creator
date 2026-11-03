@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { test as base } from '../../scripts/browser-test.mjs';
 
 export const test = base.extend({
   gamePage: async ({ page }, use) => {

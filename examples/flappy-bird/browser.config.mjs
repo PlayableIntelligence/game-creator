@@ -1,6 +1,6 @@
-import { defineConfig } from '@playwright/test';
-
-export default defineConfig({
+// Settings for scripts/browser-test.mjs (node --test with the Chrome on this machine), in Playwright's config shape.
+// Not used by it: retries, fullyParallel, forbidOnly, workers, reporter, trace and video.
+export default {
   testDir: './tests/e2e',
   timeout: 30000,
   retries: 1,
@@ -26,4 +26,4 @@ export default defineConfig({
     port: 3000,
     reuseExistingServer: true,
   },
-});
+};

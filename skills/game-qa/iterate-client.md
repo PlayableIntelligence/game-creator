@@ -1,14 +1,14 @@
 # Iterate Client -- Quick Feedback Loop
 
-The standalone iterate client (`scripts/iterate-client.js`) is designed for tight implement-then-test cycles during development. Use it after **every meaningful code change** to catch issues immediately, rather than waiting for the full `@playwright/test` suite.
+The standalone iterate client (`scripts/iterate-client.js`) is designed for tight implement-then-test cycles during development. Use it after **every meaningful code change** to catch issues immediately, rather than waiting for the full browser test suite (`npm test`).
 
 ## When to Use
 
 | Task | Tool |
 |------|------|
 | Verify a code change didn't break anything | **Iterate client** -- fast, captures state + errors |
-| Full regression suite for CI/CD | **`npm run test`** -- comprehensive Playwright Test suite |
-| Subjective visual evaluation | **Playwright MCP** -- human judgment of aesthetics |
+| Full regression suite for CI/CD | **`npm run test`** -- comprehensive browser test suite |
+| Subjective visual evaluation | **Visual inspection** (screenshots + Read, see `visual-inspection.md`) -- judgment of aesthetics |
 | During subagent implementation steps | **Iterate client** -- run after each small change |
 
 ## Usage

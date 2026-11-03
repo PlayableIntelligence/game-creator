@@ -42,7 +42,7 @@ Verify `dist/` directory exists and contains `index.html`.
 
 **Test check:**
 ```bash
-npx playwright test
+npm test   # node --test with scripts/browser-test.mjs
 ```
 All tests must pass. If tests fail, stop and report — do not deploy a broken game.
 
@@ -155,7 +155,7 @@ curl -s -o /dev/null -w "%{http_code}" <deployed-url>
 Expect HTTP 200. For here.now, this should be instant. For GitHub Pages, may take 1-2 minutes.
 
 **Visual check (optional):**
-If Playwright MCP is available, navigate to the deployed URL and take a screenshot to verify the game loads correctly.
+Take a screenshot of the deployed URL with the iterate client (`node scripts/iterate-client.js --url <deployed-url> --iterations 1 --screenshot-dir output/deploy-check`) and Read `output/deploy-check/shot-0.png` to verify the game loads correctly.
 
 **Common post-deploy issues:**
 

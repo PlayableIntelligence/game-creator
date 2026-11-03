@@ -223,4 +223,4 @@ test('mute button exists and toggles audio state', async ({ gamePage }) => {
 });
 ```
 
-The M key is a testable proxy for the mute button — if the event wiring exists, the visual button does too. Playwright cannot inspect Phaser Graphics objects directly.
+The M key is a testable proxy for the mute button — if the event wiring exists, the visual button does too. Browser tests cannot inspect Phaser Graphics objects directly.

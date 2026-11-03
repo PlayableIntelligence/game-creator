@@ -5,7 +5,7 @@ import { gameState } from './core/GameState.js';
 
 const game = new Phaser.Game(GameConfig);
 
-// Expose for Playwright testing
+// Expose for browser tests
 window.__GAME__ = game;
 window.__GAME_STATE__ = gameState;
 window.__EVENT_BUS__ = eventBus;
@@ -51,7 +51,7 @@ window.render_game_to_text = () => {
 // --- Deterministic time-stepping hook ---
 // Lets automated test scripts advance the game by a precise duration.
 // The game loop runs normally via RAF; this just waits for real time to elapse.
-// For frame-precise control in @playwright/test, prefer page.clock.install() + runFor().
+// For frame-precise control in browser tests, prefer page.clock.install() + runFor() (scripts/cdp.mjs).
 window.advanceTime = (ms) => {
   return new Promise((resolve) => {
     const start = performance.now();

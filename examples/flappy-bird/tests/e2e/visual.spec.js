@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect } from '../../scripts/browser-test.mjs';
 import { test, startPlaying } from '../fixtures/game-test.js';
 
 test.describe('Flappy Bird — Visual Regression', () => {

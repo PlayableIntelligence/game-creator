@@ -1,13 +1,13 @@
 # Test Patterns
 
-Custom fixture code, boot tests, gameplay tests, and scoring tests for Playwright game QA.
+Custom fixture code, boot tests, gameplay tests, and scoring tests for browser game QA.
 
 ## Custom Test Fixture
 
 Create a reusable fixture with game-specific helpers:
 
 ```js
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from '../../scripts/browser-test.mjs';
 
 export const test = base.extend({
   gamePage: async ({ page }, use) => {

@@ -52,7 +52,7 @@ improve the visual design
 
 # qa-game triggers
 add tests to my game
-test my game with Playwright
+test my game with browser tests
 add visual regression tests
 
 # review-game triggers

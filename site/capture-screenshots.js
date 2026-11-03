@@ -122,7 +122,7 @@ function findQAScreenshot(sourceDir) {
 
 async function captureFromDist(distDir, thumbPath, entry, sharp) {
   const http = require('http');
-  const { chromium } = require('playwright');
+  const { chromium } = await import('../scripts/cdp.mjs');
 
   // Simple static file server
   const server = http.createServer((req, res) => {

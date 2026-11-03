@@ -329,7 +329,7 @@ After loading ANY 3D model (Meshy-generated, library, or Sketchfab), **always ve
 2. **Check facing direction** — most Meshy models face +Z, most library models vary. Set `rotationY` per model in Constants.js. Start with `Math.PI` for Meshy models.
 3. **Check scale** — calculate auto-scale to fit target height. Ensure models fit within their environment (e.g., characters inside a ring, players on a platform).
 4. **Align to floor** — set `position.y = -box.min.y` to plant feet on ground
-5. **Take a Playwright screenshot** to visually confirm facing + fit. Don't skip this.
+5. **Take a screenshot** (iterate client or a short `scripts/cdp.mjs` script, then Read it) to visually confirm facing + fit. Don't skip this.
 
 See the `meshyai` skill's "Post-Generation Verification" section for detailed code patterns.
 

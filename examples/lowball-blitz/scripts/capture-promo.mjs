@@ -9,7 +9,7 @@
  *   node scripts/capture-promo.mjs --port 3008 --duration 8000 --output-dir output
  */
 
-import { chromium } from '@playwright/test';
+import { chromium } from './cdp.mjs';
 import { mkdirSync, readdirSync, unlinkSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { execSync } from 'node:child_process';

@@ -11,7 +11,7 @@ metadata:
 
 # Three.js Performance Optimization
 
-Performance patterns for Three.js games, backed by measured before/after numbers on Three.js r183 (headless Chromium via Playwright, Apple M1 Pro, software WebGL).
+Performance patterns for Three.js games, backed by measured before/after numbers on Three.js r183 (headless Chromium, scripted benchmark, Apple M1 Pro, software WebGL).
 
 ## Reference Files
 
@@ -95,7 +95,7 @@ Is the object repeated 50+ times with same geometry+material?
 
 ## Measured Results
 
-Headless Chromium 147 via Playwright, Three.js r183, Apple M1 Pro, 30 warmup + 180 sample frames, median of 3 runs.
+Headless Chromium 147 (scripted benchmark), Three.js r183, Apple M1 Pro, 30 warmup + 180 sample frames, median of 3 runs.
 
 | Scenario | Metric | Baseline | Optimized | Improvement |
 |----------|--------|----------|-----------|-------------|
@@ -109,5 +109,5 @@ Headless Chromium 147 via Playwright, Three.js r183, Apple M1 Pro, 30 warmup + 1
 ### Methodology notes
 
 - **CPU-side metrics are the trustworthy signal.** Draw calls, render CPU p95, update loop, and build time reliably show the 1–2 order-of-magnitude win.
-- **FPS and frame-time p95 are unreliable in headless Chromium.** Playwright's bundled Chromium uses SwiftShader (software WebGL), which bottlenecks on fragment shading of ~90 MB of visible geometry regardless of draw-call count. On real hardware WebGL, the FPS gap would be substantially larger — baseline would drop to single-digit FPS under real fill, and optimized would hit vsync cleanly.
+- **FPS and frame-time p95 are unreliable in headless Chromium.** Headless Chromium without a GPU uses SwiftShader (software WebGL), which bottlenecks on fragment shading of ~90 MB of visible geometry regardless of draw-call count. On real hardware WebGL, the FPS gap would be substantially larger — baseline would drop to single-digit FPS under real fill, and optimized would hit vsync cleanly.
 - **A benchmark passes** if draw calls decreased and render CPU p95 did not regress.

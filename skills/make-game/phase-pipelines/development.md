@@ -57,14 +57,14 @@ Before changing implementation code, **write the tests that will prove the miles
 
 What to write where:
 
-- **Gameplay logic, state transitions, scoring, collision rules, win/lose conditions** → Playwright tests using the patterns in `/qa-game` (the `game-test` fixture, `render_game_to_text()` for state assertions, `advanceTime()` / `page.clock` for deterministic timing). These are the default and cover almost everything.
+- **Gameplay logic, state transitions, scoring, collision rules, win/lose conditions** → browser tests using the patterns in `/qa-game` (the `game-test` fixture, `render_game_to_text()` for state assertions, `advanceTime()` / `page.clock` for deterministic timing). These are the default and cover almost everything.
 - **Pure functions that don't depend on the game runtime** (math helpers, formatters, RNG wrappers) → unit tests next to the source if the project already has a unit test runner. Don't introduce a new test framework just for one helper.
-- **Visual-only changes** (palette tweaks, particle counts, juice, transitions) → a Playwright screenshot test that captures the *current* baseline before the change, then a second assertion that the post-change screenshot differs (or matches a reviewed new baseline). For polish where "differs" isn't a meaningful assertion, fall back to live-iterate (step 5) and **explicitly note in the milestone that the AC is verified by user playtest, not automated test** — do not silently skip the test step.
-- **Multiplayer behavior** → tests that boot two clients via Playwright and assert state convergence. The `add-multiplayer` skill has scaffolding patterns.
+- **Visual-only changes** (palette tweaks, particle counts, juice, transitions) → a browser screenshot test (`toHaveScreenshot`) that captures the *current* baseline before the change, then a second assertion that the post-change screenshot differs (or matches a reviewed new baseline). For polish where "differs" isn't a meaningful assertion, fall back to live-iterate (step 5) and **explicitly note in the milestone that the AC is verified by user playtest, not automated test** — do not silently skip the test step.
+- **Multiplayer behavior** → tests that boot two clients (two pages/contexts from `scripts/cdp.mjs`) and assert state convergence. The `add-multiplayer` skill has scaffolding patterns.
 
 If the milestone AC is too vague to write a test against ("combat should feel snappy", "menus should be polished"), stop and run [playtest / repro](../sub-pipelines/playtest-repro.md) to convert the AC into something checkable before continuing.
 
-If the project has no test harness yet, run `/qa-game` to set one up before writing the milestone's first test — do not hand-roll Playwright config when the skill exists.
+If the project has no test harness yet, run `/qa-game` to set one up before writing the milestone's first test — do not hand-roll a `browser.config.mjs` when the skill exists.
 
 **4. Implement the smallest correct change**
 
@@ -85,7 +85,7 @@ If the project has no test harness yet, run `/qa-game` to set one up before writ
 | Generate custom 3D models | `/meshyai` |
 | Add procedural BGM/SFX | `/add-audio` |
 | Visual polish, juice, transitions | `/design-game` |
-| Add/extend Playwright tests | `/qa-game` |
+| Add/extend browser tests | `/qa-game` |
 | Real-time or turn-based multiplayer | `/add-multiplayer` |
 | Holistic audit + improvements | `/improve-game` |
 | Read-only architecture review | `/review-game` |

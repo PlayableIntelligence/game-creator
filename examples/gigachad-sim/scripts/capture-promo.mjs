@@ -4,7 +4,7 @@
  * Records at 0.5x speed, 25 FPS → FFmpeg speeds up to 50 FPS.
  */
 
-import { chromium } from 'playwright';
+import { chromium } from './cdp.mjs';
 
 const PORT = parseInt(process.argv.find((a, i, arr) => arr[i - 1] === '--port') ?? '3000');
 const DURATION_MS = parseInt(process.argv.find((a, i, arr) => arr[i - 1] === '--duration') ?? '13000');

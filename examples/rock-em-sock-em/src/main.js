@@ -2,7 +2,7 @@
 // main.js — Entry point for Rock 'Em Sock 'Em Robots
 //
 // Creates the Game instance, exposes test globals, and provides
-// render_game_to_text() and advanceTime() for AI agents / Playwright.
+// render_game_to_text() and advanceTime() for AI agents / browser tests.
 // =============================================================================
 
 import { Game } from './core/Game.js';
@@ -12,7 +12,7 @@ import { COMBAT } from './core/Constants.js';
 
 const game = new Game();
 
-// Expose for Playwright testing
+// Expose for browser tests
 window.__GAME__ = game;
 window.__GAME_STATE__ = gameState;
 window.__EVENT_BUS__ = eventBus;

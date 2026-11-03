@@ -1,7 +1,7 @@
 /**
  * capture-promo.mjs -- Autonomous promo video capture for mog-showdown.
  *
- * Launches a headless Chromium browser with Playwright video recording,
+ * Launches headless Chrome with video recording (recordVideo in ./cdp.mjs: CDP screencast frames to ffmpeg),
  * patches out all death/game-over paths so gameplay runs uninterrupted,
  * and simulates skilled left/right dodging inputs for a natural-looking
  * promo clip.
@@ -13,7 +13,7 @@
  *   <output-dir>/promo-raw.webm
  */
 
-import { chromium } from 'playwright';
+import { chromium } from './cdp.mjs';
 import { parseArgs } from 'node:util';
 import { rename, readdir, mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -242,7 +242,7 @@ async function main() {
   });
 
   // Slow-mo is set on browser launch, not context; we handle pacing via
-  // input timing instead. Playwright records at whatever framerate the
+  // input timing instead. The recorder samples at 25 FPS whatever the
   // compositor provides.
 
   const page = await context.newPage();

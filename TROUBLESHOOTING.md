@@ -62,17 +62,17 @@ Common issues and fixes for the game-creator plugin.
 
 **Fix**: Ensure `index.html` is at the project root (not inside `src/`). Check `vite.config.js` doesn't override `root`.
 
-## Playwright / QA Issues
+## Browser Tests / QA Issues
 
-### Tests fail with "browser not found"
+### Tests fail with "no Chrome found"
 
-**Fix**: Run `npx playwright install chromium`. The `/viral-game` pipeline attempts this automatically but it can fail in restricted environments.
+**Fix**: Install Google Chrome, or set `BOOP_CHROME=/path/to/chrome` to a Chrome or Chromium executable. The helpers (`scripts/cdp.mjs`) also need Node 22+ (or Bun). The `/viral-game` pipeline checks this automatically but it can fail in restricted environments.
 
 ### FPS test fails (reports ~7 FPS)
 
 **Expected**: Headless Chromium runs at reduced FPS (~7-9). The default threshold is 5 FPS. This is not a bug — real browsers achieve 60 FPS.
 
-**Fix**: Don't raise the FPS threshold above 5 for headless tests. Use Playwright MCP (real browser) for accurate FPS measurement.
+**Fix**: Don't raise the FPS threshold above 5 for headless tests. Use a headed Chrome run (`npm run test:headed` or `node scripts/iterate-client.js --headless 0 ...`) for accurate FPS measurement.
 
 ### Visual regression tests fail with pixel differences
 

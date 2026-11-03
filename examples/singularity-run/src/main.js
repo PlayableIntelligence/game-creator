@@ -31,7 +31,7 @@ function onFirstInteraction() {
 document.addEventListener('click', onFirstInteraction);
 document.addEventListener('touchstart', onFirstInteraction);
 
-// Expose for Playwright testing
+// Expose for browser tests
 window.__GAME__ = game;
 window.__GAME_STATE__ = gameState;
 window.__EVENT_BUS__ = eventBus;

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../scripts/browser-test.mjs';
 
 test.describe('Flappy Bird 3D — Performance', () => {
   test('game loads within 10 seconds', async ({ page }) => {

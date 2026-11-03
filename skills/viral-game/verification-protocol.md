@@ -2,13 +2,9 @@
 
 Run this protocol after **every code-modifying step** (Steps 1, 1.5, 2, 3). Step 2.5 (Promo Video) does not modify game code, so it skips QA. It delegates all QA work to a subagent to minimize main-thread context usage.
 
-## Playwright MCP Check (once, before first QA run)
+## Browser Check (once, before first QA run)
 
-Before the first QA run (after Step 1 infrastructure setup), check if Playwright MCP tools like `browser_navigate` are available. If not:
-
-1. Run: `claude mcp add playwright npx @playwright/mcp@latest`
-2. Tell the user: "Playwright MCP has been added. Please restart Claude Code for it to take effect, then tell me to continue."
-3. **Wait for user to restart and confirm.** Do not proceed until MCP tools are available.
+Before the first QA run (after Step 1 infrastructure setup), check that `scripts/cdp.mjs` is in the project and Google Chrome is installed (or `BOOP_CHROME` names a Chrome/Chromium). Visual review uses screenshots written by `scripts/iterate-client.js` and the Read tool; do not install a browser MCP server.
 
 ## QA Subagent
 
@@ -54,26 +50,25 @@ Launch a `Task` subagent with these instructions:
 > ```
 > Report any warnings but don't fail on architecture issues alone.
 >
-> **Phase 5 — Visual Review via Playwright MCP**
-> Use Playwright MCP to visually review the game. If MCP tools are not available, fall back to reading iterate screenshots from `output/iterate/`.
+> **Phase 5 — Visual Review via Screenshots**
+> Visually review the game from screenshots written by the iterate client (Chrome over the DevTools protocol, `scripts/cdp.mjs`), viewed with the Read tool. If no screenshots can be captured, fall back to code review.
 >
-> With MCP:
-> 1. `browser_navigate` to `http://localhost:<port>`
-> 2. `browser_wait_for` — wait 2 seconds for the game to load
-> 3. `browser_take_screenshot` — save as `output/qa-gameplay.png`
-> 4. Assess: Are entities visible? Is the game rendering correctly?
-> 5. Check safe zone: Is any UI hidden behind the top ~8% (Play.fun widget area)?
-> 6. Check entity sizing: Is the main character large enough (12-15% screen width for character games)?
-> 7. Wait for game over (or navigate to it), `browser_take_screenshot` — save as `output/qa-gameover.png`
-> 8. Check buttons: Are button labels visible? Blank rectangles = broken button pattern.
-> 9. Check mute button: Is there a mute toggle visible? If not, flag as ISSUE.
+> With screenshots:
+> 1. Run `node scripts/iterate-client.js --url http://localhost:<port> --iterations 1 --pause-ms 2000 --screenshot-dir output/qa` — the pause gives the game 2 seconds to load
+> 2. Read `output/qa/shot-0.png` (copy it to `output/qa-gameplay.png`)
+> 3. Assess: Are entities visible? Is the game rendering correctly?
+> 4. Check safe zone: Is any UI hidden behind the top ~8% (Play.fun widget area)?
+> 5. Check entity sizing: Is the main character large enough (12-15% screen width for character games)?
+> 6. Wait for game over (more `--iterations` with no input, or the `output/iterate/` run from Phase 3 that reached `mode: "game_over"`), Read that shot — save as `output/qa-gameover.png`
+> 7. Check buttons: Are button labels visible? Blank rectangles = broken button pattern.
+> 8. Check mute button: Is there a mute toggle visible? If not, flag as ISSUE.
 >
-> **Screenshot timeout**: If `browser_take_screenshot` hangs for more than 10 seconds (can happen with continuous WebGL animations), cancel and proceed with code review instead. Do not let a screenshot hang block the entire QA phase.
+> **Screenshot timeout**: If the iterate client hangs for more than 10 seconds on a screenshot (can happen with continuous WebGL animations), stop it and proceed with code review instead. Do not let a screenshot hang block the entire QA phase.
 >
-> **Note on iterate screenshots**: The iterate-client uses `canvas.toDataURL()` which returns blank/black images when Phaser uses WebGL with `preserveDrawingBuffer: false`. Always prefer Playwright MCP viewport screenshots (`browser_take_screenshot`) over iterate screenshots for visual review.
+> **Note on iterate screenshots**: If a screenshot comes out blank/black (a canvas read back with `canvas.toDataURL()` when Phaser uses WebGL with `preserveDrawingBuffer: false`), take a viewport screenshot instead with a short cdp.mjs script (`page.screenshot({ path })`).
 >
-> Without MCP (fallback):
-> 1. Read the iterate screenshots from `output/iterate/shot-*.png` (may be black if WebGL — this is expected)
+> Without screenshots (fallback):
+> 1. Read whatever iterate screenshots exist in `output/iterate/shot-*.png` (may be black if WebGL — this is expected)
 > 2. Fall back to code review: read scene files and assess visual correctness from the code
 >
 > **Return your results in this exact format (text only, no images):**

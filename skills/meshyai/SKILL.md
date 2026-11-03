@@ -296,7 +296,7 @@ All sources output GLB files into `public/assets/models/`. The `AssetLoader.js` 
 - [ ] **All humanoid characters rigged** — never skip rigging for bipedal models
 - [ ] Downloaded GLB before 3-day expiration
 - [ ] **Post-generation verification done** — orientation, scale, floor alignment checked
-- [ ] **Playwright screenshot taken** — visually confirmed facing direction + fit in environment
+- [ ] **Screenshot taken** (cdp.mjs / iterate client) — visually confirmed facing direction + fit in environment
 - [ ] `rotationY` set per model in Constants.js (most Meshy models need `Math.PI`)
 - [ ] Static models use `loadModel()` (regular clone)
 - [ ] Rigged models use `loadAnimatedModel()` (SkeletonUtils.clone)
