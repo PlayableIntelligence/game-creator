@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Speed up a slow-mo Playwright recording to produce high-FPS output.
+# Speed up a slow-mo recording (cdp.mjs recordVideo, CDP screencast frames at 25 FPS) to produce high-FPS output.
 # Usage: convert-highfps.sh <input.webm> <output.mp4> [slow_mo_factor]
 
 INPUT="${1:?Usage: convert-highfps.sh <input> <output> [factor]}"

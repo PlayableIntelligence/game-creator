@@ -70,7 +70,7 @@ When invoked, follow this process:
 - Read all scene files to understand the game flow and current visuals
 - Read entity files to understand the visual elements
 - Run the game mentally: what does the player see at each stage?
-- **If Playwright MCP is available**: Use `browser_navigate` to open the game, then `browser_take_screenshot` to capture each scene. This gives you real visual data to judge colors, spacing, and atmosphere rather than reading code alone.
+- **Take screenshots**: Run `node scripts/iterate-client.js --url http://localhost:3000 --iterations 3 --pause-ms 2000` (copy `scripts/cdp.mjs` and `scripts/iterate-client.js` from the plugin if missing), then Read the PNGs in `output/iterate/` to see each scene. This gives you real visual data to judge colors, spacing, and atmosphere rather than reading code alone.
 
 ### Step 2: Generate a design report
 
@@ -261,14 +261,14 @@ export const SPECTACLE = {
 - **Layered invisible buttons** — Never use `setAlpha(0)` on an interactive element with a Graphics or Sprite drawn on top for visual styling. The top layer intercepts pointer events. Instead, apply visual changes (fill color, scale tweens) directly to the interactive element itself via `setFillStyle()`.
 - **Decorative colliders** — When adding visual elements that need physics (ground, walls, boundaries), verify they are wired to entities with `physics.add.collider()` or `physics.add.overlap()`. A static body that exists but isn't connected to anything is invisible and has no gameplay effect.
 
-## Using Playwright MCP for Visual Inspection
+## Using Screenshots for Visual Inspection
 
-If the Playwright MCP is available, use it for a real visual audit:
+Use the iterate client (Chrome over the DevTools protocol, `scripts/cdp.mjs`) for a real visual audit; do not install a browser MCP server:
 
-1. **`browser_navigate`** to the game URL (e.g., `http://localhost:3000`)
-2. **`browser_take_screenshot`** — capture gameplay (game starts immediately, no title screen), check background, entities, atmosphere
-3. Let the player die, **`browser_take_screenshot`** — check game over screen polish and score display
-4. **`browser_press_key`** (Space) — restart and verify transitions
+1. **Run** `node scripts/iterate-client.js --url http://localhost:3000 --iterations 3 --pause-ms 2000` against the game URL
+2. **Read** `output/iterate/shot-0.png` — capture gameplay (game starts immediately, no title screen), check background, entities, atmosphere
+3. Let the player die (more `--iterations`), **Read** the later shots — check game over screen polish and score display
+4. **Restart** with `--restart-cycles 1 --restart-key Space` and Read the shots — verify transitions
 
 This gives you real visual data to base your design audit on, rather than imagining the game from code alone. Screenshots let you judge color cohesion, visual hierarchy, and atmosphere with your own eyes.
 
@@ -280,4 +280,4 @@ After implementing, summarize what changed:
 3. Note any new Constants, Events, or State added
 4. Suggest the user run the game to see the changes
 5. Recommend running `/game-creator:review-game` to verify nothing broke
-6. If MCP is available, take before/after screenshots to demonstrate the visual improvements
+6. Take before/after screenshots with the iterate client to demonstrate the visual improvements

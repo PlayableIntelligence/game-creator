@@ -55,7 +55,7 @@ if (HAS_TOUCH) {
   }
 }
 
-// Expose for Playwright testing
+// Expose for browser tests
 window.__GAME__ = game;
 window.__GAME_STATE__ = gameState;
 window.__EVENT_BUS__ = eventBus;

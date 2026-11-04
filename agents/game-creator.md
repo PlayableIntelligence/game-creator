@@ -39,7 +39,7 @@ The agent expects:
 
 **What stays in the main thread:**
 - Step 0: Parse input, create todo list
-- Step 1 (infrastructure only): Copy template, npm install, playwright install, start dev server
+- Step 1 (infrastructure only): Copy template, npm install, copy browser helper (`cdp.mjs`), start dev server
 - Verification protocol orchestration (launch QA subagent, read text result, launch autofix if needed)
 
 **What goes to subagents** (via `Task` tool):
@@ -98,21 +98,21 @@ Launch a `Task` subagent with these instructions:
 > ```
 > Report any warnings but don't fail on architecture issues alone.
 >
-> **Phase 5 — Visual Review via Playwright MCP**
-> Use Playwright MCP to visually review the game. If MCP tools are not available, fall back to reading iterate screenshots from `output/iterate/`.
+> **Phase 5 — Visual Review via Screenshots**
+> Visually review the game from screenshots written by the iterate client (Chrome over the DevTools protocol, `scripts/cdp.mjs`), viewed with the Read tool. Do not install a browser MCP server. If no new screenshots can be captured, fall back to reading iterate screenshots from `output/iterate/`.
 >
-> With MCP:
-> 1. `browser_navigate` to `http://localhost:<port>`
-> 2. `browser_wait_for` — wait 2 seconds for the game to load
-> 3. `browser_take_screenshot` — save as `output/qa-gameplay.png`
+> With screenshots:
+> 1. Run `node scripts/iterate-client.js --url http://localhost:<port> --iterations 1 --pause-ms 2000 --screenshot-dir output/qa` — the pause gives the game 2 seconds to load
+> 2. Read `output/qa/shot-0.png` (copy it to `output/qa-gameplay.png`)
+> 3. Read `output/qa/errors-0.json` if it exists (console errors during the capture)
 > 4. Assess: Are entities visible? Is the game rendering correctly?
 > 5. Check safe zone: Is any UI hidden behind the top ~8% (Play.fun widget area)?
 > 6. Check entity sizing: Is the main character large enough (12–15% screen width for character games)?
-> 7. Wait for game over (or navigate to it), `browser_take_screenshot` — save as `output/qa-gameover.png`
+> 7. Wait for game over (more `--iterations` with no input), Read that shot — save as `output/qa-gameover.png`
 > 8. Check buttons: Are button labels visible? Blank rectangles = broken button pattern.
 > 9. Check mute button: Is there a mute toggle visible? If not, flag as ISSUE.
 >
-> Without MCP (fallback):
+> Without new screenshots (fallback):
 > 1. Read the iterate screenshots from `output/iterate/shot-*.png`
 > 2. Assess visual quality from those screenshots
 >
@@ -213,11 +213,11 @@ Mark task 1 as `in_progress`.
 2. Update `package.json` name and `index.html` title
 3. Verify Node.js/npm availability (source nvm if needed)
 4. Run `npm install`
-5. **Install Playwright and Chromium** — Playwright is required for runtime verification and the iterate loop:
-   1. Check if Playwright is available: `npx playwright --version`
-   2. If that fails, check `node_modules/.bin/playwright --version`
-   3. If neither works, run `npm install -D @playwright/test` explicitly
-   4. Then install the browser binary: `npx playwright install chromium`
+5. **Copy the browser helper and check Chrome** — runtime verification and the iterate loop drive the installed Chrome over the DevTools protocol (no npm dependency):
+   1. Copy the helpers from the plugin: `mkdir -p scripts && cp <plugin-root>/scripts/cdp.mjs <plugin-root>/scripts/browser-test.mjs scripts/`
+   2. Check Node is 22+ (`node --version`; Bun also works)
+   3. Check Google Chrome is installed, or set `BOOP_CHROME=/path/to/chrome` to another Chrome/Chromium
+   4. Do not install any browser automation package or browser binary
    5. Verify success; if it fails, warn and continue (build verification still works, but runtime/iterate checks will be skipped)
 6. **Verify template scripts exist** — The template ships with `scripts/verify-runtime.mjs`, `scripts/iterate-client.js`, and `scripts/example-actions.json`. Confirm they are present. The `verify` and `iterate` npm scripts are already in `package.json` from the template.
 7. Start the dev server in the background. Note the port number.
@@ -476,7 +476,7 @@ If the pipeline is interrupted (crash, user cancel, timeout), `progress.md` enab
 
 - **Build failures**: The Verification Protocol handles this — fix subagent reads compiler/bundler output, fixes code, retries. Up to 3 attempts per step.
 - **Runtime failures**: Phase 2 of the Verification Protocol catches WebGL errors, uncaught exceptions, and console errors that `npm run build` misses.
-- **Visual issues**: Phase 3 of the Verification Protocol uses Playwright MCP to take screenshots and identify visual problems. Fix subagent addresses issues before continuing.
+- **Visual issues**: Phase 3 of the Verification Protocol takes screenshots with the iterate client (Chrome over CDP) and reads them to identify visual problems. Fix subagent addresses issues before continuing.
 - **Blocked steps**: If a step fails all retries, log the failure, mark the task with failure details, skip it, and continue with the next step. Include the failure in the final report.
 - **Missing dependencies**: Run `npm install` if imports fail. Check that `package.json` includes all required packages.
 

@@ -104,7 +104,7 @@ After the subagent returns:
 
 1. Run `npm run build` in the project directory to confirm no errors
 2. If the build fails, fix the issues (up to 2 retries)
-3. If Playwright MCP is available, navigate to the dev server, take a screenshot, and do a quick visual check
+3. Take a screenshot of the dev server with `node scripts/iterate-client.js --url http://localhost:<port> --iterations 1` (uses `scripts/cdp.mjs`; copy both from the plugin if missing), Read `output/iterate/shot-0.png`, and do a quick visual check
 
 ## Example Usage
 

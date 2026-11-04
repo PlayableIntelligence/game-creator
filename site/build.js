@@ -859,7 +859,7 @@ function generateLandingPage(manifest, benchmarks) {
       <div class="feat">
         <div class="feat-icon">&#x1F9EA;</div>
         <h3>Visual QA at Every Step</h3>
-        <p>Playwright MCP takes screenshots after each step, reviews visually, and autofixes any issues. Quality assurance is built in, not bolted on.</p>
+        <p>Chrome screenshots (over the DevTools protocol) are taken after each step, reviews visually, and autofixes any issues. Quality assurance is built in, not bolted on.</p>
       </div>
       <div class="feat">
         <div class="feat-icon">&#x1F3D7;</div>
@@ -917,7 +917,7 @@ function generateLandingPage(manifest, benchmarks) {
       <div class="stack-item">Three.js <span class="dim">3D Engine</span></div>
       <div class="stack-item">Strudel.cc <span class="dim">Audio</span></div>
       <div class="stack-item">Vite <span class="dim">Build</span></div>
-      <div class="stack-item">Playwright <span class="dim">Testing</span></div>
+      <div class="stack-item">Chrome DevTools Protocol <span class="dim">Testing</span></div>
       <div class="stack-item">Play.fun <span class="dim">Monetization</span></div>
       <div class="stack-item">Moltbook <span class="dim">Distribution</span></div>
     </div>

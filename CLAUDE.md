@@ -18,12 +18,12 @@ skills/
   game-assets/SKILL.md     # Pixel art sprites (code-only, no external files)
   game-designer/SKILL.md   # Visual polish (gradients, particles, juice, transitions)
   game-audio/SKILL.md      # Procedural audio (Web Audio API BGM + SFX)
-  game-qa/SKILL.md         # Playwright testing (gameplay, visual, perf)
+  game-qa/SKILL.md         # Browser testing via cdp.mjs (gameplay, visual, perf)
   game-architecture/SKILL.md  # Reference architecture patterns
   game-deploy/SKILL.md     # Deployment (here.now default, GitHub Pages, Vercel, etc.)
   use-template/SKILL.md    # Clone a gallery template as a starting point
   playdotfun/SKILL.md      # Play.fun monetization (git submodule → submodules/playdotfun)
-  promo-video/SKILL.md     # Autonomous 50 FPS gameplay recording (Playwright + FFmpeg)
+  promo-video/SKILL.md     # Autonomous 50 FPS gameplay recording (Chrome CDP + FFmpeg)
   make-game/SKILL.md       # Multi-session game-dev pipeline: idea → scaffold → development phases with milestones, ADRs, docs/STATE.md
   viral-game/SKILL.md      # One-shot viral pipeline: tweet/story/concept → scaffold → assets → design → promo video → audio → deploy (here.now) → monetize (QA every step, ~10 min)
   improve-game/SKILL.md    # Holistic audit + implement highest-impact improvements
@@ -39,7 +39,7 @@ skills/
   monetize-game/SKILL.md   # Play.fun monetization (register, SDK, redeploy)
   scaffold-gateables/SKILL.md  # Add monetization-agnostic gateable features (isEntitled hooks + skin picker, continue, etc.)
   add-multiplayer/SKILL.md # Add real-time or turn-based multiplayer via PartyKit (Cloudflare Durable Objects)
-  qa-game/SKILL.md         # Add Playwright QA tests
+  qa-game/SKILL.md         # Add browser QA tests
   sub-games/SKILL.md       # Sub.games community platform for finding players and supporters
   review-game/SKILL.md     # Code review for architecture + best practices
   unity-mcp/SKILL.md       # Unity Editor automation via MCP (git submodule → submodules/unity-mcp, beta branch)
@@ -47,7 +47,7 @@ templates/
   phaser-2d/               # Runnable 2D starter project (Phaser 3)
   threejs-3d/              # Runnable 3D starter project (Three.js)
 scripts/
-  iterate-client.js        # Standalone Playwright iterate loop (action → screenshot → state → errors)
+  iterate-client.js        # Standalone browser iterate loop via cdp.mjs (action → screenshot → state → errors)
   example-actions.json     # Example action payloads for iterate-client.js
   find-3d-asset.mjs        # Search & download GLB models (Sketchfab, Poly Haven, Poly.pizza)
   meshy-generate.mjs       # Generate 3D models with Meshy AI (text-to-3d, image-to-3d, rig, animate)
@@ -62,7 +62,7 @@ assets/
 site/
   manifest.json              # Source of truth: metadata for all templates
   build.js                   # Unified build → _site/index.html + _site/gallery/index.html
-  capture-screenshots.js     # Playwright: auto-capture thumbnails for each game
+  capture-screenshots.js     # Chrome (cdp.mjs): auto-capture thumbnails for each game
   thumbnails/                # 400x225 PNGs (committed to git)
   telemetry/
     server.js                # Express telemetry API (ingestion + stats)
@@ -102,7 +102,7 @@ All games built with this plugin follow these mandatory patterns:
 
 6. **`render_game_to_text()`** — Every game exposes `window.render_game_to_text()` in `main.js`. Returns a concise JSON string of the current game state for AI agents to read without interpreting pixels. Must include: coordinate system note, game mode (`playing`/`game_over`), score, player position/velocity, and visible entities. Keep it succinct — only current, on-screen state. Games boot directly into gameplay (no title screen by default), so `playing` is the initial mode.
 
-7. **`advanceTime(ms)`** — Every game exposes `window.advanceTime(ms)` in `main.js`. Returns a Promise that resolves after `ms` milliseconds of real time, allowing test scripts to advance the game in controlled increments. For frame-precise control in `@playwright/test`, prefer `page.clock.install()` + `runFor()`.
+7. **`advanceTime(ms)`** — Every game exposes `window.advanceTime(ms)` in `main.js`. Returns a Promise that resolves after `ms` milliseconds of real time, allowing test scripts to advance the game in controlled increments. For frame-precise control in browser tests (`scripts/browser-test.mjs`), prefer `page.clock.install()` + `runFor()`.
 
 8. **`progress.md`** — Created at the project root by the game-creator agent. Records the original user prompt, TODOs, decisions, gotchas, and loose ends after each pipeline step. Enables multi-session continuity and agent handoff.
 
@@ -128,7 +128,7 @@ Located at `examples/flappy-bird/`. Demonstrates all patterns.
 cd examples/flappy-bird
 npm install
 npm run dev          # Vite dev server on port 3000
-npm run test         # 15 Playwright tests
+npm run test         # 15 browser tests (node --test + scripts/browser-test.mjs)
 npm run build        # Production build to dist/
 ```
 
@@ -188,7 +188,7 @@ skills/phaser/
   game-objects.md             # Sprites, buttons, groups, physics
   events-and-state.md         # EventBus patterns, GameState management
   ui-patterns.md              # HUD, menus, score display
-  testing-patterns.md         # Playwright test setup and fixtures
+  testing-patterns.md         # Browser test setup and fixtures
   performance.md              # Optimization tips, texture atlases, object pooling
 ```
 
@@ -206,7 +206,7 @@ Four domains have both a reference and a user-invocable skill:
 | Reference Skill | User-Invocable Skill | Why Both Exist                                                                            |
 | --------------- | -------------------- | ----------------------------------------------------------------------------------------- |
 | `game-audio`    | `add-audio`          | `game-audio` has Web Audio API patterns reused by `add-audio` AND `viral-game` step 3      |
-| `game-qa`       | `qa-game`            | `game-qa` has Playwright patterns reused by `qa-game` AND the QA subagent in `viral-game`  |
+| `game-qa`       | `qa-game`            | `game-qa` has browser test patterns reused by `qa-game` AND the QA subagent in `viral-game`  |
 | `game-assets`   | `add-assets`         | `game-assets` has pixel art patterns reused by `add-assets` AND `viral-game` step 1.5      |
 | `game-designer` | `design-game`        | `game-designer` has visual polish patterns reused by `design-game` AND `viral-game` step 2 |
 
@@ -228,8 +228,8 @@ This separation avoids duplicating domain knowledge across multiple skills. The 
 
 ## Notes
 
-- Playwright screenshot tests use high pixel tolerance (3000 maxDiffPixels) because parallax clouds scroll between captures.
-- Headless Chromium reports low FPS (~7-9). FPS threshold in tests is set to 5. Use Playwright MCP for accurate FPS measurement.
+- Browser screenshot tests use high pixel tolerance (3000 maxDiffPixels) because parallax clouds scroll between captures.
+- Headless Chromium reports low FPS (~7-9). FPS threshold in tests is set to 5. Use a headed Chrome run (`node scripts/iterate-client.js --headless 0 ...` or `npm run test:headed`) for accurate FPS measurement.
 - The `playdotfun` skill is a git submodule at `submodules/playdotfun` (repo: `github.com/playdotfun/skills`). The symlink `skills/playdotfun → ../submodules/playdotfun/skills` makes SKILL.md resolve correctly. After cloning, run `git submodule update --init` to pull the submodule.
 - The `unity-mcp` skill is a git submodule at `submodules/unity-mcp` (repo: `github.com/CoplayDev/unity-mcp`, tracked on the `beta` branch). The symlink `skills/unity-mcp → ../submodules/unity-mcp/unity-mcp-skill` makes SKILL.md resolve correctly. After cloning, run `git submodule update --init` to pull the submodule.
 
@@ -286,7 +286,7 @@ See `TROUBLESHOOTING.md` for common issues including:
 
 - Skill triggering (wrong skill loads, skill doesn't trigger, negative tests)
 - Build failures (module not found, port conflicts, empty dist)
-- Playwright/QA (browser not found, low FPS in headless, visual regression tolerance)
+- Browser tests/QA (Chrome not found, low FPS in headless, visual regression tolerance)
 - Deployment (here.now failures, anonymous expiry, GitHub Pages blank page)
 - Play.fun (auth failures, SDK not loading, anti-cheat rejections)
 - 3D assets (T-pose, wrong facing, Meshy timeouts)

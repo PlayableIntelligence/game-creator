@@ -33,13 +33,13 @@ If a user starts with `/viral-game` but the project clearly outgrows a one-shot 
 4. Visual polish — gradients, particles, transitions, juice
 5. A 50 FPS promo video — autonomous gameplay capture, mobile portrait, ready for social media
 6. Chiptune music and retro sound effects (no audio files needed)
-7. A persistent Playwright test suite — run `npm test` after future changes
+7. A persistent browser test suite — run `npm test` after future changes
 8. Live deployment to here.now with an instant public URL
 9. Monetization via Play.fun — points tracking, leaderboards, wallet connect, and a play.fun URL to share on Moltbook
 10. A quality score and review report
 11. Redeploy with a single command (`npm run deploy`)
 
-**Quality assurance is built into every step** — each code-modifying step runs build verification, visual review via Playwright MCP, and autofixes any issues found.
+**Quality assurance is built into every step** — each code-modifying step runs build verification, visual review from screenshots, and autofixes any issues found.
 
 ## Reference Files
 
@@ -74,7 +74,7 @@ If a user starts with `/viral-game` but the project clearly outgrows a one-shot 
 
 **What stays in the main thread:**
 - Step 0: Parse arguments, create todo list
-- Step 1 (infrastructure only): Copy template, npm install, playwright install, start dev server
+- Step 1 (infrastructure only): Copy template, npm install, copy browser helper (`cdp.mjs`), start dev server
 - Verification protocol orchestration (launch QA subagent, read text result, launch autofix if needed)
 - Step 4 (deploy): Interactive auth requires user back-and-forth
 - Step 5.5 (review): Read-only analysis, no code changes
@@ -86,7 +86,7 @@ If a user starts with `/viral-game` but the project clearly outgrows a one-shot 
 - Step 2: Visual polish
 - Step 2.5: Promo video capture
 - Step 3: Audio integration
-- Step 3.5: QA test suite (Playwright)
+- Step 3.5: QA test suite (browser tests)
 
 Each subagent receives: step instructions, relevant skill name, project path, engine type, dev server port, and game concept description.
 
@@ -147,7 +147,7 @@ Base tasks (always included):
 4. Add visual polish (particles, transitions, juice)
 5. Record promo video (autonomous 50 FPS capture)
 6. Add audio (BGM + SFX)
-7. Add QA test suite (Playwright — gameplay, visual, perf)
+7. Add QA test suite (browser tests — gameplay, visual, perf)
 8. Deploy to here.now
 9. **[CONDITIONAL]** Monetize — task form depends on intent:
    - `playfun` / `both` → "Monetize with Play.fun (register on OpenGameProtocol, add SDK, redeploy)"
@@ -238,7 +238,7 @@ Mark the audio task as `completed`.
 
 Mark the QA task as `in_progress`.
 
-See [step-details.md](step-details.md) for the full Step 3.5 subagent prompt template (Playwright install, test fixtures, game/visual/perf specs, npm scripts).
+See [step-details.md](step-details.md) for the full Step 3.5 subagent prompt template (test helper copy, test fixtures, game/visual/perf specs, npm scripts).
 
 **After subagent returns**, run `npm test` to verify all tests pass. Fix test code (not game code) if needed.
 

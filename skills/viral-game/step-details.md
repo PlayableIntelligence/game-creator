@@ -17,12 +17,12 @@ This file contains the detailed subagent instructions for each pipeline step. Th
 4. Update `<title>` in `index.html` to a human-readable version of the game name
 5. **Verify Node.js/npm availability**: Run `node --version && npm --version` to confirm Node.js and npm are installed and accessible. If they fail (e.g., nvm lazy-loading), try sourcing nvm: `export NVM_DIR="$HOME/.nvm" && source "$NVM_DIR/nvm.sh"` then retry. If Node.js is not installed at all, tell the user they need to install it before continuing.
 6. Run `npm install` in the new project directory
-7. **Install Playwright and Chromium** — Playwright is required for runtime verification and the iterate loop:
-   1. Check if Playwright is available: `npx playwright --version`
-   2. If that fails, check `node_modules/.bin/playwright --version`
-   3. If neither works, run `npm install -D @playwright/test` explicitly
-   4. Then install the browser binary: `npx playwright install chromium`
-   5. Verify success; if it fails, warn and continue (build verification still works, but runtime/iterate checks will be skipped)
+7. **Copy the browser helper and check Chrome** — runtime verification and the iterate loop drive the Chrome installed on the machine over the DevTools protocol (no npm dependency):
+   1. Copy the helpers from the plugin: `mkdir -p scripts && cp <plugin-root>/scripts/cdp.mjs <plugin-root>/scripts/browser-test.mjs scripts/`
+   2. Check Node is 22+ (`node --version`; Bun also works)
+   3. Check Google Chrome is installed (macOS: `/Applications/Google Chrome.app`; Linux: `google-chrome` or `chromium` on PATH). Set `BOOP_CHROME=/path/to/chrome` to use another Chrome/Chromium
+   4. Do not install any browser automation package or browser binary
+   5. Verify success; if Chrome is missing, warn and continue (build verification still works, but runtime/iterate checks will be skipped)
 8. **Verify template scripts exist** — The template ships with `scripts/verify-runtime.mjs`, `scripts/iterate-client.js`, and `scripts/example-actions.json`. Confirm they are present. The `verify` and `iterate` npm scripts are already in `package.json` from the template.
 9. **Start the dev server** — Before running `npm run dev`, check if the configured port (in `vite.config.js`) is already in use: `lsof -i :<port> -t`. If occupied, update `vite.config.js` to use the next available port (try 3001, 3002, etc.). Then start the dev server in the background and confirm it responds. Keep it running throughout the pipeline. Note the actual port number — pass it to `scripts/verify-runtime.mjs` via the `PORT` env variable in subsequent runs.
 
@@ -662,7 +662,7 @@ Mark the design task as `completed`.
 
 Mark the promo video task as `in_progress`.
 
-**This step stays in the main thread.** It does not modify game code — it records autonomous gameplay footage using Playwright and converts it with FFmpeg. No QA verification needed.
+**This step stays in the main thread.** It does not modify game code — it records autonomous gameplay footage with `scripts/cdp.mjs` (Chrome screencast to WebM via FFmpeg) and converts it with FFmpeg. No QA verification needed.
 
 **Pre-check: FFmpeg availability**
 
@@ -734,7 +734,7 @@ bash scripts/convert-highfps.sh output/promo-raw.webm output/promo.mp4 0.5
 2. Verify duration is approximately `DESIRED_GAME_DURATION / 1000` seconds
 3. Verify frame rate is 50 FPS
 
-If capture fails (Playwright error, timeout, etc.), warn the user and skip — the promo video is a nice-to-have, not a blocker.
+If capture fails (Chrome/CDP error, timeout, etc.), warn the user and skip — the promo video is a nice-to-have, not a blocker.
 
 **Extract a thumbnail** for the user to preview:
 ```bash
@@ -792,7 +792,7 @@ Launch a `Task` subagent with these instructions:
 **Tell the user:**
 > Your game now has music and sound effects! Click/tap once to activate audio, then you'll hear the music.
 >
-> **Next up: QA tests.** I'll add a persistent Playwright test suite so you can run `npm test` after future changes. Ready?
+> **Next up: QA tests.** I'll add a persistent browser test suite so you can run `npm test` after future changes. Ready?
 
 Mark the audio task as `completed`.
 
@@ -817,7 +817,7 @@ Launch a `Task` subagent with these instructions:
 >
 > Apply the game-qa skill to create a persistent test suite:
 >
-> 1. **Install Playwright** (if not already installed): `npm install -D @playwright/test` + `npx playwright install chromium`
+> 1. **Copy the test helpers** (if not already present): `cp <plugin-root>/scripts/cdp.mjs <plugin-root>/scripts/browser-test.mjs scripts/` (no npm install; uses the machine's Chrome)
 > 2. **Create test fixtures** (`tests/fixtures/game-test.js`) — custom fixture that waits for game boot, provides `startPlaying()`, and exposes `render_game_to_text()`
 > 3. **Create test helpers** (`tests/helpers/seed-random.js`) — Mulberry32 seeded PRNG for deterministic tests
 > 4. **Create `tests/e2e/game.spec.js`** — core gameplay tests:
@@ -836,13 +836,14 @@ Launch a `Task` subagent with these instructions:
 >    - Load time < 5s
 >    - FPS > 5 (headless Chromium reports low FPS; threshold is intentionally low)
 >    - Canvas dimensions match Constants.js
-> 7. **Create `playwright.config.js`** with `webServer` pointing to `npm run dev` on the correct port
+> 7. **Create `browser.config.mjs`** with `webServer` pointing to `npm run dev` on the correct port
 > 8. **Add npm scripts** to `package.json`:
 >    ```json
 >    {
 >      "scripts": {
->        "test": "npx playwright test",
->        "test:headed": "npx playwright test --headed"
+>        "test": "node --test --test-concurrency=1 \"tests/**/*.spec.js\"",
+>        "test:headed": "BROWSER_TEST_HEADED=1 node --test --test-concurrency=1 \"tests/**/*.spec.js\"",
+>        "test:update-snapshots": "BROWSER_TEST_UPDATE_SNAPSHOTS=1 node --test --test-concurrency=1 \"tests/**/*.spec.js\""
 >      }
 >    }
 >    ```

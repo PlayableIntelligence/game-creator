@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from '../../scripts/browser-test.mjs';
 
 export const test = base.extend({
   page: async ({ page }, use) => {

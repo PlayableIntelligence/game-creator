@@ -76,10 +76,10 @@ Engine-agnostic for browser games — focuses on UI, particles, gradients, trans
 
 ## Cross-Cutting: QA & Testing
 
-Browser-game testing via Playwright. Applies to any game running in a browser.
+Browser-game testing via the plugin's Chrome DevTools protocol helpers (`cdp.mjs`, `browser-test.mjs`). Applies to any game running in a browser.
 
-- **qa-game** — Add Playwright tests: gameplay verification, visual regression, performance.
-- **game-qa** _(reference)_ — Playwright patterns, fixtures, deterministic test setup, FPS measurement.
+- **qa-game** — Add browser tests: gameplay verification, visual regression, performance.
+- **game-qa** _(reference)_ — Browser test patterns, fixtures, deterministic test setup, FPS measurement.
 
 ---
 
@@ -98,7 +98,7 @@ Browser-game testing via Playwright. Applies to any game running in a browser.
 ## Cross-Cutting: Promo & Recording
 
 - **record-promo** — Record an autonomous 50 FPS promo video for social media.
-- **promo-video** _(reference)_ — Playwright + FFmpeg gameplay capture pipeline.
+- **promo-video** _(reference)_ — Chrome (cdp.mjs) + FFmpeg gameplay capture pipeline.
 
 ---
 

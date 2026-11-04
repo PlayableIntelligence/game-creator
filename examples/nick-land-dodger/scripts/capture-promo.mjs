@@ -1,7 +1,7 @@
 /**
  * Autonomous promo video capture for nick-land-dodger.
  *
- * Technique: Playwright's recordVideo caps at 25 FPS.
+ * Technique: recordVideo (./cdp.mjs) records at 25 FPS.
  * We slow the game to 0.5× and record for 2× duration,
  * then FFmpeg speeds it up 2× → effective 50 FPS output.
  *
@@ -9,7 +9,7 @@
  *   node scripts/capture-promo.mjs [--port 3003] [--duration 13000] [--output output/promo-raw.webm]
  */
 
-import { chromium } from 'playwright';
+import { chromium } from './cdp.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 

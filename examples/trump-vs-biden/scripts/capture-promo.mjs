@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from './cdp.mjs';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';

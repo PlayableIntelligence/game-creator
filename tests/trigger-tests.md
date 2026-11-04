@@ -184,7 +184,7 @@ Manual test prompts to verify skills trigger correctly. Run each prompt against 
 
 **Should trigger:**
 - "add tests to my game"
-- "write Playwright tests"
+- "write browser tests"
 - "add QA tests"
 - "test my game"
 

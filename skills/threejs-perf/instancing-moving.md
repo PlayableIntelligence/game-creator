@@ -134,7 +134,7 @@ function update(dt) {
 
 ## Measured Results
 
-Scenario: 8,000 entities in a wave-field (sin/cos of position + time), Three.js r183, headless Chromium 147 via Playwright, Apple M1 Pro, 30 warmup + 180 sample frames, median of 3 runs.
+Scenario: 8,000 entities in a wave-field (sin/cos of position + time), Three.js r183, headless Chromium 147 (scripted benchmark), Apple M1 Pro, 30 warmup + 180 sample frames, median of 3 runs.
 
 | Metric | Baseline | Optimized | Delta |
 |--------|----------|-----------|-------|
@@ -147,7 +147,7 @@ Scenario: 8,000 entities in a wave-field (sin/cos of position + time), Three.js 
 
 Update loop shrinks because `matrix.makeTranslation` + `setMatrixAt(i, m)` bypasses per-`Object3D` state churn (dirty flags, matrix recompute, parent propagation). Render CPU drops by ~20× because the baseline burns ~10ms per frame just submitting 8,000 draw calls.
 
-FPS and frame-time p95 are not cited here — Playwright's bundled Chromium runs software WebGL (SwiftShader), which bottlenecks on fragment shading regardless of draw-call count. On real hardware the FPS delta would be substantially larger.
+FPS and frame-time p95 are not cited here — headless Chromium without a GPU runs software WebGL (SwiftShader), which bottlenecks on fragment shading regardless of draw-call count. On real hardware the FPS delta would be substantially larger.
 
 ## Template Files
 

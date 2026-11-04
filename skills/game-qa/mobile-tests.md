@@ -42,7 +42,7 @@ test('touch tap registers as input', async ({ gamePage }) => {
 
 ## Notes
 
-- The `mobile-chrome` project in `playwright.config.js` uses Pixel 5 device emulation
-- Touch events are simulated via Playwright's `.tap()` method
+- The `mobile-chrome` project in `browser.config.mjs` emulates a Pixel 5 (393x851 viewport, `isMobile`, `hasTouch`)
+- Touch events are simulated via the `.tap()` method (`page.tap(selector)` / `locator.tap()`, CDP touch events)
 - Virtual joystick testing requires checking if the DOM element exists (games without joystick will skip)
 - Canvas tap tests verify the game doesn't crash on touch input, not specific gameplay behavior

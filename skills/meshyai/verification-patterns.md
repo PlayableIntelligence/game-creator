@@ -4,7 +4,7 @@ After loading any Meshy-generated model, **always verify orientation and scale**
 
 ## Auto-Orientation Check
 
-Meshy models typically face +Z, but this varies. After loading, **log the bounding box and visually verify** via Playwright MCP or dev tools:
+Meshy models typically face +Z, but this varies. After loading, **log the bounding box and visually verify** via a screenshot (iterate client or `scripts/cdp.mjs`, viewed with Read) or dev tools:
 
 ```js
 // Add this immediately after loading any GLB
@@ -46,7 +46,7 @@ if (modelWidth * currentScale > containerWidth) {
 }
 ```
 
-**Always take a Playwright screenshot after model integration** to visually verify:
+**Always take a screenshot after model integration** (cdp.mjs / iterate client) to visually verify:
 1. Characters face the correct direction
 2. Characters fit within their environment
 3. Characters don't clip through floors/walls/each other

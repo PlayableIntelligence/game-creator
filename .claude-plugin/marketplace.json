@@ -37,7 +37,7 @@
         "game-design",
         "game-audio",
         "strudel",
-        "playwright",
+        "chrome-devtools-protocol",
         "qa"
       ],
       "category": "development"

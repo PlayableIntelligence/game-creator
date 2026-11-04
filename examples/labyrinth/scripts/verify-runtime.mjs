@@ -1,7 +1,7 @@
 // scripts/verify-runtime.mjs
 // Launches headless Chromium, loads the game, checks for runtime errors.
 // Exit 0 = pass, Exit 1 = fail (prints errors to stderr).
-import { chromium } from '@playwright/test';
+import { chromium } from './cdp.mjs';
 
 const PORT = process.env.PORT || 3000;
 const URL = `http://localhost:${PORT}`;

@@ -111,4 +111,4 @@ Tell the user:
 > - `src/sprites/palette.js` — shared color palette
 > - `src/sprites/player.js`, `enemies.js`, `items.js` — sprite data
 >
-> Run the game to see the new visuals. If you have Playwright tests, run `/game-creator:qa-game` to update the visual regression snapshots.
+> Run the game to see the new visuals. If you have browser tests, run `/game-creator:qa-game` to update the visual regression snapshots.

@@ -1,15 +1,15 @@
 ---
 name: promo-video
 description: >
-  Record a high-FPS autonomous promo video of a Phaser game using Playwright.
+  Record a high-FPS autonomous promo video of a Phaser game using the Chrome DevTools protocol helper (scripts/cdp.mjs).
   Triggers on: promo video, gameplay recording, marketing video, game capture.
 argument-hint: "[path-to-game]"
 license: MIT
-compatibility: Requires Playwright and FFmpeg installed locally for video capture and encoding.
+compatibility: Requires Node.js 22+ (or Bun), Google Chrome and FFmpeg installed locally for video capture and encoding.
 metadata:
   author: OpusGameLabs
   version: 1.3.0
-  tags: [game, promo, video, recording, playwright, ffmpeg]
+  tags: [game, promo, video, recording, cdp, ffmpeg]
 ---
 
 # Promo Video Recording
@@ -18,10 +18,10 @@ Record smooth, autonomous promo footage of a Phaser game for marketing / social 
 
 ## Technique
 
-Playwright's `recordVideo` caps at 25 FPS with no config option. We work around it:
+`recordVideo` from `scripts/cdp.mjs` (Chrome screencast frames piped to FFmpeg) writes a 25 FPS WebM with no config option. We work around it:
 
 1. **Slow the game to 0.5×** by patching all 5 Phaser time subsystems
-2. **Record for 2× the desired duration** at Playwright's native 25 FPS
+2. **Record for 2× the desired duration** at the recorder's native 25 FPS
 3. **FFmpeg speed-up 2×** → effective 50 FPS output
 
 | Parameter               | Default                                  | Effect                                                                |
@@ -33,14 +33,14 @@ Playwright's `recordVideo` caps at 25 FPS with no config option. We work around 
 
 ## Prerequisites
 
-- **Playwright** — must be installed (`npm install -D @playwright/test && npx playwright install chromium`)
+- **Browser helper** — copy it into the game (`cp <plugin-root>/scripts/cdp.mjs <project-dir>/scripts/`); it drives the installed Google Chrome (or `BOOP_CHROME=/path/to/chrome`), no npm install
 - **FFmpeg** — must be available on PATH (`brew install ffmpeg` on macOS)
 - **Dev server running** — game must be served on localhost
 
 Check both before starting:
 
 ```bash
-npx playwright --version
+test -f scripts/cdp.mjs && node --version   # Node 22+
 ffmpeg -version | head -1
 ```
 
@@ -177,7 +177,7 @@ const videoPath = await video.path();
 ## Full Capture Script Template
 
 ```js
-import { chromium } from "playwright";
+import { chromium } from "./cdp.mjs";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -379,7 +379,7 @@ Before running the capture:
 
 - [ ] Dev server is running and responding
 - [ ] FFmpeg is installed on the system
-- [ ] Playwright is installed with Chromium
+- [ ] `scripts/cdp.mjs` is copied in and Google Chrome is installed
 - [ ] Game boots directly into gameplay (no menu blocking)
 - [ ] Death/failure method identified and patched
 - [ ] Input keys match the game's actual controls

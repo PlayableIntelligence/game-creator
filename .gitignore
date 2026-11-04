@@ -4,7 +4,6 @@ _site/
 .DS_Store
 *.log
 test-results/
-playwright-report/
 
 # Vite cache
 .vite/
@@ -15,9 +14,6 @@ test-*.png
 # Claude Code
 .claude/
 .plan.md
-
-# Playwright MCP
-.playwright-mcp/
 
 # Gallery build artifacts
 gallery/thumbnails/

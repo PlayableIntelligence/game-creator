@@ -2,7 +2,7 @@
 // =============================================================================
 // iterate-client.js — Tight implement→test loop for browser game development
 //
-// A standalone Playwright script that launches a browser, performs choreographed
+// A standalone browser script (Chrome over the DevTools protocol, ./cdp.mjs) that launches a browser, performs choreographed
 // actions on a game, captures screenshots + text state, and tracks console errors.
 // Designed for AI agents to verify changes after each small code edit.
 //
@@ -27,7 +27,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { chromium } from '@playwright/test';
+import { chromium } from './cdp.mjs';
 
 // ---------------------------------------------------------------------------
 // CLI argument parsing
@@ -183,7 +183,8 @@ function makeVirtualTimeShim() {
 // ---------------------------------------------------------------------------
 
 async function getCanvasHandle(page) {
-  const handle = await page.evaluateHandle(() => {
+  // The CDP helper has no element handles: mark the largest canvas and return a locator for it.
+  const found = await page.evaluate(() => {
     let best = null;
     let bestArea = 0;
     for (const canvas of document.querySelectorAll('canvas')) {
@@ -193,9 +194,11 @@ async function getCanvasHandle(page) {
         best = canvas;
       }
     }
-    return best;
+    for (const c of document.querySelectorAll('canvas[data-iterate-canvas]')) c.removeAttribute('data-iterate-canvas');
+    if (best) best.setAttribute('data-iterate-canvas', '');
+    return !!best;
   });
-  return handle.asElement();
+  return found ? page.locator('canvas[data-iterate-canvas]') : null;
 }
 
 async function captureCanvasPngBase64(canvas) {
@@ -249,7 +252,7 @@ async function captureScreenshot(page, canvas, outPath) {
     }
   }
 
-  // Strategy 2: Playwright element screenshot
+  // Strategy 2: element screenshot
   if (!buffer && canvas) {
     try {
       buffer = await canvas.screenshot({ type: 'png' });
@@ -322,7 +325,7 @@ async function runActions(page, canvas, steps) {
       }
     }
 
-    // Advance frame-by-frame (each evaluate round-trip lets Playwright process
+    // Advance frame-by-frame (each evaluate round-trip lets the browser process
     // events, so input state is properly registered per-frame)
     const frames = step.frames || 1;
     for (let f = 0; f < frames; f++) {

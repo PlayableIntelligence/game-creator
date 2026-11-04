@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../scripts/browser-test.mjs';
 
 test.describe('Flight Simulator — Performance', () => {
   test('game loads within 3 seconds', async ({ page }) => {

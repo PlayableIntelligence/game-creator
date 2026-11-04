@@ -1,6 +1,6 @@
 # Visual Regression & Advanced Testing
 
-Screenshot comparison tests, performance/FPS tests, accessibility tests, and deterministic testing patterns for browser games.
+Screenshot comparison tests, performance/FPS tests, basic accessibility checks, and deterministic testing patterns for browser games.
 
 ## Visual Regression Screenshots
 
@@ -85,16 +85,12 @@ test('game maintains 30+ FPS during gameplay', async ({ gamePage }) => {
 
 ## Accessibility Tests
 
-Canvas games are inherently opaque to screen readers, but test the surrounding HTML:
+Canvas games are inherently opaque to screen readers, but check the surrounding HTML. There is no axe-core scan any more; assert the basics with locators instead:
 
 ```js
-import AxeBuilder from '@axe-core/playwright';
-
-test('page has no accessibility violations', async ({ gamePage }) => {
-  const results = await new AxeBuilder({ page: gamePage })
-    .exclude('canvas')
-    .analyze();
-  expect(results.violations).toEqual([]);
+test('menu buttons have accessible names', async ({ gamePage }) => {
+  await expect(gamePage.getByRole('button', { name: /play/i })).toBeVisible();
+  await expect(gamePage.locator('html')).toHaveAttribute('lang', /.+/);
 });
 ```
 
@@ -121,7 +117,7 @@ Use it in tests:
 
 ```js
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript({ path: './tests/helpers/seed-random.js' });
+  await page.addInitScript({ content: readFileSync('./tests/helpers/seed-random.js', 'utf8') }); // import { readFileSync } from 'node:fs'
 });
 ```
 

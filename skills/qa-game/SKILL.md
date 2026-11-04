@@ -1,17 +1,17 @@
 ---
 name: qa-game
-description: Add Playwright QA tests to a game — visual regression, gameplay verification, and performance. Use when the user says "add tests", "test my game", "add QA", "check for bugs", or "add visual regression tests". Do NOT use for manual playtesting or gameplay design.
+description: Add browser QA tests to a game — visual regression, gameplay verification, and performance. Use when the user says "add tests", "test my game", "add QA", "check for bugs", or "add visual regression tests". Do NOT use for manual playtesting or gameplay design.
 argument-hint: "[path-to-game]"
 license: MIT
 metadata:
   author: OpusGameLabs
   version: 1.3.0
-  tags: [game, qa, testing, playwright, visual-regression]
+  tags: [game, qa, testing, cdp, visual-regression]
 ---
 
 # QA Game
 
-Add automated QA testing with Playwright to an existing game project. Tests verify your game boots, scenes work, scoring functions, and visuals haven't broken — like a safety net for your game.
+Add automated browser QA testing (Chrome over the DevTools protocol, no npm dependency) to an existing game project. Tests verify your game boots, scenes work, scoring functions, and visuals haven't broken — like a safety net for your game.
 
 ## Instructions
 
@@ -30,10 +30,10 @@ First, load the game-qa skill to get the full testing patterns and fixtures.
 - Read all scene files to understand the game flow
 - Read `design-brief.md` if it exists — it documents expected mechanics, magnitudes, and win/lose reachability
 
-### Step 2: Setup Playwright
+### Step 2: Setup browser tests
 
-1. Install dependencies: `npm install -D @playwright/test @axe-core/playwright && npx playwright install chromium`
-2. Create `playwright.config.js` with the correct dev server port and webServer config
+1. Copy the helpers from the plugin: `mkdir -p scripts && cp <plugin-root>/scripts/cdp.mjs <plugin-root>/scripts/browser-test.mjs scripts/` (needs Node 22+ or Bun and Google Chrome; no npm install), and add the `test`, `test:headed` and `test:update-snapshots` scripts from the `game-qa` skill to `package.json`
+2. Create `browser.config.mjs` with the correct dev server port and webServer config
 3. Expose `window.__GAME__`, `window.__GAME_STATE__`, `window.__EVENT_BUS__`, `window.__EVENTS__` in `src/main.js` if not already present
 4. Create the test directory structure:
    ```
@@ -110,8 +110,8 @@ conscious design choice, not an oversight.
 
 ### Step 6: Run and verify
 
-1. Run `npx playwright test` to execute all tests
-2. If visual tests fail on first run, that's expected — generate baselines with `npx playwright test --update-snapshots`
+1. Run `npm test` to execute all tests
+2. If visual tests fail on first run, that's expected — generate baselines with `npm run test:update-snapshots`
 3. Run again to verify all tests pass
 4. Summarize results
 
@@ -120,7 +120,7 @@ conscious design choice, not an oversight.
 Tell the user in plain English:
 
 - How many tests were created and what they check
-- How to run them: `npm test` (headless), `npm run test:headed` (see the browser), `npm run test:ui` (interactive dashboard)
+- How to run them: `npm test` (headless), `npm run test:headed` (see the browser), `npm run test:update-snapshots` (accept new screenshots)
 - "These tests are your safety net. Run them after making changes to make sure nothing broke."
 
 ## Example Usage
@@ -128,7 +128,7 @@ Tell the user in plain English:
 ```
 /qa-game examples/flappy-bird
 ```
-Result: Installs Playwright → creates 15 tests (boot, scene transitions, input, scoring, restart, game-over, visual regression, FPS, load time) → generates `tests/` directory with fixtures and helpers → all tests pass. Run `npm test` anytime after changes.
+Result: Copies the browser test helpers → creates 15 tests (boot, scene transitions, input, scoring, restart, game-over, visual regression, FPS, load time) → generates `tests/` directory with fixtures and helpers → all tests pass. Run `npm test` anytime after changes.
 
 ## Next Step
 

@@ -11,7 +11,7 @@
 //   PORT=5173 node scripts/verify-runtime.mjs
 // =============================================================================
 
-import { chromium } from '@playwright/test';
+import { chromium } from './cdp.mjs';
 
 const PORT = process.env.PORT || 3000;
 const URL = `http://localhost:${PORT}`;

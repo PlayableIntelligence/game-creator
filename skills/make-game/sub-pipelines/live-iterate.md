@@ -22,11 +22,11 @@ Do not skip this loop. A change is not "done" until it has been iterated on. If 
 
 1. **Confirm the dev server is live.** If it isn't, start it (`npm run dev` or equivalent for the engine) and wait for the ready signal. Do not assume HMR caught the change — for non-HMR setups (production build, some frameworks), force a reload.
 
-2. **Check console errors first.** Open the page (or use the existing Playwright session) and read the browser console. Any uncaught error means stop and triage — do not move forward to behavior checks while errors are present.
+2. **Check console errors first.** Open the page (or use the existing browser session from `scripts/cdp.mjs` / the iterate client) and read the browser console. Any uncaught error means stop and triage — do not move forward to behavior checks while errors are present.
 
 3. **Read the game state without pixels.** Call `window.render_game_to_text()` and inspect the returned JSON. This is faster, cheaper, and more reliable than screenshots for verifying state-shape changes (mode, score, entity counts, player position). Quote the relevant fields back to yourself.
 
-4. **Step time deterministically when needed.** For changes that depend on time-based behavior (physics, animations, timers, AI), use `window.advanceTime(ms)` to step the simulation in known increments. Re-read `render_game_to_text()` after each step. For Playwright-driven verification, prefer `page.clock.install()` + `runFor()` for frame-precise control.
+4. **Step time deterministically when needed.** For changes that depend on time-based behavior (physics, animations, timers, AI), use `window.advanceTime(ms)` to step the simulation in known increments. Re-read `render_game_to_text()` after each step. For scripted browser verification (`scripts/cdp.mjs`, browser tests), prefer `page.clock.install()` + `runFor()` for frame-precise control.
 
 5. **Drive input via the iterate client (optional but recommended for input-driven changes).** Run `node scripts/iterate-client.js --url <dev-url> --actions-json '<actions>'` from the repo root to play scripted input, capture screenshots, dump state, and surface console errors in one pass. See `scripts/example-actions.json` for the action shape.
 

@@ -55,7 +55,7 @@ Often skipped, often the source of mid-development pivots. You MUST get an expli
 Use answers from steps 1–3 to narrow engine candidates. Also factor in the user's existing experience — a JS/TS dev with no game-engine background is usually better off with Phaser or Three.js than starting fresh in Unity. Present 2–3 options with pros/cons (language, GUI editor, ecosystem, asset pipeline) and let the user choose. Confirm:
 
 - [ ] **Engine + language** chosen with the user (not assumed).
-- [ ] **Test framework** (Playwright for browser games is the default in this skill).
+- [ ] **Test framework** (browser tests on `node --test` with `scripts/browser-test.mjs` are the default for browser games in this skill).
 - [ ] **Deployment target** — browser, Steam, mobile store, itch.io? Affects engine choice.
 
 **5. Solidify the plan**
