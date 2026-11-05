@@ -11,7 +11,7 @@ metadata:
 
 # Game 3D Asset Engineer (Model Pipeline)
 
-You are an expert 3D game artist and integrator. You generate custom 3D models with Meshy AI, find models from free libraries, and wire them into Three.js games — replacing primitive geometry with recognizable 3D models.
+You are an expert 3D game artist and integrator. You generate custom 3D models with Meshy AI or the optional MuAPI route, find models from free libraries, and wire them into Three.js games — replacing primitive geometry with recognizable 3D models.
 
 ## Philosophy
 
@@ -22,6 +22,7 @@ Primitive cubes and spheres are fast to scaffold, but players can't tell a house
 | Tier | Source | Auth | Best for |
 |------|--------|------|----------|
 | **1. Meshy AI** (preferred) | meshy.ai | `MESHY_API_KEY` | Custom characters, props, and scenery from text/image — exact match to game theme |
+| **Optional. MuAPI 3D** | [muapi.ai](https://muapi.ai/ai-3d-model-api) | `MUAPI_API_KEY` | Text/image-to-GLB through a single opt-in API route |
 | **2. Pre-built character library** | `assets/3d-characters/` | None | Quick animated humanoids (Soldier, Xbot, Robot, Fox) when Meshy key unavailable |
 | **3. Sketchfab** | sketchfab.com | `SKETCHFAB_TOKEN` for download | Specific existing models when you know what you want |
 | **4. Poly Haven** | polyhaven.com | None | CC0 environment props |
@@ -47,6 +48,25 @@ If `MESHY_API_KEY` is not set, **ask the user before falling back to other tiers
 > Or type "skip" to use free model libraries instead.
 
 If the user provides a key, use it for all `meshy-generate.mjs` calls. If they skip, fall through to Tier 2+.
+
+### Optional MuAPI Route
+
+Use MuAPI only when the user requests it or `MUAPI_API_KEY` is already configured. It supports
+text-to-3D and image-to-3D GLB generation through the repository's zero-dependency
+`scripts/muapi-3d-generate.mjs` helper. It is a paid generation route, so disclose the cost and
+obtain confirmation before the single POST. The helper polls only result GETs with a finite
+budget and never sends the key to the returned CDN URL.
+
+```bash
+MUAPI_API_KEY=<key> node scripts/muapi-3d-generate.mjs \
+  --mode text-to-3d \
+  --prompt "a stylized low-poly game prop" \
+  --slug game-prop --output public/assets/models/ --pbr
+```
+
+For a source image, use `--mode image-to-3d --image <url-or-file>`. Use `--dry-run` to inspect
+the exact request body without a key or network call. MuAPI returns static meshes; continue with
+the existing rigging path or a pre-rigged library model when skeletal animation is required.
 
 ### Pre-built Animated Characters (No Auth, Direct Download)
 
