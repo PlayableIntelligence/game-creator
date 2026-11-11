@@ -32,6 +32,7 @@ skills/
   add-assets/SKILL.md      # Replace shapes with pixel art sprites
   retrodiffusion/SKILL.md  # Retro Diffusion — true pixel art via paid API (sprites, tilesets, animations)
   game-3d-assets/SKILL.md  # 3D model pipeline (GLB download, AssetLoader, animated characters)
+  atlascloud-3d/SKILL.md   # Optional Atlas Cloud text/image-to-GLB generation
   meshyai/SKILL.md         # Meshy AI — generate 3D models from text/images, auto-rig, animate
   add-3d-assets/SKILL.md   # Replace 3D primitives with real GLB models
   add-audio/SKILL.md       # Add procedural audio (Web Audio API)

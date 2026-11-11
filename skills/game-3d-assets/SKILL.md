@@ -11,7 +11,7 @@ metadata:
 
 # Game 3D Asset Engineer (Model Pipeline)
 
-You are an expert 3D game artist and integrator. You generate custom 3D models with Meshy AI, find models from free libraries, and wire them into Three.js games — replacing primitive geometry with recognizable 3D models.
+You are an expert 3D game artist and integrator. You generate custom 3D models with Meshy AI or the optional Atlas Cloud provider, find models from free libraries, and wire them into Three.js games — replacing primitive geometry with recognizable 3D models.
 
 ## Philosophy
 
@@ -22,7 +22,8 @@ Primitive cubes and spheres are fast to scaffold, but players can't tell a house
 | Tier | Source | Auth | Best for |
 |------|--------|------|----------|
 | **1. Meshy AI** (preferred) | meshy.ai | `MESHY_API_KEY` | Custom characters, props, and scenery from text/image — exact match to game theme |
-| **2. Pre-built character library** | `assets/3d-characters/` | None | Quick animated humanoids (Soldier, Xbot, Robot, Fox) when Meshy key unavailable |
+| **Optional. Atlas Cloud** | atlascloud.ai | `ATLASCLOUD_API_KEY` | Text/image-to-GLB through Hunyuan3D when Atlas Cloud is requested or already configured |
+| **2. Pre-built character library** | `assets/3d-characters/` | None | Quick animated humanoids (Soldier, Xbot, Robot, Fox) when generation is unavailable |
 | **3. Sketchfab** | sketchfab.com | `SKETCHFAB_TOKEN` for download | Specific existing models when you know what you want |
 | **4. Poly Haven** | polyhaven.com | None | CC0 environment props |
 | **5. Poly.pizza** | poly.pizza | `POLY_PIZZA_API_KEY` | 10K+ low-poly CC-BY models |
@@ -47,6 +48,21 @@ If `MESHY_API_KEY` is not set, **ask the user before falling back to other tiers
 > Or type "skip" to use free model libraries instead.
 
 If the user provides a key, use it for all `meshy-generate.mjs` calls. If they skip, fall through to Tier 2+.
+
+### Optional Atlas Cloud Route
+
+Do not replace the Meshy default or prompt every user for another provider. Use Atlas Cloud only when the user asks for it or `ATLASCLOUD_API_KEY` is already configured. It generates static GLB assets from text or images; it does not replace Meshy's rigging and animation stages.
+
+Before a paid generation, disclose that credits are consumed and obtain confirmation. Then submit exactly once:
+
+```bash
+ATLASCLOUD_API_KEY=<key> node scripts/atlascloud-3d-generate.mjs \
+  --mode text-to-3d \
+  --prompt "a stylized low-poly game prop" \
+  --slug <asset-slug> --output public/assets/models/ --pbr
+```
+
+See the `atlascloud-3d` skill for image-to-3D, dry-run, status, and bounded polling commands.
 
 ### Pre-built Animated Characters (No Auth, Direct Download)
 
@@ -129,7 +145,9 @@ After rigging, the model comes with basic walk/run animations. Log clip names to
 
 For named personalities, be descriptive: `"a cartoon caricature of <Name>, <hair/glasses/suit details>, low poly game character"`.
 
-**Tier 2 — Pre-built in `assets/3d-characters/`**: If Meshy is unavailable, check `manifest.json` for a name/theme match. Copy the GLB. Done.
+**Optional Atlas Cloud route**: If the user requested Atlas Cloud or its key is already configured, generate a static GLB with `atlascloud-3d-generate.mjs`. For humanoid animation, continue to Meshy rigging or choose a pre-rigged library model.
+
+**Tier 2 — Pre-built in `assets/3d-characters/`**: If generation is unavailable, check `manifest.json` for a name/theme match. Copy the GLB. Done.
 
 **Tier 3 — Search Sketchfab for character-specific model**: Use `find-3d-asset.mjs`:
 ```bash
@@ -346,9 +364,9 @@ See the `meshyai` skill's "Post-Generation Verification" section for detailed co
 
 ## Process
 
-### Step 0: Check Meshy API Key
+### Step 0: Check Generation Provider
 
-Before starting, check if `MESHY_API_KEY` is available. If not, ask the user for one (see "Meshy API Key" section above). If the user skips, proceed with Tier 2+ fallbacks.
+Before starting, check if `MESHY_API_KEY` is available. If not, ask the user for one (see "Meshy API Key" section above). If the user requested Atlas Cloud or already has `ATLASCLOUD_API_KEY`, offer that opt-in route after cost confirmation. Otherwise proceed with the free fallbacks without adding another provider prompt.
 
 ### Step 1: Audit
 

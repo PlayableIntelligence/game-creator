@@ -14,6 +14,8 @@ import { join, resolve } from 'node:path';
 
 // ── Key patterns ──────────────────────────────────────────────
 const EXPLICIT_KEYS = [
+  'ATLASCLOUD_API_KEY',
+  'ATLAS_CLOUD_API_KEY',
   'MESHY_API_KEY',
   'WORLDLABS_API_KEY',
   'WLT_API_KEY',

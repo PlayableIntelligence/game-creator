@@ -106,6 +106,7 @@ src/
 | `game-qa` | Browser testing (Chrome over CDP, no npm dependency) — gameplay, visual regression, performance |
 | `game-architecture` | Reference architecture patterns for event-driven games |
 | `game-deploy` | Deployment — here.now (default), GitHub Pages, Vercel, Netlify, itch.io |
+| `atlascloud-3d` | Optional Atlas Cloud text/image-to-GLB generation with bounded result polling |
 | `playdotfun` | Play.fun (OpenGameProtocol) — SDK, API, auth, leaderboards |
 | `unity-mcp` | Unity Editor automation via MCP (CoplayDev/unity-mcp, beta) |
 | `fetch-tweet` | Fetch tweet content for tweet-to-game conversion |
@@ -121,6 +122,7 @@ src/
 | `/add-feature [description]` | Add a gameplay feature following architecture patterns |
 | `/add-assets [path]` | Replace geometric shapes with pixel art sprites |
 | `/retrodiffusion [prompt]` | Generate true pixel art sprites/tilesets/animations via Retro Diffusion API (paid) |
+| `/atlascloud-3d [prompt-or-image]` | Generate a static GLB through Atlas Cloud (optional, paid) |
 | `/add-audio [path]` | Add Strudel.cc music and sound effects |
 | `/monetize-game [path]` | Register on Play.fun, add SDK, get monetized URL |
 | `/qa-game [path]` | Add browser QA tests |
