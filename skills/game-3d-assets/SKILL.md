@@ -58,6 +58,7 @@ These GLB files from the Three.js repo have **Idle + Walk + Run** animations and
 | **Xbot** | `https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Xbot.glb` | idle, walk, run + additive poses | 2.9 MB | MIT |
 | **RobotExpressive** | `https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/RobotExpressive/RobotExpressive.glb` | Idle, Walking, Running, Dance, Jump + 8 more | 464 KB | MIT |
 | **Fox** | `https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Fox/glTF-Binary/Fox.glb` | Survey (idle), Walk, Run | 163 KB | CC0/CC-BY 4.0 |
+| **Knight** (Vuena, blocky) | `https://raw.githubusercontent.com/Vuena/free-low-poly-characters-cc0/main/GLB/blocky_03_knight.glb` | idle, walk, run, jump, fall, wave, punch, death, cheer, dance | 400 KB | CC0 |
 
 ### Gesture Characters (from `assets/3d-characters/`)
 
